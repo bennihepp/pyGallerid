@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = gallery:main
+      [console_scripts]
+      populate_gallery = gallery.scripts.populate:main
+      
