@@ -32,25 +32,31 @@ def main(argv=sys.argv):
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
-    with transaction.manager:
+    with transaction.manager as tm:
+        session = DBSession
         user_model = UserModel('hepp', 'benjamin.hepp@gmail.com', 'abc')
-        DBSession.add(user_model)
+        session.add(user_model)
+        print 'user_model:', user_model.id
+        tm.commit()
+        print user_model.id
+    with transaction.manager:
         album1_model = AlbumModel('album1', user_model.id, 'this is the first album')
         album2_model = AlbumModel('album2', user_model.id, 'this is the second album')
-        DBSession.add(album1_model)
-        DBSession.add(album2_model)
+        session.add(album1_model)
+        session.add(album2_model)
+        transaction.commit()
         for i in xrange(5):
             name = 'picture %d' % i
             description = 'this is picture #%d' % i
             url = 'album1/pictures/%d.jpeg' % i
             picture_model = PictureModel(url, url, url, name,
                                          description, album1_model.id)
-            DBSession.add(picture_model)
+            session.add(picture_model)
         for i in xrange(3):
             name = 'picture %d' % i
             description = 'this is picture #%d' % i
             url = 'album2/pictures/%d.jpeg' % i
             picture_model = PictureModel(url, url, url, name,
                                          description, album2_model.id)
-            DBSession.add(picture_model)
-
+            session.add(picture_model)
+    

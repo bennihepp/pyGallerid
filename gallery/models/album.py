@@ -4,6 +4,7 @@ from . import *
 
 class AlbumModel(Base):
     __tablename__ = 'albums'
+
     id = Column(Integer, primary_key=True)
     name = Column(Text)
     user_id = Column(None, ForeignKey("users.id"))

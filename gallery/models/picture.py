@@ -2,6 +2,7 @@ from . import *
 
 class PictureModel(Base):
     __tablename__ = 'pictures'
+
     id = Column(Integer, primary_key=True)
     display_url = Column(Text)
     original_url = Column(Text)
