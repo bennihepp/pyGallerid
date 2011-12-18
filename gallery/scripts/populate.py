@@ -11,8 +11,10 @@ from pyramid.paster import (
 
 from ..models import (
     DBSession,
-    MyModel,
     Base,
+    UserModel,
+    AlbumModel,
+    PictureModel,
     )
 
 def usage(argv):
@@ -31,5 +33,24 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        model = MyModel(name='one', value=1)
-        DBSession.add(model)
+        user_model = UserModel('hepp', 'benjamin.hepp@gmail.com', 'abc')
+        DBSession.add(user_model)
+        album1_model = AlbumModel('album1', user_model.id, 'this is the first album')
+        album2_model = AlbumModel('album2', user_model.id, 'this is the second album')
+        DBSession.add(album1_model)
+        DBSession.add(album2_model)
+        for i in xrange(5):
+            name = 'picture %d' % i
+            description = 'this is picture #%d' % i
+            url = 'album1/pictures/%d.jpeg' % i
+            picture_model = PictureModel(url, url, url, name,
+                                         description, album1_model.id)
+            DBSession.add(picture_model)
+        for i in xrange(3):
+            name = 'picture %d' % i
+            description = 'this is picture #%d' % i
+            url = 'album2/pictures/%d.jpeg' % i
+            picture_model = PictureModel(url, url, url, name,
+                                         description, album2_model.id)
+            DBSession.add(picture_model)
+
