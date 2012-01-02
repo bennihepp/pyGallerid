@@ -31,8 +31,8 @@ class ModelTests(unittest.TestCase):
         from zope.sqlalchemy import ZopeTransactionExtension
         Base.metadata.create_all(engine)
         with transaction.manager:
-            from ..scripts.populate import fillDB
-            fillDB(DBSession())
+            from ..scripts.populate import test_fillDB
+            test_fillDB(DBSession())
 
     def tearDown(self):
         DBSession.remove()

@@ -31,12 +31,14 @@ class AlbumModel(Base):
     #)
 
     def __init__(self, name, description=None, location=None,
-                 date=datetime.datetime.now(), user_id=None):
+                 date_from=datetime.datetime.now(), date_to=None,
+                 user_id=None):
         self.name = name
         self.user_id = user_id
         self.description = description
         self.location = location
-        self.date = date
+        self.date_from = date_from
+        self.date_to = date_to
 
 class PictureModel(Base):
     __tablename__ = 'pictures'
