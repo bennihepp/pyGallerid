@@ -12,6 +12,7 @@
         % for album in albums.values():
             <il>
                 <a href="${album_href(album)}">${album.name}</a>
+				(${len(album.pictures)} pictures)<br />
             </il>
         % endfor
     </ol>

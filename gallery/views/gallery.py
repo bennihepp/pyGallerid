@@ -23,6 +23,7 @@ def create_menu_urls(context, request):
 def view_gallery(context, request):
     #one = DBSession.query(MyModel).filter(MyModel.name=='one').first()
     username = request.matchdict['username']
+    print 'username:', username
     user = DBSession.query(UserModel).\
         filter(UserModel.name == username).\
         first()
@@ -96,7 +97,25 @@ def view_picture(context, request):
     #    filter(PictureModel.album_id == album.id).\
     #    first()
 
+    def original_url(picture):
+        #url = request.route_url('view_picture',
+        #                         #username=username,
+        #                         #album_name=album_name,
+        #                         picture_name=picture.name,
+        #                         **request.matchdict)
+        url = picture.original_file
+        return url
+    def display_url(picture):
+        url = picture.display_file
+        return url
+    def thumbnail_url(picture):
+        url = picture.thumbnail_file
+        return url
+
     return {'menu_urls' : create_menu_urls(context, request),
             'username' : username,
             'album' : album,
-            'picture' : picture}
+            'picture' : picture,
+            'original_url' : original_url,
+            'display_url' : display_url,
+            'thumbnail_url' : thumbnail_url}

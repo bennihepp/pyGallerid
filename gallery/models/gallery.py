@@ -44,9 +44,9 @@ class PictureModel(Base):
     __tablename__ = 'pictures'
 
     id = Column(Integer, primary_key=True)
-    display_url = Column(Text)
-    original_url = Column(Text)
-    thumbnail_url = Column(Text)
+    display_file = Column(Text)
+    original_file = Column(Text)
+    thumbnail_file = Column(Text)
     name = Column(Text)
     description = Column(Text)
     album_id = Column(None, ForeignKey("albums.id"))
@@ -63,13 +63,13 @@ class PictureModel(Base):
 
     #album = relationship("AlbumModel", backref=backref("pictures", order_by=id))
 
-    def __init__(self, name, display_url, original_url=None, thumbnail_url=None,
+    def __init__(self, name, display_file, original_file=None, thumbnail_file=None,
                  description=None, location=None,
                  date=datetime.datetime.now(), album_id=None):
         self.name = name
-        self.display_url = display_url
-        self.original_url = original_url
-        self.thumbnail_url = thumbnail_url
+        self.display_file = display_file
+        self.original_file = original_file
+        self.thumbnail_file = thumbnail_file
         self.description = description
         self.location = location
         self.date = date

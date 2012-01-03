@@ -11,6 +11,9 @@
 	Album name: ${album.name}
 </div>
 <div class="picture">
-    Picture name: ${picture.name}
+    Picture name: ${picture.name}<br />
+	Original URL: <a href="${original_url(picture)}">${original_url(picture)}</a><br />
+	Display URL: <a href="${display_url(picture)}">${display_url(picture)}</a><br />
+	Thumbnail URL: <a href="${thumbnail_url(picture)}">${thumbnail_url(picture)}</a><br />
 </div>
 </%block>
