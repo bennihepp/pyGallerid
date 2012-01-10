@@ -1,2 +1,246 @@
 @charset "UTF-8";
 /* CSS Document */
+
+div.content-navigation {
+    margin: 10px 10px 10px 10px;
+    padding: 5px 0px 0px 0px;
+    color: #666666;
+}
+    span.content-navigation-current {
+        font-weight: bold;
+        font-family: Arial;
+        font-size: 14px;
+        color: white;
+    }
+    .content-navigation-options {
+        float: right;
+    }
+div.content-info {
+    margin: 10px 10px 10px 10px;
+    padding: 0px;
+    color: #666666;
+}
+
+div.content-header {
+    margin: 10px 10px 10px 10px;
+    padding: 5px 0px 0px 0px;
+}
+    .content-title {
+        margin-top: 0;
+        color: #8CCA1E;
+        font-size: 18px;
+        font-weight: normal;
+    }
+
+a.navigation {
+    font-weight: normal;
+    font-family: Arial;
+    font-size: 14px;
+}
+
+div.album-navigation-top {
+    margin: 0px 10px 10px 10px;
+    padding: 0px 0px 0px 0px;
+    /* border-top: 1px solid #666666; */
+    word-wrap: break-word;
+    font-family: Arial;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+}
+div.album-navigation-bottom {
+    margin: 10px 10px 10px 10px;
+    padding: 5px 0px 0px 0px;
+    border-top: 1px solid #666666;
+    word-wrap: break-word;
+    font-family: Arial;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+div.content-description {
+    margin: 10px 10px 10px 10px;
+    padding: 5px 0px 0px 0px;
+    border-top: 1px solid #666666;
+    word-wrap: break-word;
+    font-family: Arial;
+    font-size: 14px;
+}
+div.content-description-bottom-line {
+    margin: 10px 10px 0px 10px;
+    padding: 5px 0px 0px 0px;
+    border-top: 1px solid #666666;
+}
+div.content-footer {
+    margin: 10px 10px 10px 10px;
+    padding: 5px 0px 0px 0px;
+    border-top: 1px solid #666666;
+}
+
+a:link { text-decoration:none; font-weight:normal; color:white; }
+a:visited { text-decoration:none; font-weight:normal; color:white; }
+a:hover { text-decoration:underline; font-weight:normal; color:white; }
+a:active { text-decoration:underline; font-weight:normal; color:white; }
+a:focus { text-decoration:none; font-weight:normal; color:white; }
+a.navigation-first{
+    font-weight: normal;
+    font-size: 12px;
+    margin-right: 10px;
+}
+a.navigation-prev{
+    font-weight: normal;
+    font-size: 12px;
+    margin-right: 10px;
+}
+a.navigation-next{
+    font-weight: normal;
+    font-size: 12px;
+    margin-left: 10px;
+}
+a.navigation-last{
+    font-weight: normal;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+div.pictures {
+    margin: 0px 0px 0px 0px;
+    padding: 0px 10px 0px 10px;
+    background: #161616;
+    text-align: center;
+}
+
+    ul.picture-list {
+        margin: 0px 0px 0px 0px;
+        padding: 0px 0px 0px 0px;
+        position: relative;
+        display: block;
+        background: #161616;
+    }
+
+    li.picture-item {
+        margin: 0px 10px 0px 10px;
+        padding: 30px 0px 80px 0px;
+        display: inline-block;
+        list-style: none outside none;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    div.picture-cell {
+        margin: 0px 0px 0px 0px;
+        padding: 0px;
+        background: #666666;
+    }
+
+    div.picture-container {
+        margin: 0px 0px 0px 0px;
+        padding: 0px;
+        vertical-align: middle;
+        text-align: center;
+    }
+        a.picture-link {
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+            outline: medium none;
+            text-align: center;
+            vertical-align: middle;
+        }
+            img.image-box {
+                padding: 0px 0px 0px 0px;
+                margin: 0px 0px 0px 0px;
+                background: no-repeat center center #161616;
+                border: 1px solid #666666;
+                padding: 1px;
+            }
+            img.image-box:hover {
+                border: 1px solid #C2C2C2;
+            }
+
+    div.picture-info {
+        margin: 0px 0px 0px 0px;
+        padding: 0px 1px 0px 1px;
+        border: 1px solid #666666;
+        background: #666666;
+    }
+        div.picture-descr {
+            color: white;
+            margin: 0px 0px 0px 0px;
+            padding: 20px 0px 5px 10px;
+            font-family: Arial;
+            font-size: 14px;
+            text-align: left;
+        }
+
+div.albums {
+    margin: 0px 0px 30px 0px;
+    padding: 0px 10px 0px 10px;
+    background: #161616;
+    text-align: center;
+}
+
+    ul.album-list {
+        margin: 0px 80px 0px 80px;
+        padding: 20px 20px 20px 20px;
+        position: relative;
+        display: block;
+        background: #2D2D2D;
+        border: 1px solid #666666;
+        border-radius: 30px;
+        -moz-border-radius: 30px;
+    }
+
+    li.album-item {
+        margin: 0px;
+        padding: 30px 20px 80px 20px;
+        display: inline-block;
+        list-style: none outside none;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    div.album-cell {
+        margin: 0px 0px 0px 0px;
+        padding: 0px;
+        background: #666666;
+    }
+
+    div.album-container {
+        margin: 0px 0px 0px 0px;
+        padding: 0px;
+        vertical-align: middle;
+        text-align: center;
+    }
+        a.album-link {
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+            outline: medium none;
+            text-align: center;
+            vertical-align: middle;
+        }
+            img.image-box {
+                padding: 0px 0px 0px 0px;
+                margin: 0px 0px 0px 0px;
+                background: no-repeat center center #161616;
+                border: 1px solid #666666;
+                padding: 1px;
+            }
+            img.image-box:hover {
+                border: 1px solid #C2C2C2;
+            }
+
+    div.album-info {
+        margin: 0px 0px 0px 0px;
+        padding: 0px 1px 0px 1px;
+        border: 1px solid #666666;
+        background: #666666;
+    }
+        div.album-descr {
+            color: white;
+            margin: 0px 0px 0px 0px;
+            padding: 20px 0px 5px 10px;
+            font-family: Arial;
+            font-size: 14px;
+            text-align: left;
+        }

@@ -5,19 +5,18 @@ import datetime
 import dateutil.parser
 import hashlib
 from PIL import Image
-
-from ZODB.FileStorage import FileStorage
-from ZODB.DB import DB
 import transaction
+
+from sqlalchemy import engine_from_config
 
 from pyramid.paster import (
     get_appsettings,
     setup_logging,
 )
 
-from ..models.user import User
-from ..models.gallery import GalleryContainer, Gallery, \
-     GalleryAlbum, GalleryPicture
+from ..models import DBSession, Base
+from ..models.user import UserModel
+from ..models.gallery import CategoryModel, AlbumModel, PictureModel
 
 DEFAULT_ROOT_PASSWORD = 'qwert'
 
@@ -37,23 +36,22 @@ def main(argv=sys.argv):
     config_uri = argv[1]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
-    #engine = engine_from_config(settings, 'sqlalchemy.')
-    #DBSession.configure(bind=engine)
-    #Base.metadata.create_all(engine)
-    storage = FileStorage(settings['zodbconn.file'])
-    db = DB(storage)
-    conn = db.open()
-    zodb_root = conn.root()
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+    Base.metadata.create_all(engine)
     with transaction.manager:
-        populateDB(zodb_root, settings)
-        transaction.commit()
+        fillDB(DBSession, settings)
 
-def test_populateDB(app_root):
-    #user = User('root', 'benjamin.hepp@gmail.com', 'abc')
-    album1 = Album('album1', 'this is the first album')
-    album2 = Album('album2', 'this is the second album')
+def test_fillDB(session):
+    user_model = UserModel('root', 'benjamin.hepp@gmail.com', 'abc')
+    session.add(user_model)
+    transaction.commit()
+    user_model = session.query(UserModel).all()[0]
+    album1_model = AlbumModel('album1', 'this is the first album', user_id=user_model.id)
+    album2_model = AlbumModel('album2', 'this is the second album', user_id=user_model.id)
     session.add(album1_model)
     session.add(album2_model)
+    transaction.commit()
     albums = session.query(AlbumModel).order_by(AlbumModel.name).all()
     for i in xrange(5):
         name = 'picture %d' % i
@@ -71,46 +69,48 @@ def test_populateDB(app_root):
         session.add(picture_model)
     transaction.commit()
 
-def create_album(category, album_name, date_from, date_to):
-    if album_name in category:
-        album = category[album_name]
+def create_album(session, category, album_name, date_from, date_to):
+    if album_name in category.album_dict:
+        album_model = category.album_dict[album_name]
     else:
         print '  creating new album:', album_name
-        album = GalleryAlbum(album_name, album_name,
-                             ' '.join([album_name]*20),
-                             date_from=date_from,
-                             date_to=date_to)
-        category.add(album)
+        album_model = AlbumModel(album_name, '', date_from=date_from,
+                                 date_to=date_to, category_id=category.id)
+        category.album_dict[album_name] = album_model
+    #session.add(album_model)
     #transaction.commit()
-    return album
+    #album_model = session.query(AlbumModel).filter(AlbumModel.name == album_name).first()
+    return album_model
 
-def import_picture(category, album_name, date_from, date_to,
+def import_picture(session, category, album_name, date_from, date_to,
                    picture_name, original_file, display_file,
                    thumbnail_file, img_size, display_size, thumb_size,
                    date):
-    album = create_album(category, album_name, date_from, date_to)
+    album = create_album(session, category, album_name, date_from, date_to)
     description = picture_name
     print '  adding picture "%s"' % picture_name
-    picture = GalleryPicture(picture_name, display_file,
-                           original_file, thumbnail_file,
-                           description, date=date,
-                           original_size=img_size,
-                           display_size=display_size,
-                           thumbnail_size=thumb_size)
-    album.add(picture)
+    picture_model = PictureModel(picture_name, display_file,
+                                 original_file, thumbnail_file,
+                                 description, date=date,
+                                 original_size=img_size,
+                                 display_size=display_size,
+                                 thumbnail_size=thumb_size,
+                                 album_id=album.id)
+    album.picture_dict[picture_name] = picture_model
     if category.preview_picture == None:
-        category.preview_picture = picture
+        category.preview_picture = picture_model
     if album.preview_picture == None:
-        album.preview_picture = picture
+        album.preview_picture = picture_model
+    #session.add(picture_model)
 
-def populateDB(zodb_root, settings):
-    #password_hash, password_salt = User.hash_password(DEFAULT_ROOT_PASSWORD)
-    #user = User('root', 'benjamin.hepp@gmail.com', password_hash, password_salt)
-    gallery = Gallery('Photography by Benjamin Hepp')
-    category = GalleryContainer('New Zealand', 'Southern Alps - New Zealand')
-    gallery.add(category)
-    zodb_root['gallery_app_root'] = gallery
+def fillDB(session, settings):
+    password_hash, password_salt = UserModel.hash_password(DEFAULT_ROOT_PASSWORD)
+    user_model = UserModel('root', 'benjamin.hepp@gmail.com', password_hash, password_salt)
+    category_model = CategoryModel('New Zealand', 'Southern Alps - New Zealand')
+    category_model.user = user_model
+    session.add(user_model)
     #transaction.commit()
+    #user_model = DBSession.query(UserModel).filter(UserModel.name == 'root').first()
 
     datematcher = re.compile(r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')
 
@@ -168,7 +168,7 @@ def populateDB(zodb_root, settings):
                         sys.exit(1)
                         date = None
                     #print 'info:', img.info.keys()
-                    #
+                    #print ret
                     thumb_img = img.copy()
                     thumb_img.thumbnail(DEFAULT_THUMBNAIL_SIZE, Image.ANTIALIAS)
                     if not os.path.exists(os.path.split(abs_thumbnail_file)[0]):
@@ -185,9 +185,10 @@ def populateDB(zodb_root, settings):
                         os.makedirs(os.path.split(abs_display_file)[0])
                     display_img.save(abs_display_file)
                     import_picture(
-                        category, album_name,
-                        date_from, date_to,
-                        picture_name,
-                        original_file, display_file, thumbnail_file,
+                        session, category_model,
+                        album_name, date_from, date_to,
+                        picture_name, original_file,
+                        display_file, thumbnail_file,
                         img.size, display_img.size, thumb_img.size,
                         date)
+    transaction.commit()

@@ -3,9 +3,9 @@ import transaction
 
 from pyramid import testing
 
-from ..models import DBSession, Base
-from ..models.user import UserModel
-from ..models.gallery import AlbumModel, PictureModel
+from ..models import appmaker
+from ..models.user import User
+from ..models.gallery import Gallery, GalleryContainer, GalleryAlbum, GalleryPicture
 
 class ViewTests(unittest.TestCase):
     def setUp(self):

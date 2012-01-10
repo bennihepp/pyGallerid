@@ -11,11 +11,13 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_tm',
     #'pyramid_handlers',
-    #'pyramid_zodbconn',
-    #'ZODB3',
+    'ZODB3',
+    'pyramid_zodbconn',
     'transaction',
     'zope.sqlalchemy',
-    'SQLAlchemy',
+    #'SQLAlchemy',
+    'PIL',
+    #'dateutil',
 ]
 
 setup(name='gallery',

@@ -1,5 +1,5 @@
 ## view_album.mako
-<%inherit file="layout.mako"/>
+<%inherit file="layout.html.mako"/>
 
 <%block name="title">View picture</%block>
 

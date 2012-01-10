@@ -1,7 +1,8 @@
 pyramid
 pyramid_debugtoolbar
 pyramid_tm
-pyramid_handlers
+ZODB3
+pyramid_zodbconn
 transaction
 zope.sqlalchemy
-SQLAlchemy
+PIL
