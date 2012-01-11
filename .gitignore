@@ -12,6 +12,8 @@ jquery
 *.egg-info
 dist
 build
+include
+lib
 local
 eggs
 parts
