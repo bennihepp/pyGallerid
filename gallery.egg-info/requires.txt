@@ -1,8 +1,0 @@
-pyramid
-pyramid_debugtoolbar
-pyramid_tm
-ZODB3
-pyramid_zodbconn
-transaction
-zope.sqlalchemy
-PIL

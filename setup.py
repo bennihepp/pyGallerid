@@ -13,16 +13,17 @@ requires = [
     #'pyramid_handlers',
     'ZODB3',
     'pyramid_zodbconn',
+    #'repoze.zodbconn',
     'transaction',
-    'zope.sqlalchemy',
+    #'zope.sqlalchemy',
     #'SQLAlchemy',
     'PIL',
-    #'dateutil',
+    'python-dateutil',
 ]
 
-setup(name='gallery',
-      version='0.0',
-      description='gallery',
+setup(name='pyGallerid',
+      version='0.1',
+      description='python web photo gallery based on pyramid',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
@@ -39,12 +40,12 @@ setup(name='gallery',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="gallery",
+      test_suite="pyGallerid",
       entry_points = """\
       [paste.app_factory]
-      main = gallery:main
+      main = pyGallerid:main
       [console_scripts]
-      populate_gallery = gallery.scripts.populate:main
+      populate_pyGallerid = pyGallerid.scripts.populate:main
       """,
       )
 

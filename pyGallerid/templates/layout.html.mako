@@ -11,7 +11,7 @@ Untitled Document
 </%block></title>
 
 <link rel="stylesheet" type="text/css" href="/static/css/global.css" media="screen" />
-<link rel="stylesheet" type="text/css" href="/static/css/custom.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/static/css/pyGallerid.css" media="screen" />
 <!--[if lte IE 7]>
 <link rel="stylesheet" type="text/css" href="/static/css/global_ie.css" />
 <![endif]-->
@@ -24,7 +24,7 @@ Untitled Document
 <script type="text/javascript" src="/static/js/jquery/jquery.mousewheel-3.0.6.pack.js"></script>
 <link rel="stylesheet" href="/static/js/jquery/jquery.fancybox.css" type="text/css" media="screen" />
 <script type="text/javascript" src="/static/js/jquery/jquery.fancybox.pack.js"></script>
-<script type="text/javascript" src="/static/js/gallery.js"></script>
+<script type="text/javascript" src="/static/js/pyGallerid.js"></script>
 
 </head>
 

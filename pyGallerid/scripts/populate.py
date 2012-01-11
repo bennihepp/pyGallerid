@@ -6,8 +6,15 @@ import dateutil.parser
 import hashlib
 from PIL import Image
 
-from ZODB.FileStorage import FileStorage
-from ZODB.DB import DB
+# this is not documented in the pyramid 1.3 documentation,
+# so if it disappears at some point just use repoze.zodbconn
+# or connect to the ZODB directly
+from pyramid.zodbconn import db_from_uri
+
+#import repoze.zodbconn.uri
+#from ZODB.FileStorage import FileStorage
+#from ZODB.DB import DB
+
 import transaction
 
 from pyramid.paster import (
@@ -16,7 +23,7 @@ from pyramid.paster import (
 )
 
 from ..models.user import User
-from ..models.gallery import GalleryContainer, Gallery, \
+from ..models.pyGallerid import GalleryContainer, Gallery, \
      GalleryAlbum, GalleryPicture
 
 DEFAULT_ROOT_PASSWORD = 'qwert'
@@ -37,11 +44,14 @@ def main(argv=sys.argv):
     config_uri = argv[1]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
+    # for SQLalchemy
     #engine = engine_from_config(settings, 'sqlalchemy.')
     #DBSession.configure(bind=engine)
     #Base.metadata.create_all(engine)
-    storage = FileStorage(settings['zodbconn.file'])
-    db = DB(storage)
+    db = db_from_uri(settings['zodbconn.uri'])
+    # for ZODB without repoze.zodbconn
+    #storage = FileStorage(settings['zodbconn.file'])
+    #db = DB(storage)
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
@@ -109,7 +119,7 @@ def populateDB(zodb_root, settings):
     gallery = Gallery('Photography by Benjamin Hepp')
     category = GalleryContainer('New Zealand', 'Southern Alps - New Zealand')
     gallery.add(category)
-    zodb_root['gallery_app_root'] = gallery
+    zodb_root['pyGallerid-app-root'] = gallery
     #transaction.commit()
 
     datematcher = re.compile(r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')

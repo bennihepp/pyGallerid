@@ -2,3 +2,11 @@
 ---
 
 -  Initial version
+
+0.1
+---
+
+- First running version of pyGallerid.
+
+  Basic functionality existing.
+

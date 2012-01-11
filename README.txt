@@ -1,1 +1,2 @@
-gallery README
+pyGallerid README
+
