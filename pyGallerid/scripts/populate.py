@@ -4,12 +4,12 @@ import re
 import datetime
 import dateutil.parser
 import hashlib
-from PIL import Image
+import Image
 
 # this is not documented in the pyramid 1.3 documentation,
 # so if it disappears at some point just use repoze.zodbconn
 # or connect to the ZODB directly
-from pyramid.zodbconn import db_from_uri
+from pyramid_zodbconn import db_from_uri
 
 #import repoze.zodbconn.uri
 #from ZODB.FileStorage import FileStorage
@@ -23,7 +23,7 @@ from pyramid.paster import (
 )
 
 from ..models.user import User
-from ..models.pyGallerid import GalleryContainer, Gallery, \
+from ..models.gallery import GalleryContainer, Gallery, \
      GalleryAlbum, GalleryPicture
 
 DEFAULT_ROOT_PASSWORD = 'qwert'
