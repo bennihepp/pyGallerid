@@ -73,6 +73,9 @@ def view_gallery(context, request):
                 picture.thumbnail_file
             )
         )
+        print 'picture:', picture
+        print 'file:', file
+        print 'url:', url
         return url
     def preview_width(category):
         picture = category.preview_picture
