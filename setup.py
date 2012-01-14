@@ -18,7 +18,7 @@ requires = [
     #'zope.sqlalchemy',
     #'SQLAlchemy',
     'PIL',
-    'python-dateutil',
+    'python-dateutil==1.5',
 ]
 
 setup(name='pyGallerid',

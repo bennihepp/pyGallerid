@@ -131,6 +131,8 @@ def populateDB(zodb_root, settings):
         print 'scanning %s' % root
         for file in files:
             arr = os.path.splitext(file)
+            import pdb
+            pdb.set_trace()
             if len(arr) > 1:
                 if arr[-1].lower() in \
                     ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
