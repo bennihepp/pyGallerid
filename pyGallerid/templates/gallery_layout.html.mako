@@ -18,7 +18,7 @@
 
 <%block name="body">
 
-    % if request.registry.settings.get('allow_editing', 'false') == 'true'
+    % if request.registry.settings.get('allow_editing', 'false') == 'true':
         % if editing:
             <script type="text/javascript">
                 pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
