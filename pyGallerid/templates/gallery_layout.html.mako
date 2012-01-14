@@ -19,7 +19,7 @@
 <%block name="body">
 
     <%
-        if request.registry.settings.get('allow_editing', 'false') == 'false':
+        if not request.registry.settings.get('allow_editing', 'false') == 'true':
             editing = False
     %>
 
