@@ -25,13 +25,13 @@
                     <div class="album-container">
                         <a class="album-link"
                             title="${item.description}"
-                            href="${request.resource_url(item, '@@'+request.view_name) | u}">
+                            href="${request.resource_url(item, '@@'+request.view_name) | n}">
                         <img class="image-box"
                             alt="${item.name}"
                             width="${preview_width(item)}"
                             height="${preview_height(item)}"
                             src="/static/img/spacer.gif"
-                            data-src="${preview_url(item) | u}"
+                            data-src="${preview_url(item) | n}"
                             style="
                                 background-repeat: no-repeat;" />
                         </a>

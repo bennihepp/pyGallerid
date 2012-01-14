@@ -8,12 +8,12 @@
     ${parent.navigation_options()}
     % if show_as_grid == 'True':
         <a class="navigation"
-            href="${request.resource_url(request.context, '@@'+request.view_name, query=dict(page=1, grid=False)) | u}">
+            href="${request.resource_url(request.context, '@@'+request.view_name, query=dict(page=1, grid=False)) | n}">
             Show as list
         </a>
     % else:
         <a class="navigation"
-            href="${request.resource_url(request.context, '@@'+request.view_name, query=dict(page=1, grid=True)) | u}">
+            href="${request.resource_url(request.context, '@@'+request.view_name, query=dict(page=1, grid=True)) | n}">
             Show as grid
         </a>
     % endif
@@ -52,23 +52,23 @@
 
 <div class="album-navigation-top">
 <%block name="album_navigation">
-    <a class="navigation-first" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=1, grid=show_as_grid)) | u}"
+    <a class="navigation-first" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=1, grid=show_as_grid)) | n}"
         % if page <= 1:
             style="visibility: hidden"
         % endif
     >&lt;&lt;</a>
-    <a class="navigation-prev" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=page-1, grid=show_as_grid)) | u}"
+    <a class="navigation-prev" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=page-1, grid=show_as_grid)) | n}"
         % if page <= 1:
             style="visibility: hidden"
         % endif
     >&lt; Prev</a>
     Page ${page} of ${num_of_pages}
-    <a class="navigation-next" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=page+1, grid=show_as_grid)) | u}"
+    <a class="navigation-next" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=page+1, grid=show_as_grid)) | n}"
         % if page >= num_of_pages:
             style="visibility: hidden">
         % endif
     >Next &gt;</a>
-    <a class="navigation-last" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=num_of_pages, grid=show_as_grid)) | u}"
+    <a class="navigation-last" href="${request.resource_url(album, '@@'+request.view_name, query=dict(page=num_of_pages, grid=show_as_grid)) | n}"
         % if page >= num_of_pages:
             style="visibility: hidden">
         % endif
@@ -87,14 +87,14 @@
                     <div class="picture-container">
                         <a class="picture-link"
                             title="${picture.description}"
-                            href="${display_url(picture) | u}"
+                            href="${display_url(picture) | n}"
                             rel="picture-gallery">
                         <img class="image-box"
                             alt="${picture.name}"
                             width="${preview_width(picture)}"
                             height="${preview_height(picture)}"
                             src="/static/img/spacer.gif"
-                            data-src="${preview_url(picture) | u}"
+                            data-src="${preview_url(picture) | n}"
                             style="
                                 background-repeat: no-repeat;" />
                         </a>

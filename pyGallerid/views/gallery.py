@@ -1,5 +1,6 @@
 import os
 import datetime
+import urllib
 
 from pyramid.location import lineage
 from pyramid.view import view_config
@@ -73,9 +74,10 @@ def view_gallery(context, request):
                 picture.thumbnail_file
             )
         )
+        url = urllib.url2pathname(url)
         print 'picture:', picture
         print 'file:', file
-        print 'url:', url
+        print 'path:', url
         return url
     def preview_width(category):
         picture = category.preview_picture
