@@ -75,9 +75,6 @@ def view_gallery(context, request):
             )
         )
         url = urllib.url2pathname(url)
-        print 'picture:', picture
-        print 'file:', file
-        print 'path:', url
         return url
     def preview_width(category):
         picture = category.preview_picture
@@ -125,6 +122,7 @@ def view_album(context, request):
                 #picture.original_file
             #)
         #)
+        #url = urllib.url2pathname(url)
         #return url
     def display_url(picture):
         file = picture.display_file
@@ -134,6 +132,7 @@ def view_album(context, request):
                 picture.display_file
             )
         )
+        url = urllib.url2pathname(url)
         return url
     preview_type = 'display'
     if request.params.get('grid', 'False') == 'True':
@@ -146,6 +145,7 @@ def view_album(context, request):
                 picture.thumbnail_file
             )
         )
+        url = urllib.url2pathname(url)
         return url
     def preview_width(picture):
         return picture.__getattribute__('%s_width' % preview_type)

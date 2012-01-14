@@ -18,13 +18,11 @@ def main(global_config, **settings):
     # This is only needed when using SQLAlchemy
     #engine = engine_from_config(settings, 'sqlalchemy.')
     #DBSession.configure(bind=engine)
-    print 'static:', settings['static_dir']
     config.add_static_view(
         'static',
         settings['static_dir'],
         cache_max_age=3600
     )
-    print 'static:', settings['original_picture_dir']
     config.add_static_view(
         'pictures/original',
         settings['original_picture_dir'],
