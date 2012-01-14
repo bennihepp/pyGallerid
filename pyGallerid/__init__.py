@@ -1,5 +1,5 @@
 from pyramid.config import Configurator
-#from pyramid_zodbconn import get_connection
+from pyramid_zodbconn import get_connection
 
 from.models import appmaker
 

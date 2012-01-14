@@ -10,6 +10,7 @@ jquery
 
 .DS_Store
 
+.Python
 # Packages
 *.egg
 *.egg-info
