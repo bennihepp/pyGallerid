@@ -110,7 +110,7 @@ def populateDB(zodb_root, settings, category, picture_dir):
     thumbnail_dir = settings['thumbnail_picture_dir']
     display_dir = settings['display_picture_dir']
 
-    files = os.listdir(picture_dir)
+    files = os.listdir(root)
 
     print 'scanning %s' % root
     for file in files:
