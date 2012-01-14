@@ -13,7 +13,7 @@ from pyramid.response import Response
 from ..models.user import User
 from ..models.gallery import Gallery, GalleryContainer, GalleryAlbum, GalleryPicture
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json')
+#@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json')
 def update_gallery(context, request):
     result = {'pg-status' : 'failed'}
     print request.params
@@ -54,14 +54,14 @@ def update_gallery(context, request):
             return result
     return result
 
-@view_config(context=GalleryContainer, name='edit',
-             renderer='view_gallery.html.mako')
+#@view_config(context=GalleryContainer, name='edit',
+#             renderer='view_gallery.html.mako')
 def view_gallery_edit(context, request):
     d = view_gallery(context, request)
     d.update({'editing' : True})
     return d
 
-@view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
+#@view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
 def view_gallery(context, request):
     preview_type = 'thumbnail'
     def preview_url(category):
@@ -88,14 +88,14 @@ def view_gallery(context, request):
             'preview_width' : preview_width,
             'preview_height' : preview_height}
 
-@view_config(context=GalleryAlbum, name='edit',
-             renderer='view_album.html.mako')
+#@view_config(context=GalleryAlbum, name='edit',
+#             renderer='view_album.html.mako')
 def view_album_edit(context, request):
     d = view_album(context, request)
     d.update({'editing' : True})
     return d
 
-@view_config(context=GalleryAlbum, renderer='view_album.html.mako')
+#@view_config(context=GalleryAlbum, renderer='view_album.html.mako')
 def view_album(context, request):
     if request.params.get('grid', 'False') == 'True':
         pictures_per_page = 20

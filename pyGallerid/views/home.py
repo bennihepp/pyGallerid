@@ -6,6 +6,7 @@ from pyramid.httpexceptions import (
 )
 from pyramid.response import Response
 
-#@view_config(route_name='home')
+@view_config(route_name='home')
 def home(context, request):
-    return HTTPFound(location=request.route_url('view_album_gallery', username='root'))
+    return Response("Hello")
+    #return HTTPFound(location=request.route_url('view_album_gallery', username='root'))
