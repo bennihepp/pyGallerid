@@ -2,11 +2,6 @@
 
 <%inherit file="layout.html.mako"/>
 
-<%
-    if request.registry.settings.get('allow_editing', 'false') == 'false':
-        editing = False
-%>
-
 <%block name="header">
     % if len(lineage_list) > 1:
     <p class="hidden">
@@ -22,6 +17,11 @@
 ## </%block>
 
 <%block name="body">
+
+    <%
+        if request.registry.settings.get('allow_editing', 'false') == 'false':
+            editing = False
+    %>
 
     % if editing:
         <script type="text/javascript">
