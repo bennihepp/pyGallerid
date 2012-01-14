@@ -46,6 +46,7 @@ setup(name='pyGallerid',
       main = pyGallerid:main
       [console_scripts]
       populate_pyGallerid = pyGallerid.scripts.populate:main
+      add_pictures_pyGallerid = pyGallerid.scripts.add_pictures:main
       """,
       )
 
