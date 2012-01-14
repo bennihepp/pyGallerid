@@ -18,16 +18,28 @@ def main(global_config, **settings):
     # This is only needed when using SQLAlchemy
     #engine = engine_from_config(settings, 'sqlalchemy.')
     #DBSession.configure(bind=engine)
-    config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('pictures/original',
-                           settings['original_picture_dir'],
-                           cache_max_age=3600)
-    config.add_static_view('pictures/display',
-                           settings['display_picture_dir'],
-                           cache_max_age=3600)
-    config.add_static_view('pictures/thumbnails',
-                           settings['thumbnail_picture_dir'],
-                           cache_max_age=3600)
+    print 'static:', settings['static_dir']
+    config.add_static_view(
+        'static',
+        settings['static_dir'],
+        cache_max_age=3600
+    )
+    print 'static:', settings['original_picture_dir']
+    config.add_static_view(
+        'pictures/original',
+        settings['original_picture_dir'],
+        cache_max_age=3600
+    )
+    config.add_static_view(
+        'pictures/display',
+        settings['display_picture_dir'],
+        cache_max_age=3600
+    )
+    config.add_static_view(
+        'pictures/thumbnails',
+        settings['thumbnail_picture_dir'],
+        cache_max_age=3600
+    )
     #config.add_route('home', '/')
     #config.add_route('view_picture',
     #                 '/{username}/pictures/{album_name}/{picture_name}')
