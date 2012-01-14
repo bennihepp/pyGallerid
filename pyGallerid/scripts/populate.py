@@ -139,6 +139,7 @@ def populateDB(zodb_root, settings):
                     try:
                         match = datematcher.match(album_path)
                         year, month, day_from, day_to, album_name = match.groups()
+                        print year, month, day_from
                         date_from = dateutil.parser.parse(
                             '%s %s %s' % (year, month, day_from)).date()
                         date_to = dateutil.parser.parse(
