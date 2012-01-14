@@ -111,6 +111,7 @@ def populateDB(zodb_root, settings, category, picture_dir):
     display_dir = settings['display_picture_dir']
 
     files = os.listdir(root)
+    files.sort()
 
     print 'scanning %s' % root
     for file in files:

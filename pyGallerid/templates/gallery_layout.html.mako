@@ -18,10 +18,12 @@
 
 <%block name="body">
 
-    % if editing:
-        <script type="text/javascript">
-            pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
-        </script>
+    % if request.registry.settings.get('allow_editing', 'false') == 'true'
+        % if editing:
+            <script type="text/javascript">
+                pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
+            </script>
+        % endif
     % endif
 
     <div class="content-navigation">
@@ -49,18 +51,20 @@
         <div class="content-navigation-options">
             <%block name="navigation_options">
             </%block>
-            % if editing:
-                <a class="navigation"
-                    href="${request.resource_url(request.context, '@@') | n}">
-                    Stop editing
-                </a>
-            % else:
-                <a class="navigation"
-                    href="${request.resource_url(request.context, '@@edit') | n}">
-                    Edit content
-                </a>
+            % if request.registry.settings.get('allow_editing', 'false') == 'true':
+                % if editing:
+                    <a class="navigation"
+                        href="${request.resource_url(request.context, '@@') | n}">
+                        Stop editing
+                    </a>
+                % else:
+                    <a class="navigation"
+                        href="${request.resource_url(request.context, '@@edit') | n}">
+                        Edit content
+                    </a>
+                % endif
+                &nbsp;|&nbsp;
             % endif
-            &nbsp;|&nbsp;
         </div>
     </div>
 
