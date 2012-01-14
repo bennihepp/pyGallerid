@@ -19,6 +19,7 @@
 <%block name="body">
 
     <%
+        global editing
         if not request.registry.settings.get('allow_editing', 'false') == 'true':
             editing = False
     %>

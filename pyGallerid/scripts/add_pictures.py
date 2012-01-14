@@ -97,7 +97,11 @@ def populateDB(zodb_root, settings, category, picture_dir):
     #password_hash, password_salt = User.hash_password(DEFAULT_ROOT_PASSWORD)
     #user = User('root', 'benjamin.hepp@gmail.com', password_hash, password_salt)
     gallery = zodb_root['pyGallerid-app-root']
-    container = gallery[category]
+    if category in gallery:
+        container = gallery[category]
+    else:
+        container = GalleryContainer(category, category)
+        gallery.add(container)
 
     datematcher = re.compile(r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')
 
