@@ -131,8 +131,6 @@ def populateDB(zodb_root, settings):
         print 'scanning %s' % root
         for file in files:
             arr = os.path.splitext(file)
-            import pdb
-            pdb.set_trace()
             if len(arr) > 1:
                 if arr[-1].lower() in \
                     ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
@@ -163,7 +161,7 @@ def populateDB(zodb_root, settings):
                         original_file)
                     print '  generating thumbnail'
                     img = Image.open(abs_file)
-                    from PIL.ExifTags import TAGS
+                    from ExifTags import TAGS
                     info = img._getexif()
                     ret = {}
                     for tag, value in info.items():
