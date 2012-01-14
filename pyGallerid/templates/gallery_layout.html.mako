@@ -13,14 +13,14 @@
 </%block>
 
 ## <%block name="html_body_tags">
-##     data-json-update-url="${request.resource_url(request.context, '@@update')}"
+##     data-json-update-url="${request.resource_url(request.context, '@@update') | u}"
 ## </%block>
 
 <%block name="body">
 
     % if editing:
         <script type="text/javascript">
-            pg_init_editing('${request.resource_url(request.context, '@@update')}');
+            pg_init_editing('${request.resource_url(request.context, '@@update') | u}');
         </script>
     % endif
 
@@ -28,7 +28,7 @@
         &gt;&nbsp;
         % for elem in lineage_list[1:][::-1]:
             <a class="navigation"
-                href="${request.resource_url(elem, '@@'+request.view_name)}">
+                href="${request.resource_url(elem, '@@'+request.view_name) | u}">
                     ${render_resource(elem)}
             </a>
             &nbsp;&gt;&nbsp;
@@ -51,12 +51,12 @@
             </%block>
             % if editing:
                 <a class="navigation"
-                    href="${request.resource_url(request.context, '@@')}">
+                    href="${request.resource_url(request.context, '@@') | u}">
                     Stop editing
                 </a>
             % else:
                 <a class="navigation"
-                    href="${request.resource_url(request.context, '@@edit')}">
+                    href="${request.resource_url(request.context, '@@edit') | u}">
                     Edit content
                 </a>
             % endif
