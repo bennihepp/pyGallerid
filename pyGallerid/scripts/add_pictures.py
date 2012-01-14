@@ -96,7 +96,11 @@ def import_picture(category, album_name, date_from, date_to,
 def populateDB(zodb_root, settings, category, picture_dir):
     #password_hash, password_salt = User.hash_password(DEFAULT_ROOT_PASSWORD)
     #user = User('root', 'benjamin.hepp@gmail.com', password_hash, password_salt)
-    gallery = zodb_root['pyGallerid-app-root']
+    if 'pyGallerid-app-root' in zodb_root:
+        gallery = zodb_root['pyGallerid-app-root']
+    else:
+        gallery = Gallery('Photography by Benjamin Hepp')
+
     if category in gallery:
         container = gallery[category]
     else:
