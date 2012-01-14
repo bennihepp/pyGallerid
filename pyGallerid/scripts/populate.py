@@ -112,6 +112,7 @@ def import_picture(category, album_name, date_from, date_to,
         category.preview_picture = picture
     if album.preview_picture == None:
         album.preview_picture = picture
+    transaction.commit()
 
 def populateDB(zodb_root, settings):
     #password_hash, password_salt = User.hash_password(DEFAULT_ROOT_PASSWORD)
