@@ -180,7 +180,7 @@ def populateDB(zodb_root, settings, category, picture_dir):
                     os.makedirs(os.path.split(abs_display_file)[0])
                 display_img.save(abs_display_file)
                 import_picture(
-                    category, album_name,
+                    container, album_name,
                     date_from, date_to,
                     picture_name,
                     original_file, display_file, thumbnail_file,
