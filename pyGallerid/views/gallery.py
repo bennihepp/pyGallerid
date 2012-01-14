@@ -59,7 +59,8 @@ def update_gallery(context, request):
              renderer='view_gallery.html.mako')
 def view_gallery_edit(context, request):
     d = view_gallery(context, request)
-    d.update({'editing' : True})
+    if request.registry.settings.get('allow_editing', 'false') == 'true':
+        d.update({'editing' : True})
     return d
 
 @view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
@@ -94,7 +95,8 @@ def view_gallery(context, request):
              renderer='view_album.html.mako')
 def view_album_edit(context, request):
     d = view_album(context, request)
-    d.update({'editing' : True})
+    if request.registry.settings.get('allow_editing', 'false') == 'true':
+        d.update({'editing' : True})
     return d
 
 @view_config(context=GalleryAlbum, renderer='view_album.html.mako')

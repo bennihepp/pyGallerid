@@ -18,12 +18,6 @@
 
 <%block name="body">
 
-    <%
-        global editing
-        if not request.registry.settings.get('allow_editing', 'false') == 'true':
-            editing = False
-    %>
-
     % if editing:
         <script type="text/javascript">
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
