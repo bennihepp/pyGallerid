@@ -28,7 +28,7 @@ def main(global_config, **settings):
     config.add_static_view('pictures/thumbnails',
                            settings['thumbnail_picture_dir'],
                            cache_max_age=3600)
-    config.add_route('home', '/')
+    #config.add_route('home', '/')
     #config.add_route('view_picture',
     #                 '/{username}/pictures/{album_name}/{picture_name}')
     #config.add_route('view_album', '/{username}/gallery/{category}/{album_name}/{page}')
