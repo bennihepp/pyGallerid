@@ -22,6 +22,7 @@ from pyramid.paster import (
     setup_logging,
 )
 
+from ..models import appmaker
 from ..models.user import User
 from ..models.gallery import GalleryContainer, Gallery, \
      GalleryAlbum, GalleryPicture
@@ -60,7 +61,21 @@ def main(argv=sys.argv):
         populateDB(zodb_root, settings, category, picture_dir)
         transaction.commit()
 
-def create_album(category, album_name, date_from, date_to):
+def retrieve_gallery(zodb_root):
+    return appmaker(zodb_root)
+
+def retrieve_gallery_child(parent, child_name, description=None):
+    if child_name in parent:
+        child = parent[child_name]
+    else:
+        print '  creating new container:', child_name
+        child = GalleryContainer(child_name, child_name, parent)
+        parent.add(child)
+    if description is not None:
+        child.description = description
+    return child
+
+def retrieve_album(category, album_name, date_from, date_to):
     if album_name in category:
         album = category[album_name]
     else:
@@ -77,7 +92,7 @@ def import_picture(category, album_name, date_from, date_to,
                    picture_name, original_file, display_file,
                    thumbnail_file, img_size, display_size, thumb_size,
                    date):
-    album = create_album(category, album_name, date_from, date_to)
+    album = retrieve_album(category, album_name, date_from, date_to)
     description = picture_name
     print '  adding picture "%s"' % picture_name
     picture = GalleryPicture(picture_name, display_file,
@@ -93,19 +108,16 @@ def import_picture(category, album_name, date_from, date_to,
         album.preview_picture = picture
     transaction.commit()
 
-def populateDB(zodb_root, settings, category, picture_dir):
+def populateDB(zodb_root, settings, category_name, picture_dir):
     #password_hash, password_salt = User.hash_password(DEFAULT_ROOT_PASSWORD)
     #user = User('root', 'benjamin.hepp@gmail.com', password_hash, password_salt)
-    if 'pyGallerid-app-root' in zodb_root:
-        gallery = zodb_root['pyGallerid-app-root']
-    else:
-        gallery = Gallery('Photography by Benjamin Hepp')
+    gallery = retrieve_gallery(zodb_root)
+    #if 'pyGallerid-app-root' in zodb_root:
+    #    gallery = zodb_root['pyGallerid-app-root']
+    #else:
+    #    gallery = Gallery('Photography by Benjamin Hepp')
 
-    if category in gallery:
-        container = gallery[category]
-    else:
-        container = GalleryContainer(category, category)
-        gallery.add(container)
+    category = retrieve_gallery_child(gallery, category_name)
 
     datematcher = re.compile(r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')
 
@@ -185,7 +197,7 @@ def populateDB(zodb_root, settings, category, picture_dir):
                     os.makedirs(os.path.split(abs_display_file)[0])
                 display_img.save(abs_display_file)
                 import_picture(
-                    container, album_name,
+                    category, album_name,
                     date_from, date_to,
                     picture_name,
                     original_file, display_file, thumbnail_file,

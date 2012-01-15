@@ -37,18 +37,41 @@ class GalleryContainer(PersistentDict, PersistentLocationAware):
             self.description = description
         self.preview_picture = None
         self.preview_size = (-1,-1)
+        self.__children = PersistentList()
+
+    @property
+    def children_iter(self):
+        return self.__children.__iter__()
+
+    @property
+    def children(self):
+        return list(self.__children)
+    @children.setter
+    def children(self, children):
+        if len(children) != len(self):
+            raise ValueError('len(children) and len(self) must be equal')
+        for child in children:
+            if not child.name in self:
+                raise ValueError('children and self must contain the same objects')
+        self.__children = PersistentList(children)
 
     def add(self, item):
         self[item.__name__] = item
         item.__parent__ = self
+
+    def insert(self, index, item):
+        self.add(item)
+        self.__children.insert(index, item)
 
     def __setitem__(self, name, item):
         if item.__name__ != name:
             raise ValueError('name and item.__name__ must be equal')
         PersistentDict.__setitem__(self, name, item)
         item.__parent__ = self
+        self.__children.append(item)
 
     def __delitem__(self, name):
+        self.__children.remove(self[name])
         self[name].__parent__ = None
         PersistentDict.__delitem__(self, name)
 
@@ -70,26 +93,12 @@ class GalleryAlbum(GalleryContainer):
         self.location = location
         self.date_from = date_from
         self.date_to = date_to
-        self.__pictures = PersistentList()
 
-    @property
-    def pictures(self):
-        return self.__pictures
-
-    def add(self, item):
-        self[item.__name__] = item
-
-    def insert(self, index, item):
-        GalleryContainer.add(self, item)
-        self.__pictures.insert(index, item)
-
-    def __setitem__(self, name, item):
-        GalleryContainer.__setitem__(self, name, item)
-        self.__pictures.append(item)
-
-    def __delitem__(self, name):
-        self.__pictures.remove(self[name])
-        GalleryContainer.__delitem__(self, name)
+    pictures_iter = property(lambda self: self.children_iter)
+    pictures = property(lambda self: self.children)
+    @pictures.setter
+    def pictures(self, pictures):
+        self.children = pictures
 
 class GalleryPicture(Persistent, PersistentLocationAware):
     def __init__(self, name,

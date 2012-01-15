@@ -1,6 +1,8 @@
 def bootstrap_db():
-    from persistent.mapping import PersistentMapping
-    return PersistentMapping()
+    import gallery
+    return gallery.Gallery('Photography by Benjamin Hepp')
+    #from persistent.mapping import PersistentMapping
+    #return PersistentMapping()
 
 def appmaker(zodb_root):
     if not 'pyGallerid-app-root' in zodb_root:

@@ -16,7 +16,7 @@
 
 <div class="albums">
     <ul class="album-list">
-        % for item in gallery_container:
+        % for item in gallery_container.children:
             <li class="album-item">
                 <div class="album-cell"
                     style="width: ${preview_width(item)}px;
