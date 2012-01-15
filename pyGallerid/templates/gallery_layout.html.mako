@@ -18,12 +18,10 @@
 
 <%block name="body">
 
-    % if request.registry.settings.get('allow_editing', 'false') == 'true':
-        % if editing:
-            <script type="text/javascript">
-                pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
-            </script>
-        % endif
+    % if editing:
+        <script type="text/javascript">
+            pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
+        </script>
     % endif
 
     <div class="content-navigation">
@@ -42,7 +40,7 @@
             <p style="display: inline;" \
                 class="pg-editable" \
                 data-pg-id="GalleryContainer:" \
-                data-pg-type="text" \
+                data-pg-type="name-text" \
                 data-pg-name="name">
         % endif
                 ${render_resource(request.context)}
@@ -51,6 +49,7 @@
         <div class="content-navigation-options">
             <%block name="navigation_options">
             </%block>
+            ## TODO
             % if request.registry.settings.get('allow_editing', 'false') == 'true':
                 % if editing:
                     <a class="navigation"

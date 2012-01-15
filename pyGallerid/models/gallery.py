@@ -13,17 +13,20 @@ class PersistentLocationAware(object):
         return self.__name__
     @name.setter
     def name(self, value):
+        print 'setting name of', self, 'to', value
         if self.parent is not None:
-            self.parent[value] = self
-            del self.parent[self.name]
+            print 'changing linkage to parent object'
+            parent = self.parent
+            del parent[self.name]
             self.__name__ = value
+            parent[value] = self
+            print 'self.parent[name] =', self.parent[self.name]
         else:
             raise AttributeError('The name of a root object can\'t be changed')
 
     @property
     def parent(self):
         return self.__parent__
-
 
 class GalleryContainer(PersistentDict, PersistentLocationAware):
     def __init__(self, name, description=None, parent=None):

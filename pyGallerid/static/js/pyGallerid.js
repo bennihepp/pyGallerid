@@ -2,6 +2,7 @@
     $('body').fadeIn(1000);
 });*/
 
+// image loading helper
 $(document).ready(function() {
     console.log('running');
     $(".image-box")
@@ -17,7 +18,16 @@ $(document).ready(function() {
     });
 });
 
-$(document).ready(function() {
+// Galleria
+/*$(document).ready(function() {
+    $(".picture-link").galleria({
+        width: 800,
+        height: 600
+    });
+});*/
+
+// fancybox
+/*$(document).ready(function() {
     $(".picture-link").fancybox(
         {
             type : 'image',
@@ -36,8 +46,9 @@ $(document).ready(function() {
             },
         }
     );
-});
+});*/
 
+// editing functionality
 var pg_input_providers = {};
 function pg_register_input_provider(pg_type, input_provider)
 {
@@ -51,16 +62,18 @@ pg_register_input_provider('text', function (source, parent) {
     }
     parent.html(input);
     return {
+        method:
+            'GET',
         data:
-        function() {
-            return input.val();
-        },
+            function() {
+                return input.val();
+            },
         update:
-        function() {
-            if (input.val() != source.html().trim()) {
-                source.html(input.val());
+            function() {
+                if (input.val() != source.html().trim()) {
+                    source.html(input.val());
+                }
             }
-        }
     };
 });
 pg_register_input_provider('multiline', function (source, parent) {
@@ -75,16 +88,18 @@ pg_register_input_provider('multiline', function (source, parent) {
     }
     parent.html(input);
     return {
+        method:
+            'POST',
         data:
-        function() {
-            return input.val();
-        },
+            function() {
+                return input.val();
+            },
         update:
-        function(json_data) {
-            if (input.val() != source.html().trim()) {
-                source.html(input.val());
+            function(json_data) {
+                if (input.val() != source.html().trim()) {
+                    source.html(input.val());
+                }
             }
-        }
     };
 });
 pg_register_input_provider('date', function (source, parent) {
@@ -94,15 +109,17 @@ pg_register_input_provider('date', function (source, parent) {
     input.datepicker({dateFormat: "yy-mm-dd"})
         .datepicker("setDate", source.data('pg-value'));
     return {
+        method:
+            'GET',
         data:
-        function() {
-            return input.val();
-        },
+            function() {
+                return input.val();
+            },
         update:
-        function(json_data) {
-            console.log(json_data);
-            source.html(json_data['pg-date']);
-        }
+            function(json_data) {
+                console.log(json_data);
+                source.html(json_data['pg-date']);
+            }
     };
 });
 pg_register_input_provider('date-from-to', function (source, parent) {
@@ -114,16 +131,41 @@ pg_register_input_provider('date-from-to', function (source, parent) {
     input_to.datepicker({dateFormat: "yy-mm-dd"})
         .datepicker("setDate", source.data('pg-date-to'));
     return {
+        method:
+            'GET',
         data:
-        function() {
-            console.log({from: input_from.val(), to: input_to.val()});
-            return {from: input_from.val(), to: input_to.val()};
-        },
+            function() {
+                console.log({from: input_from.val(), to: input_to.val()});
+                return {from: input_from.val(), to: input_to.val()};
+            },
         update:
-        function(json_data) {
-            console.log(json_data);
-            source.html(json_data['pg-date-from-to']);
-        }
+            function(json_data) {
+                console.log(json_data);
+                source.html(json_data['pg-date-from-to']);
+            }
+    };
+});
+pg_register_input_provider('list-order', function (source, parent) {
+    var list = $(source.data('pg-list-selector')).first();
+    console.log(list);
+    list.sortable();
+    return {
+        method:
+            'POST',
+        data:
+            function() {
+                var items = list.find($(source.data('pg-item-selector')));
+                console.log(items);
+                var ids = [];
+                items.each(function (i) {
+                    ids.push($(this).data('pg-id'));
+                });
+                return ids;
+            },
+        update:
+            function(json_data) {
+                console.log(json_data);
+            }
     };
 });
 
@@ -182,7 +224,7 @@ function pg_init_editing(json_url)
                     .after(status)
                 ).insertAfter(elem);
                 // call the input provider
-                var inputCallbacks = pg_input_providers[pg_type](elem, input_div);
+                var inputProvider = pg_input_providers[pg_type](elem, input_div);
                 // slide in new DOM elements
                 container.slideDown('fast');
                 // extract the current click handler of the element
@@ -209,35 +251,51 @@ function pg_init_editing(json_url)
                         status.fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200)
                             .fadeIn(200).delay(1000).fadeOut(200);
                     }
-                    $.getJSON(
-                        json_url,
-                        {
+                    $.ajax({
+                        url: json_url,
+                        dataType: 'json',
+                        type: inputProvider.method,
+                        data: {
+                            'pg-type': elem.data('pg-type'),
                             'pg-id': elem.data('pg-id'),
                             'pg-name': elem.data('pg-name'),
-                            'pg-value': inputCallbacks.data()
+                            'pg-value': JSON.stringify(inputProvider.data()),
                         },
-                        function(json_data) {
-                            if (json_data['pg-status'] == 'success') {
-                                inputCallbacks.update(json_data);
-                                status.css('color', '#00FF00')
-                                .html('&nbsp;|&nbsp;Succeeded')
-                                .fadeIn(100).delay(500).queue(function() {
-                                    container.slideUp('fast', function() {
-                                        // slide out new DOM elements
-                                        container.remove();
-                                        // remove editing mark
-                                        //elem.removeData('pg-editing');
-                                        // remove all click handler from the element
-                                        elem.off('click');
-                                        // and add the previous handler
-                                        elem.on('click', previousHandler);
-                                    });
-                                });
-                            } else {
-                                errorHandler();
+                        /*beforeSend: function(xhr) {
+                            if (xhr && xhr.overrideMimeType) {
+                                xhr.overrideMimeType("application/json;charset=UTF-8");
                             }
+                        },*/
+                    })
+                    .success(function(json_data) {
+                        if (json_data['pg-status'] == 'success') {
+                            inputProvider.update(json_data);
+                            status.css('color', '#00FF00')
+                            .html('&nbsp;|&nbsp;Succeeded')
+                            .fadeIn(100).delay(500).queue(function() {
+                                container.slideUp('fast', function() {
+                                    // slide out new DOM elements
+                                    container.remove();
+                                    // remove editing mark
+                                    //elem.removeData('pg-editing');
+                                    // remove all click handler from the element
+                                    elem.off('click');
+                                    // and add the previous handler
+                                    elem.on('click', previousHandler);
+                                    // redirect to new page if necessary
+                                    window.location.replace(json_data['pg-replace-url']);
+                                    if ('pg-replace-url' in json_data) {
+                                        window.location.replace(json_data['pg-replace-url']);
+                                    }
+                                    if ('pg-redirect-url' in json_data) {
+                                        window.location = json_data['pg-redirect-url'];
+                                    }
+                                });
+                            });
+                        } else {
+                            errorHandler();
                         }
-                    )
+                    })
                     .error(errorHandler);
                 });
             } else {

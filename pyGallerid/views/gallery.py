@@ -1,5 +1,6 @@
 import os
 import datetime
+import json
 import urllib
 
 from pyramid.location import lineage
@@ -13,6 +14,21 @@ from pyramid.response import Response
 
 from ..models.user import User
 from ..models.gallery import Gallery, GalleryContainer, GalleryAlbum, GalleryPicture
+
+@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
+             request_param='pg-type=list-order')
+def update_gallery_list_order(context, request):
+    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
+    pg_ids = json.loads(request.params['pg-value'])
+    obj_list = []
+    for pg_id in pg_ids:
+        obj_list.append(context[pg_id])
+    context.children = obj_list
+    result['pg-status'] = 'success'
+    result['pg-redirect-url'] = request.resource_url(context)
+    #result['pg-replace-url'] = request.resource_url(context)
+    return result
 
 @view_config(context=GalleryContainer, xhr=True, name='update', renderer='json')
 def update_gallery(context, request):
@@ -101,31 +117,39 @@ def view_album_edit(context, request):
 
 @view_config(context=GalleryAlbum, renderer='view_album.html.mako')
 def view_album(context, request):
-    if request.params.get('grid', 'False') == 'True':
+    display_mode = request.params.get('display_mode', 'list')
+    if display_mode == 'list':
+        pictures_per_page = 10
+    elif display_mode == 'grid':
         pictures_per_page = 20
     else:
-        pictures_per_page = 10
-    num_of_pages = len(context) / pictures_per_page + 1
-    try:
-        page = int(request.params.get('page', 1))
-    except ValueError:
+        pictures_per_page = -1
+    if pictures_per_page > 0:
+        num_of_pages = len(context) / pictures_per_page + 1
+        try:
+            page = int(request.params.get('page', 1))
+        except ValueError:
+            page = 1
+        if page < 1 or page > num_of_pages:
+            page = 1
+        pictures_start_index = (page - 1) * pictures_per_page
+        pictures_end_index = pictures_start_index + pictures_per_page
+        pictures = context.pictures[pictures_start_index:pictures_end_index]
+    else:
         page = 1
-    if page < 1 or page > num_of_pages:
-        page = 1
-    pictures_start_index = (page - 1) * pictures_per_page
-    pictures_end_index = pictures_start_index + pictures_per_page
-    pictures = context.pictures[pictures_start_index:pictures_end_index]
+        num_of_pages = 1
+        pictures = context.pictures
 
-    #def original_url(picture):
-        #file = picture.original_file
-        #url = request.static_url(
-            #os.path.join(
-                #request.registry.settings['original_picture_dir'],
-                #picture.original_file
-            #)
-        #)
-        #url = urllib.url2pathname(url)
-        #return url
+    def original_url(picture):
+        file = picture.original_file
+        url = request.static_url(
+            os.path.join(
+                request.registry.settings['original_picture_dir'],
+                picture.original_file
+            )
+        )
+        url = urllib.url2pathname(url)
+        return url
     def display_url(picture):
         file = picture.display_file
         url = request.static_url(
@@ -136,9 +160,9 @@ def view_album(context, request):
         )
         url = urllib.url2pathname(url)
         return url
-    preview_type = 'display'
-    if request.params.get('grid', 'False') == 'True':
-        preview_type = 'thumbnail'
+    preview_type = 'thumbnail'
+    if display_mode == 'list':
+        preview_type = 'display'
     def preview_url(picture):
         file = picture.thumbnail_file
         url = request.static_url(
@@ -158,10 +182,10 @@ def view_album(context, request):
             'editing' : False,
             'lineage_list' : list(lineage(context)),
             'pictures' : pictures,
-            'show_as_grid' : request.params.get('grid', 'False'),
+            'display_mode' : display_mode,
             'page' : page,
             'num_of_pages' : num_of_pages,
-            #'original_url' : original_url,
+            'original_url' : original_url,
             'display_url' : display_url,
             'preview_url' : preview_url,
             'preview_width' : preview_width,

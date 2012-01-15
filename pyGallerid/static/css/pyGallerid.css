@@ -230,6 +230,26 @@ div.albums {
                 border: 1px solid #C2C2C2;
             }
 
+    div.children-order-edit {
+    }
+
+    div.preview-picture-edit {
+        margin: 0px 0px 0px 0px;
+        padding: 0px 1px 0px 1px;
+        border: 1px solid #666666;
+        background: #666666;
+        font-family: Arial;
+        font-size: 14px;
+        text-align: left;
+    }
+        div.preview-picture-edit p {
+            color: white;
+            margin: 0px 0px 0px 0px;
+            padding: 5px 0px 5px 10px;
+            font-family: Arial;
+            font-size: 14px;
+            text-align: left;
+    }
     div.album-info {
         margin: 0px 0px 0px 0px;
         padding: 0px 1px 0px 1px;

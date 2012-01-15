@@ -16,8 +16,23 @@
 
 <div class="albums">
     <ul class="album-list">
+
+        % if editing:
+            <div class="children-order-edit">
+                <p class="pg-editable" \
+                    data-pg-id="GalleryContainer:" \
+                    data-pg-type="list-order" \
+                    data-pg-list-selector="ul.album-list" \
+                    data-pg-item-selector="li.album-item[data-pg-id]" \
+                    data-pg-name="children">
+                    Edit order
+                </p>
+            </div>
+        % endif
+
         % for item in gallery_container.children:
-            <li class="album-item">
+            <li class="album-item" \
+                data-pg-id="${item.name}">
                 <div class="album-cell"
                     style="width: ${preview_width(item)}px;
                            height: ${preview_height(item)}px;">
@@ -36,6 +51,16 @@
                                 background-repeat: no-repeat;" />
                         </a>
                     </div>
+                    % if editing:
+                        <div class="preview-picture-edit" style="width: ${preview_width(item)}px;">
+                            <p class="pg-editable" \
+                                data-pg-id="GalleryContainer:" \
+                                data-pg-type="picture" \
+                                data-pg-name="preview_picture">
+                                Edit preview picture
+                            </p>
+                        </div>
+                    % endif
                     <div class="album-info" style="width: ${preview_width(item)}px;">
                         <div class="album-descr">
                             <p class="pg-editable" \
