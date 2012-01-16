@@ -33,8 +33,8 @@
 
 <div class="content-info">
     <span class="content-navigation-current pg-editable" \
-        data-pg-id="Album:" \
-        data-pg-type="date-from-to" \
+        data-pg-context="" \
+        data-pg-type="attribute-date-from-to" \
         data-pg-name="__date_from_to" \
         data-pg-date-from="${album.date_from}" \
         data-pg-date-to="${album.date_to}">
@@ -50,8 +50,8 @@
 
 <div class="content-description">
     <p class="pg-editable" \
-        data-pg-id="Album:" \
-        data-pg-type="long-description-text" \
+        data-pg-context="" \
+        data-pg-type="attribute-multiline-text" \
         data-pg-name="long_description">
         ${album.long_description}
     </p>
@@ -138,19 +138,20 @@
             % if editing:
                 <div class="children-order-edit">
                     <p class="pg-editable" \
-                        data-pg-id="GalleryAlbum:" \
+                        data-pg-context="" \
                         data-pg-type="list-order" \
                         data-pg-list-selector="ul.picture-list" \
-                        data-pg-item-selector="li.picture-item[data-pg-id]" \
+                        data-pg-item-selector="li.picture-item[data-pg-context]" \
                         data-pg-name="children">
                         Edit order
                     </p>
                 </div>
             % endif
     
-            % for picture in pictures:
+            % for picture_id, picture in pictures:
                 <li class="picture-item" \
-                    data-pg-id="${picture.name}">
+                    data-pg-id="${picture_id}" \
+                    data-pg-context="${picture.name}">
                     <div class="picture-cell"
                         style="width: ${preview_width(picture)}px;
                                height: ${preview_height(picture)}px;">
@@ -173,8 +174,8 @@
                         % if editing:
                             <div class="preview-picture-edit" style="width: ${preview_width(picture)}px;">
                                 <p class="pg-editable" \
-                                    data-pg-id="GalleryAlbum:" \
-                                    data-pg-type="picture" \
+                                    data-pg-context="${picture.name}" \
+                                    data-pg-type="preview-picture" \
                                     data-pg-name="preview_picture">
                                     Edit preview picture
                                 </p>
@@ -183,8 +184,8 @@
                         <div class="picture-info" style="width: ${preview_width(picture)}px;">
                             <div class="picture-descr">
                                 <p class="pg-editable" \
-                                    data-pg-id="Picture:${picture.name}" \
-                                    data-pg-type="description-text" \
+                                    data-pg-context="${picture.name}" \
+                                    data-pg-type="attribute-text" \
                                     data-pg-name="description">
                                     ${picture.description}
                                 </p>
@@ -195,7 +196,7 @@
             % endfor
         </ul>
     % elif display_mode == 'gallery':
-        % for picture in pictures:
+        % for picture_id, picture in pictures:
             <a href="${display_url(picture) | n}" \
                 rel="${original_url(picture) | n}">
             <img class="image-box" \

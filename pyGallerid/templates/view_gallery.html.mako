@@ -20,19 +20,20 @@
         % if editing:
             <div class="children-order-edit">
                 <p class="pg-editable" \
-                    data-pg-id="GalleryContainer:" \
+                    data-pg-context="" \
                     data-pg-type="list-order" \
                     data-pg-list-selector="ul.album-list" \
-                    data-pg-item-selector="li.album-item[data-pg-id]" \
+                    data-pg-item-selector="li.album-item[data-pg-context]" \
                     data-pg-name="children">
                     Edit order
                 </p>
             </div>
         % endif
 
-        % for item in gallery_container.children:
+        % for item_id, item in items:
             <li class="album-item" \
-                data-pg-id="${item.name}">
+                data-pg-id="${item_id}" \
+                data-pg-context="${item.name}">
                 <div class="album-cell"
                     style="width: ${preview_width(item)}px;
                            height: ${preview_height(item)}px;">
@@ -54,8 +55,8 @@
                     % if editing:
                         <div class="preview-picture-edit" style="width: ${preview_width(item)}px;">
                             <p class="pg-editable" \
-                                data-pg-id="GalleryContainer:" \
-                                data-pg-type="picture" \
+                                data-pg-context="" \
+                                data-pg-type="preview-picture" \
                                 data-pg-name="preview_picture">
                                 Edit preview picture
                             </p>
@@ -64,8 +65,8 @@
                     <div class="album-info" style="width: ${preview_width(item)}px;">
                         <div class="album-descr">
                             <p class="pg-editable" \
-                                data-pg-id="GalleryContainer:${item.name}" \
-                                data-pg-type="text" \
+                                data-pg-context="${item.name}" \
+                                data-pg-type="attribute-text" \
                                 data-pg-size="33" \
                                 data-pg-name="description">
                                 ${item.description}

@@ -39,8 +39,8 @@
         % else:
             <p style="display: inline;" \
                 class="pg-editable" \
-                data-pg-id="GalleryContainer:" \
-                data-pg-type="name-text" \
+                data-pg-context="" \
+                data-pg-type="attribute-text" \
                 data-pg-name="name">
         % endif
                 ${render_resource(request.context)}

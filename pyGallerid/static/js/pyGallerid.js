@@ -54,7 +54,7 @@ function pg_register_input_provider(pg_type, input_provider)
 {
     pg_input_providers[pg_type] = input_provider;
 }
-pg_register_input_provider('text', function (source, parent) {
+pg_register_input_provider('attribute-text', function (source, parent) {
     var input = $('<input/>').attr('type', 'text').addClass(source.attr('class'))
                 .val(source.html().trim());
     if (source.data('pg-size') != undefined) {
@@ -76,7 +76,7 @@ pg_register_input_provider('text', function (source, parent) {
             }
     };
 });
-pg_register_input_provider('multiline', function (source, parent) {
+pg_register_input_provider('attribute-multiline-text', function (source, parent) {
     var input = $('<textarea/>').attr('type', 'text').attr('cols', '100')
                 .attr('rows', '8').addClass(source.attr('class'))
                 .html(source.html().trim());
@@ -102,7 +102,7 @@ pg_register_input_provider('multiline', function (source, parent) {
             }
     };
 });
-pg_register_input_provider('date', function (source, parent) {
+pg_register_input_provider('attribute-date', function (source, parent) {
     var input = $('<input/>').attr('type', 'text').addClass(source.attr('class'));
     //var input = $('<div/>').addClass(source.attr('class'));
     parent.html(input);
@@ -122,7 +122,7 @@ pg_register_input_provider('date', function (source, parent) {
             }
     };
 });
-pg_register_input_provider('date-from-to', function (source, parent) {
+pg_register_input_provider('attribute-date-from-to', function (source, parent) {
     var input_from = $('<input/>').attr('type', 'text').addClass(source.attr('class'));
     var input_to= $('<input/>').attr('type', 'text').addClass(source.attr('class'));
     parent.html(input_from.after('&nbsp;-&nbsp;').after(input_to));
@@ -257,7 +257,7 @@ function pg_init_editing(json_url)
                         type: inputProvider.method,
                         data: {
                             'pg-type': elem.data('pg-type'),
-                            'pg-id': elem.data('pg-id'),
+                            'pg-context': elem.data('pg-context'),
                             'pg-name': elem.data('pg-name'),
                             'pg-value': JSON.stringify(inputProvider.data()),
                         },
@@ -283,11 +283,12 @@ function pg_init_editing(json_url)
                                     // and add the previous handler
                                     elem.on('click', previousHandler);
                                     // redirect to new page if necessary
-                                    window.location.replace(json_data['pg-replace-url']);
-                                    if ('pg-replace-url' in json_data) {
+                                    //if ('pg-replace-url' in json_data) {
+                                    if (json_data.hasOwnProperty('pg-replace-url')) {
                                         window.location.replace(json_data['pg-replace-url']);
                                     }
-                                    if ('pg-redirect-url' in json_data) {
+                                    //if ('pg-redirect-url' in json_data) {
+                                    if (json_data.hasOwnProperty('pg-redirect-url')) {
                                         window.location = json_data['pg-redirect-url'];
                                     }
                                 });
