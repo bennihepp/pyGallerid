@@ -25,11 +25,36 @@
         <script type="text/javascript">
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
 
-            function sorting_dialog() {
-                init_sorting_dialog(
-                    '${request.resource_url(request.context, '@@retrieve') | n}'
-                );
-            }
+            $(document).ready(function() {
+                $('#pg-edit-order').click(function() {
+                    pg_context = $(this).data('pg-context');
+                    pg_id = $(this).data('pg-id');
+                    open_picture_list_sorting_dialog(
+                        '${request.resource_url(request.context, '@@retrieve') | n}',
+                        pg_id,
+                        pg_context
+                    );
+                });
+                $('#pg-edit-select-preview-picture').click(function() {
+                    pg_context = $(this).data('pg-context');
+                    pg_id = $(this).data('pg-id');
+                    open_picture_list_dialog(
+                        '${request.resource_url(request.context, '@@retrieve') | n}',
+                        pg_id,
+                        pg_context
+                    );
+                });
+                $('#pg-edit-preview-picture').click(function() {
+                    pg_context = $(this).data('pg-context');
+                    pg_id = $(this).data('pg-id');
+                    alert('not implemented yet');
+                    //open_picture_edit_dialog(
+                    //    '${request.resource_url(request.context, '@@retrieve') | n}',
+                    //    pg_id,
+                    //    pg_context
+                    //);
+                });
+            });
         </script>
     % endif
 

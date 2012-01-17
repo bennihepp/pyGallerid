@@ -24,9 +24,11 @@ Untitled Document
 ## jquery-ui
 <link rel="stylesheet" href="/static/js/jquery/ui-lightness/jquery-ui-1.8.17.custom.css" type="text/css" media="screen" />
 <script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
+## simplemodal
+<script type="text/javascript" src="/static/js/jquery/jquery.simplemodal.1.4.2.min.js"></script>
 ## fancybox
-<link rel="stylesheet" href="/static/js/jquery/jquery.fancybox.css" type="text/css" media="screen" />
-<script type="text/javascript" src="/static/js/jquery/jquery.fancybox.pack.js"></script>
+#<link rel="stylesheet" href="/static/js/jquery/jquery.fancybox.css" type="text/css" media="screen" />
+#<script type="text/javascript" src="/static/js/jquery/jquery.fancybox.pack.js"></script>
 ## shadowbox
 ##<link rel="stylesheet" type="text/css" href="/static/js/shadowbox/shadowbox.css">
 ##<script type="text/javascript" src="/static/js/shadowbox/shadowbox.js"></script>

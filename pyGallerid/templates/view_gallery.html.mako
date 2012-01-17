@@ -11,14 +11,16 @@
 
             % if editing:
                 <div class="children-order-edit">
-                    <p onclick="sorting_dialog();">
+                    <p id="pg-edit-order" \
+                        data-pg-id="picture-order-list-dialog" \
+                        data-pg-context="">
                         Edit order
                     </p>
                 </div>
                 ##<div class="children-order-edit">
                 ##    <p class="pg-editable" \
                 ##        data-pg-context="" \
-                ##        data-pg-type="list-order" \
+                ##        data-pg-type="order-list" \
                 ##        data-pg-list-selector="ul.album-list" \
                 ##        data-pg-item-selector="li.album-item[data-pg-context]" \
                 ##        data-pg-name="children">
@@ -49,10 +51,14 @@
                     </div>
                     % if editing:
                         <div class="preview-picture-edit" style="width: ${preview_width(item)}px;">
-                            <p class="pg-editable" \
-                                data-pg-context="" \
-                                data-pg-type="preview-picture" \
-                                data-pg-name="preview_picture">
+                            <p id="pg-edit-select-preview-picture" \
+                                data-pg-id="select-preview-picture-dialog" \
+                                data-pg-context="${item.name}">
+                                Select preview picture
+                            </p>
+                            <p id="pg-edit-preview-picture" \
+                                data-pg-id="preview-picture-dialog" \
+                                data-pg-context="${picture.name}">
                                 Edit preview picture
                             </p>
                         </div>

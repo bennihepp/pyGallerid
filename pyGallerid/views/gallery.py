@@ -62,8 +62,8 @@ def thumbnail_height(request, picture):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=list-order')
-def update_gallery_list_order(context, request):
+             request_param='pg-type=order-list')
+def update_gallery_order_list(context, request):
     #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
     result = {'pg-status' : 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
@@ -78,6 +78,22 @@ def update_gallery_list_order(context, request):
     #result['pg-redirect-url'] = request.resource_url(context)
     #result['pg-replace-url'] = request.resource_url(context)
     return result
+
+@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
+             request_param='pg-type=select-picture')
+def update_gallery_select_picture(context, request):
+    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status' : 'failed'}
+    pg_context = find_resource(context, request.params['pg-context'])
+    pg_id = json.loads(request.params['pg-value'])
+    print 'selected picture %s' % pg_id
+    pg_context.preview_picture = pg_context[pg_id]
+    result['pg-status'] = 'success'
+    result['pg-redirect-url'] = request.resource_url(context, '@@edit')
+    #result['pg-redirect-url'] = request.resource_url(context)
+    #result['pg-replace-url'] = request.resource_url(context)
+    return result
+
 
 @view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
              request_param='pg-type=attribute-multiline-text')

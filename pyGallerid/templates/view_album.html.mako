@@ -101,7 +101,7 @@
                 height: 800,
             }
         );*/
-        $(".picture-link").fancybox(
+        /*$(".picture-link").fancybox(
             {
                 type : 'image',
                 openEffect	: 'fade',
@@ -118,7 +118,12 @@
                     },
                 },
             }
-        );
+        );*/
+        $(".picture-link").click(function() {
+            var img = $('<img/>').attr('src', $(this).attr('href'));
+            img.modal();
+            return false;
+        });
     });
 % elif display_mode == 'gallery':
     Galleria.loadTheme('/static/js/galleria/themes/classic/galleria.classic.min.js');
@@ -137,14 +142,16 @@
     
             % if editing:
                 <div class="children-order-edit">
-                    <p onclick="sorting_dialog();">
+                    <p id="pg-edit-order" \
+                        data-pg-id="picture-order-list-dialog" \
+                        data-pg-context="">
                         Edit order
                     </p>
                 </div>
                 ##<div class="children-order-edit">
                 ##    <p class="pg-editable" \
                 ##        data-pg-context="" \
-                ##        data-pg-type="list-order" \
+                ##        data-pg-type="order-list" \
                 ##        data-pg-list-selector="ul.picture-list" \
                 ##        data-pg-item-selector="li.picture-item[data-pg-context]" \
                 ##        data-pg-name="children">
@@ -176,10 +183,9 @@
                         </div>
                         % if editing:
                             <div class="preview-picture-edit" style="width: ${preview_width(picture)}px;">
-                                <p class="pg-editable" \
-                                    data-pg-context="${picture.name}" \
-                                    data-pg-type="preview-picture" \
-                                    data-pg-name="preview_picture">
+                                <p id="pg-edit-preview-picture" \
+                                    data-pg-id="preview-picture-dialog" \
+                                    data-pg-context="${picture.name}">
                                     Edit preview picture
                                 </p>
                             </div>

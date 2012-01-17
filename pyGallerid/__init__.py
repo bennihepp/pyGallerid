@@ -16,8 +16,8 @@ def root_factory(request):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    if settings.get('debug', 'false') == 'true':
-        import wingdbstub
+    if settings.get('wingdbstub', 'false') == 'true':
+        import utils.wingdbstub
 
     config = Configurator(root_factory=root_factory, settings=settings)
     # This is only needed when using SQLAlchemy

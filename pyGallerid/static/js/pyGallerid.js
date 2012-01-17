@@ -47,8 +47,9 @@ $(document).ready(function() {
     );
 });*/
 
-// sorting dialog functionality
-function init_sorting_dialog(json_url) {
+// picture-list dialog
+function open_picture_list_dialog(json_url, pg_id, pg_context,
+                                  updateCallback, cancelCallback) {
     var errorHandler = function() {
         alert('Unable to retrieve thumbnails');
     };
@@ -59,13 +60,13 @@ function init_sorting_dialog(json_url) {
         type: 'GET',
         data: {
             'pg-type': 'thumbnails',
-            'pg-context': '',
+            'pg-context': pg_context,
         },
     })
     .success(function(json_data) {
         if (json_data['pg-status'] == 'success') {
             var thumbnails = $.parseJSON(json_data['pg-thumbnails']);
-            var container = $('<div/>').attr('id', 'list-order-dialog');
+            var container = $('<div/>').attr('id', pg_id);
             var list = $('<ul/>');
             thumbnails.forEach(function(t) {
                 var picture_name = $('<p/>').html(
@@ -80,42 +81,68 @@ function init_sorting_dialog(json_url) {
                     .data('pg-id', t['index']);
                 list.append(list_element);
             });
-            container.html(list).hide;
-            container
-                .data('pg-context', '')
-                .data('pg-list-selector', '#list-order-dialog ul')
-                .data('pg-item-selector', '#list-order-dialog li')
-                .data('pg-name', 'children');
+            var update_btn = $('<a/>');
+            var cancel_btn = $('<a/>');
+            update_btn.click(function() {
+            });
+            cancel_btn.click(function() {
+            });
+            container.append(list);
+            container.append(update_btn);
+            container.append(cancel_btn);
+            container.hide();
             $('body').append(container);
-            inputProvider = pg_get_input_provider(
-                'list-order', container, undefined
-            );
+            $.modal(container,
             container.dialog({
                 autoOpen: false,
                 modal: true,
                 width: '90%',
                 buttons: {
                     "Update": function() {
-                        function successHandler(callback) {
-                            container.dialog("close");
-                            callback();
-                        }
-                        function errorHandler() {
-                            alert("Unable to reorder list, try again!");
-                        }
-                        pg_update(container, inputProvider, successHandler, errorHandler);
+                        updateCallback(container); 
                     },
                     "Cancel": function() {
-                        container.dialog("close");
+                        cancelCallback(container);
                     },
                 },
             });
-            $('#list-order-dialog').dialog('open');
+            container.dialog('open');
         } else {
             errorHandler();
         }
     })
     .error(errorHandler);
+}
+
+// sorting functionality for the picture-list dialog
+function open_picture_list_sorting_dialog(json_url, pg_id, pg_context) {
+    function pgSuccessHandler(callback) {
+        $.modal.close();
+        //$('#' + pg_id).close();
+        //container.dialog("close");
+        callback();
+    }
+    function pgErrorHandler() {
+        alert("Unable to reorder list, try again!");
+    }
+    var inputProvider = undefined;
+    var updateCallback = function(container) {
+        pg_update(container, inputProvider, pgSuccessHandler, pgErrorHandler);
+    };
+    var cancelCallback = function(container) {
+        $.modal.close();
+        //$('#' + pg_id).close();
+        //container.dialog("close");
+    };
+    open_picture_list_dialog(json_url, pg_id, pg_context, updateCallback)
+    $('#' + pg_id)
+        .data('pg-context', '')
+        .data('pg-list-selector', '#' + pg_id + ' ul')
+        .data('pg-item-selector', '#' + pg_id + ' li')
+        .data('pg-name', 'children');
+    inputProvider = pg_get_input_provider(
+        'order-list', $('#' + pg_id), undefined
+    );
 }
 
 // editing functionality
@@ -220,14 +247,14 @@ pg_register_input_provider('attribute-date-from-to', function (source, parent) {
             }
     };
 });
-pg_register_input_provider('list-order', function (source, parent) {
+pg_register_input_provider('order-list', function (source, parent) {
     var list = $(source.data('pg-list-selector')).first();
     list.sortable();
     return {
         method:
             'POST',
         type:
-            'list-order',
+            'order-list',
         data:
             function() {
                 var items = list.find($(source.data('pg-item-selector')));
@@ -236,6 +263,33 @@ pg_register_input_provider('list-order', function (source, parent) {
                     ids.push($(this).data('pg-id'));
                 });
                 return ids;
+            },
+        update:
+            function(json_data) {
+            }
+    };
+});
+pg_register_input_provider('select-picture', function (source, parent) {
+    var list = $(source.data('pg-list-selector')).first();
+    // make only one item selectable
+    list.selectable({
+        /*selected: function(event, ui) {
+            $(event.target).data('pg-selected-id', $(this).data('pg-id'));
+        },*/
+        stop: function(event, ui) {
+            $(event.target).children('.ui-selected').not(':first').removeClass('ui-selected');
+            var first = $(event.target).children('.ui-selected').first();
+            list.data('pg-selected-id', first.data('pg-id'));
+        },
+    });
+    return {
+        method:
+            'GET',
+        type:
+            'select-picture',
+        data:
+            function() {
+                return list.data('pg-selected-ig');
             },
         update:
             function(json_data) {

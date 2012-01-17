@@ -312,3 +312,28 @@ div.albums {
     font-size: 13px;
     color: #444;
 }
+
+#simplemodal-container a.modalCloseImg {
+	background:url(/static/js/jquery/x.png) no-repeat;
+	width:25px;
+	height:29px;
+	display:inline;
+	z-index:3200;
+	position:absolute;
+	top:-15px;
+	right:-18px;
+	cursor:pointer;
+}
+<!--[if lt IE 7]>
+<style type='text/css'>
+	#simplemodal-container a.modalCloseImg {
+		background:none;
+		right:-14px;
+		width:22px;
+		height:26px;
+		filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(
+			src='/static/js/jquery/x.png', sizingMethod='scale'
+		);
+	}
+</style>
+<![endif]-->
