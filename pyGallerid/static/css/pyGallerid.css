@@ -111,6 +111,20 @@ div.pictures {
     text-align: center;
 }
 
+    #list-order-dialog ul {
+        margin: 0px 0px 0px 0px;
+        padding: 0px 0px 0px 0px;
+        position: relative;
+        display: block;
+    }
+    #list-order-dialog li {
+        margin: 10px;
+        display: inline-block;
+        list-style: none outside none;
+        vertical-align: middle;
+        text-align: center;
+    }
+
     ul.picture-list {
         margin: 0px 0px 0px 0px;
         padding: 0px 0px 0px 0px;
@@ -121,7 +135,7 @@ div.pictures {
 
     li.picture-item {
         margin: 0px 10px 0px 10px;
-        padding: 30px 0px 80px 0px;
+        padding: 40px 0px 40px 0px;
         display: inline-block;
         list-style: none outside none;
         vertical-align: middle;
@@ -193,7 +207,7 @@ div.albums {
 
     li.album-item {
         margin: 0px;
-        padding: 30px 20px 80px 20px;
+        padding: 40px 20px 40px 20px;
         display: inline-block;
         list-style: none outside none;
         vertical-align: middle;
@@ -264,3 +278,37 @@ div.albums {
             font-size: 14px;
             text-align: left;
         }
+
+.pg-edit-container {
+    font-size: 14px;
+    color: white;
+    font-weight: normal;
+    font-family: Arial;
+}
+.pg-edit-action {
+    display: block;
+}
+.pg-edit-status-field {
+    font-weight: bold;
+}
+.pg-edit-text,
+.pg-edit-multiline-text,
+.pg-edit-date {
+    color: white;
+    background: black;
+    border: 2px solid #0aa;
+    border-radius: 6px;
+    /*font-size: 80%;*/
+    padding: 2px;
+}
+.pg-edit-text {
+    width: 80%;
+}
+.pg-edit-multiline-text {
+    font-size: 100%;
+}
+
+.footer .copyright {
+    font-size: 13px;
+    color: #444;
+}

@@ -89,19 +89,19 @@
 
 <script type="text/javascript">
 % if display_mode in ('list', 'grid'):
-    Shadowbox.init({
+    /*Shadowbox.init({
         skipSetup: true,
-    });
+    });*/
     $(document).ready(function() {
-        Shadowbox.setup(".picture-link", {
+        /*Shadowbox.setup(".picture-link", {
                 gallery: 'album',
                 overlayOpacity: 0.9,
                 viewportPadding: 0,
                 width: 1024,
                 height: 800,
             }
-        );
-        /*$(".picture-link").fancybox(
+        );*/
+        $(".picture-link").fancybox(
             {
                 type : 'image',
                 openEffect	: 'fade',
@@ -118,7 +118,7 @@
                     },
                 },
             }
-        );*/
+        );
     });
 % elif display_mode == 'gallery':
     Galleria.loadTheme('/static/js/galleria/themes/classic/galleria.classic.min.js');
@@ -137,24 +137,27 @@
     
             % if editing:
                 <div class="children-order-edit">
-                    <p class="pg-editable" \
-                        data-pg-context="" \
-                        data-pg-type="list-order" \
-                        data-pg-list-selector="ul.picture-list" \
-                        data-pg-item-selector="li.picture-item[data-pg-context]" \
-                        data-pg-name="children">
+                    <p onclick="sorting_dialog();">
                         Edit order
                     </p>
                 </div>
+                ##<div class="children-order-edit">
+                ##    <p class="pg-editable" \
+                ##        data-pg-context="" \
+                ##        data-pg-type="list-order" \
+                ##        data-pg-list-selector="ul.picture-list" \
+                ##        data-pg-item-selector="li.picture-item[data-pg-context]" \
+                ##        data-pg-name="children">
+                ##        Edit order by dragging
+                ##    </p>
+                ##</div>
             % endif
     
             % for picture_id, picture in pictures:
                 <li class="picture-item" \
                     data-pg-id="${picture_id}" \
                     data-pg-context="${picture.name}">
-                    <div class="picture-cell"
-                        style="width: ${preview_width(picture)}px;
-                               height: ${preview_height(picture)}px;">
+                    <div class="picture-cell">
                     <!-- max 1024x536 -->
                         <div class="picture-container">
                             <a class="picture-link"

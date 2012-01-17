@@ -6,37 +6,32 @@
 
 <%block name="body">
 
-% if len(lineage_list) > 1:
-<div class="content-header">
-% else:
-<div class="content-header hidden">
-% endif
-    <h3 class="content-title">${gallery_container.description}</h3>
-</div>
-
 <div class="albums">
     <ul class="album-list">
 
-        % if editing:
-            <div class="children-order-edit">
-                <p class="pg-editable" \
-                    data-pg-context="" \
-                    data-pg-type="list-order" \
-                    data-pg-list-selector="ul.album-list" \
-                    data-pg-item-selector="li.album-item[data-pg-context]" \
-                    data-pg-name="children">
-                    Edit order
-                </p>
-            </div>
-        % endif
-
+            % if editing:
+                <div class="children-order-edit">
+                    <p onclick="sorting_dialog();">
+                        Edit order
+                    </p>
+                </div>
+                ##<div class="children-order-edit">
+                ##    <p class="pg-editable" \
+                ##        data-pg-context="" \
+                ##        data-pg-type="list-order" \
+                ##        data-pg-list-selector="ul.album-list" \
+                ##        data-pg-item-selector="li.album-item[data-pg-context]" \
+                ##        data-pg-name="children">
+                ##        Edit order by dragging
+                ##    </p>
+                ##</div>
+            % endif
+    
         % for item_id, item in items:
             <li class="album-item" \
                 data-pg-id="${item_id}" \
                 data-pg-context="${item.name}">
-                <div class="album-cell"
-                    style="width: ${preview_width(item)}px;
-                           height: ${preview_height(item)}px;">
+                <div class="album-cell">
                 <!-- max 1024x536 -->
                     <div class="album-container">
                         <a class="album-link"

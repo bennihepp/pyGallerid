@@ -22,8 +22,8 @@ Untitled Document
 <script type="text/javascript" src="/static/js/jquery/jquery-1.7.1.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery/jquery.mousewheel-3.0.6.pack.js"></script>
 ## jquery-ui
-<link rel="stylesheet" href="/static/js/jquery/smoothness/jquery-ui-1.8.16.custom.css" type="text/css" media="screen" />
-<script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.16.custom.min.js"></script>
+<link rel="stylesheet" href="/static/js/jquery/ui-lightness/jquery-ui-1.8.17.custom.css" type="text/css" media="screen" />
+<script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
 ## fancybox
 ##<link rel="stylesheet" href="/static/js/jquery/jquery.fancybox.css" type="text/css" media="screen" />
 ##<script type="text/javascript" src="/static/js/jquery/jquery.fancybox.pack.js"></script>
@@ -55,7 +55,11 @@ Untitled Document
   </div>
 
   <div class="footer">
-	<%block name="footer" />
+	<%block name="footer">
+	  <div class="copyright">
+		© Copyright 2011-2012 Benjamin Hepp
+	  </div>
+	</%block>
   </div>
 
 </div>

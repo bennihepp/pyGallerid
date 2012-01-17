@@ -6,7 +6,10 @@
     % if len(lineage_list) > 1:
     <p class="hidden">
     % else:
-    <p>
+    <p class="pg-editable" \
+        data-pg-context="" \
+        data-pg-type="attribute-text" \
+        data-pg-name="description">
     % endif
         ${request.context.description}
     </p>
@@ -21,6 +24,12 @@
     % if editing:
         <script type="text/javascript">
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
+
+            function sorting_dialog() {
+                init_sorting_dialog(
+                    '${request.resource_url(request.context, '@@retrieve') | n}'
+                );
+            }
         </script>
     % endif
 
@@ -65,6 +74,19 @@
                 &nbsp;|&nbsp;
             % endif
         </div>
+    </div>
+
+    % if len(lineage_list) > 1:
+    <div class="content-header">
+    % else:
+    <div class="content-header hidden">
+    % endif
+        <h3 class="content-title pg-editable" \
+            data-pg-context="" \
+            data-pg-type="attribute-text" \
+            data-pg-name="description">
+            ${request.context.description}
+        </h3>
     </div>
 
     ${next.body()}
