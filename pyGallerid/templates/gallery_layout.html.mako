@@ -26,7 +26,7 @@
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
 
             $(document).ready(function() {
-                $('#pg-edit-order').click(function() {
+                $('.pg-edit-order').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
                     open_picture_list_order_dialog(
@@ -35,7 +35,7 @@
                         pg_context
                     );
                 });
-                $('#pg-edit-select-preview-picture').click(function() {
+                $('.pg-edit-select-preview-picture').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
                     open_picture_list_select_dialog(
@@ -44,7 +44,7 @@
                         pg_context
                     );
                 });
-                $('#pg-edit-preview-picture').click(function() {
+                $('.pg-edit-preview-picture').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
                     alert('not implemented yet');

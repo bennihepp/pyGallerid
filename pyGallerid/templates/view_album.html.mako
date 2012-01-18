@@ -150,7 +150,7 @@
     
             % if editing:
                 <div class="children-order-edit">
-                    <p id="pg-edit-order" \
+                    <p class="pg-edit-order" \
                         data-pg-id="picture-order-list-dialog" \
                         data-pg-context="">
                         Edit order
@@ -191,7 +191,7 @@
                         </div>
                         % if editing:
                             <div class="preview-picture-edit" style="width: ${preview_width(picture)}px;">
-                                <p id="pg-edit-preview-picture" \
+                                <p class="pg-edit-preview-picture" \
                                     data-pg-id="preview-picture-dialog" \
                                     data-pg-context="${picture.name}">
                                     Edit preview picture
