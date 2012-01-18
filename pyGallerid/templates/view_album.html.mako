@@ -120,8 +120,16 @@
             }
         );*/
         $(".picture-link").click(function() {
-            var img = $('<img/>').attr('src', $(this).attr('href'));
-            img.modal();
+            var picture = $(this);
+            var pictures = [];
+            $(".picture-link").each(function() {
+                var tmp_picture = $('<img/>').attr('src', $(this).attr('href'));
+                pictures.push(tmp_picture);
+                if ($(this).is(picture)) {
+                    picture = tmp_picture;
+                }
+            });
+            open_picture_lightbox('picture-lightbox', $(picture), $(pictures));
             return false;
         });
     });

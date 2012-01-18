@@ -17,48 +17,70 @@ from ..models.user import User
 from ..models.gallery import Gallery, GalleryContainer, GalleryAlbum, GalleryPicture
 
 
-def original_url(request, picture):
-    file = picture.original_file
+def picture_item(method):
+    def new_method(item):
+        if isinstance(item, GalleryContainer):
+            item = item.preview_picture
+        return method(item)
+    return new_method
+def picture_request_item(method):
+    def new_method(request, item):
+        if isinstance(item, GalleryContainer):
+            item = item.preview_picture
+        return method(request, item)
+    return new_method
+
+@picture_request_item
+def original_url(request, item):
+    file = item.original_file
     url = request.static_url(
         os.path.join(
             request.registry.settings['original_picture_dir'],
-            picture.original_file
+            item.original_file
         )
     )
     url = urllib.unquote(url)
     return url
-def original_width(request, picture):
-    return picture.original_width
-def original_height(request, picture):
-    return picture.original_height
-def display_url(request, picture):
-    file = picture.display_file
+@picture_item
+def original_width(item):
+    return item.original_width
+@picture_item
+def original_height(item):
+    return item.original_height
+@picture_request_item
+def display_url(request, item):
+    file = item.display_file
     url = request.static_url(
         os.path.join(
             request.registry.settings['display_picture_dir'],
-            picture.display_file
+            item.display_file
         )
     )
     url = urllib.unquote(url)
     return url
-def display_width(request, picture):
-    return picture.display_width
-def display_height(request, picture):
-    return picture.display_height
-def thumbnail_url(request, picture):
-    file = picture.thumbnail_file
+@picture_item
+def display_width(item):
+    return item.display_width
+@picture_item
+def display_height(item):
+    return item.display_height
+@picture_request_item
+def thumbnail_url(request, item):
+    file = item.thumbnail_file
     url = request.static_url(
         os.path.join(
             request.registry.settings['thumbnail_picture_dir'],
-            picture.thumbnail_file
+            item.thumbnail_file
         )
     )
     url = urllib.unquote(url)
     return url
-def thumbnail_width(request, picture):
-    return picture.thumbnail_width
-def thumbnail_height(request, picture):
-    return picture.thumbnail_height
+@picture_item
+def thumbnail_width(item):
+    return item.thumbnail_width
+@picture_item
+def thumbnail_height(item):
+    return item.thumbnail_height
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
@@ -85,9 +107,12 @@ def update_gallery_select_picture(context, request):
     #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
     result = {'pg-status' : 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
-    pg_id = json.loads(request.params['pg-value'])
-    print 'selected picture %s' % pg_id
-    pg_context.preview_picture = pg_context[pg_id]
+    pg_resource = find_resource(
+        pg_context,
+        json.loads(request.params['pg-value'])
+    )
+    print 'selected picture %s' % pg_resource.name
+    pg_context.preview_picture = pg_resource
     result['pg-status'] = 'success'
     result['pg-redirect-url'] = request.resource_url(context, '@@edit')
     #result['pg-redirect-url'] = request.resource_url(context)
@@ -214,8 +239,8 @@ def retrieve_thumbnails(context, request):
             'index': index,
             'name': child.name,
             'url': thumbnail_url(request, thumbnail),
-            'width': thumbnail_width(request, thumbnail),
-            'height': thumbnail_height(request, thumbnail),
+            'width': thumbnail_width(thumbnail),
+            'height': thumbnail_height(thumbnail),
         })
     result['pg-thumbnails'] = json.dumps(pg_thumbnails)
     result['pg-status'] = 'success'
@@ -234,8 +259,8 @@ def view_gallery(context, request):
     items = list(enumerate(context.children_iter))
 
     local_preview_url = lambda item: thumbnail_url(request, item.preview_picture)
-    local_preview_width = lambda item: 0.5 * thumbnail_width(request, item.preview_picture)
-    local_preview_height = lambda item: 0.5 * thumbnail_height(request, item.preview_picture)
+    local_preview_width = lambda item: 0.5 * thumbnail_width(item.preview_picture)
+    local_preview_height = lambda item: 0.5 * thumbnail_height(item.preview_picture)
 
     return {'gallery' : context,
             'items' : items,
@@ -287,12 +312,12 @@ def view_album(context, request):
     local_display_url = lambda item: display_url(request, item)
     if display_mode == 'list':
         local_preview_url = lambda item: display_url(request, item)
-        local_preview_width = lambda item: display_width(request, item)
-        local_preview_height = lambda item: display_height(request, item)
+        local_preview_width = lambda item: display_width(item)
+        local_preview_height = lambda item: display_height(item)
     else:
         local_preview_url = lambda item: thumbnail_url(request, item)
-        local_preview_width = lambda item: thumbnail_width(request, item)
-        local_preview_height = lambda item: thumbnail_height(request, item)
+        local_preview_width = lambda item: thumbnail_width(item)
+        local_preview_height = lambda item: thumbnail_height(item)
 
     return {'album' : context,
             'editing' : False,

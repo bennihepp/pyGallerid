@@ -58,7 +58,7 @@
                             </p>
                             <p id="pg-edit-preview-picture" \
                                 data-pg-id="preview-picture-dialog" \
-                                data-pg-context="${picture.name}">
+                                data-pg-context="${item.name}">
                                 Edit preview picture
                             </p>
                         </div>

@@ -35,6 +35,9 @@ div.header {
         font-family: "Lucida Calligraphy";
         font-size: 26pt;
     }
+    div.header p {
+        display: inline;
+    }
 
 div.content {
     margin: 0 auto;

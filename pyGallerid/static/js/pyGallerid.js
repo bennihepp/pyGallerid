@@ -47,102 +47,232 @@ $(document).ready(function() {
     );
 });*/
 
-// picture-list dialog
-function open_picture_list_dialog(json_url, pg_id, pg_context,
-                                  updateCallback, cancelCallback) {
-    var errorHandler = function() {
-        alert('Unable to retrieve thumbnails');
-    };
-    // get thumbnail data
-    $.ajax({
-        url: json_url,
-        dataType: 'json',
-        type: 'GET',
-        data: {
-            'pg-type': 'thumbnails',
-            'pg-context': pg_context,
-        },
-    })
-    .success(function(json_data) {
-        if (json_data['pg-status'] == 'success') {
-            var thumbnails = $.parseJSON(json_data['pg-thumbnails']);
-            var container = $('<div/>').attr('id', pg_id);
-            var list = $('<ul/>');
-            thumbnails.forEach(function(t) {
-                var picture_name = $('<p/>').html(
-                    (t['index']+1) + ': ' + t['name']
-                );
-                var picture_url = t['url'];
-                var picture = $('<img/>').attr('src', picture_url)
-                    .attr('width', '150px');
-                var list_element = $('<li/>').html(picture_name.after(picture));
-                list_element
-                    .data('pg-context', t['name'])
-                    .data('pg-id', t['index']);
-                list.append(list_element);
-            });
-            var update_btn = $('<a/>');
-            var cancel_btn = $('<a/>');
-            update_btn.click(function() {
-            });
-            cancel_btn.click(function() {
-            });
-            container.append(list);
-            container.append(update_btn);
-            container.append(cancel_btn);
-            container.hide();
-            $('body').append(container);
-            $.modal(container,
-            container.dialog({
-                autoOpen: false,
-                modal: true,
-                width: '90%',
-                buttons: {
-                    "Update": function() {
-                        updateCallback(container); 
-                    },
-                    "Cancel": function() {
-                        cancelCallback(container);
-                    },
-                },
-            });
-            container.dialog('open');
-        } else {
-            errorHandler();
+// lightbox functionaliy through simplemodal
+function open_picture_lightbox(pg_id, picture, pictures)
+{
+    // create DOM elements
+    var container = $('<div/>').attr('id', pg_id);
+    var control_div = $('<div/>').addClass('control-box');
+    var control_bar = $('<div/>').addClass('control-bar');
+    var content_div = $('<div/>').addClass('content-box');
+    var prev_div = $('<div/>').addClass('prev');
+    var next_div = $('<div/>').addClass('next');
+    var picture_div = $('<div/>').addClass('picture');
+    var close_btn = $('<a/>').html('Close');
+    close_btn.click(function() {
+        $.modal.close();
+    });
+    container.data('pg-picture', picture);
+    console.log(pictures.index(picture));
+    var prev_btn = $('<a/>').html('&lt;&nbsp;&nbsp;');
+    prev_btn.click(function() {
+        index = pictures.index(picture);
+        if (index > 0) {
+            picture_div.html(pictures[index - 1]);
         }
-    })
-    .error(errorHandler);
+        console.log('prev');
+    });
+    var next_btn = $('<a/>').html('&nbsp;&nbsp;&gt;');
+    next_btn.click(function() {
+        index = pictures.index(picture);
+        console.log(index);
+        if (index < (pictures.length + 1)) {
+            picture_div.html(pictures[index + 1]);
+        }
+        console.log('next');
+    });
+    control_bar.append(close_btn);
+    control_div.append($('<div/>'));
+    control_div.append(control_bar);
+    control_div.append($('<div/>'));
+    prev_div.append(prev_btn);
+    next_div.append(next_btn);
+    picture_div.append(picture);
+    content_div.append(prev_div);
+    content_div.append(picture_div);
+    content_div.append(next_div);
+    container.append(control_div);
+    container.append(content_div);
+    // open modal dialog
+    container.modal({
+        closeHTML: '',
+        escClose: true,
+        opacity: 90,
+        overlayCss: {backgroundColor:"#000"},
+        overlayClose: true,
+        onOpen: function (dialog) {
+            dialog.overlay.fadeIn('fast', function () {
+                dialog.data.hide();
+                dialog.container.fadeIn('fast');
+                dialog.data.fadeIn('fast');
+            });
+        },
+        onClose: function (dialog) {
+            dialog.data.fadeOut('fast');
+            dialog.container.fadeOut('fast', function () {
+                dialog.overlay.fadeOut('fast', function () {
+                    $.modal.close();
+                });
+            });
+        },
+    });
 }
 
-// sorting functionality for the picture-list dialog
-function open_picture_list_sorting_dialog(json_url, pg_id, pg_context) {
+// picture-list dialog
+function open_picture_list_dialog(json_url, pg_id, pg_context,
+    modalOpenedCallback,
+    updateCallback, cancelCallback) {
+var errorHandler = function() {
+    alert('Unable to retrieve thumbnails');
+};
+// get thumbnail data
+$.ajax({
+    url: json_url,
+    dataType: 'json',
+    type: 'GET',
+    data: {
+        'pg-type': 'thumbnails',
+        'pg-context': pg_context,
+    },
+})
+.success(function(json_data) {
+    if (json_data['pg-status'] == 'success') {
+        var thumbnails = $.parseJSON(json_data['pg-thumbnails']);
+        var container = $('<div/>').attr('id', pg_id);
+        var list = $('<ul/>');
+        thumbnails.forEach(function(t) {
+            var picture_name = $('<p/>').html(
+                (t['index']+1) + ': ' + t['name']
+            );
+            var picture_url = t['url'];
+            var picture = $('<img/>').attr('src', picture_url)
+                .attr('width', '150px');
+            var list_element = $('<li/>').html(picture_name.after(picture));
+            list_element
+                .data('pg-context', t['name'])
+                .data('pg-id', t['index']);
+            list.append(list_element);
+        });
+        var control_div = $('<div/>').addClass('control-bar');
+        var update_btn = $('<a/>').html('Update');
+        var cancel_btn = $('<a/>').html('Cancel');
+        update_btn.click(function() {
+            updateCallback(container);
+        });
+        cancel_btn.click(function() {
+            cancelCallback(container);
+        });
+        control_div.append(update_btn);
+        control_div.append('&nbsp;&nbsp;|&nbsp;&nbsp;');
+        control_div.append(cancel_btn);
+        container.append(control_div);
+        container.append(list);
+        //container.hide();
+        //$('body').append(container);
+        container.modal({
+            opacity: 80,
+            overlayCss: {backgroundColor:"#000"},
+            onOpen: function (dialog) {
+                dialog.overlay.fadeIn('fast', function () {
+                    dialog.data.hide();
+                    dialog.container.fadeIn('fast');
+                    dialog.data.fadeIn('fast');
+                });
+            },
+            onClose: function (dialog) {
+                dialog.data.fadeOut('fast');
+                dialog.container.fadeOut('fast', function () {
+                    dialog.overlay.fadeOut('fast', function () {
+                        $.modal.close();
+                    });
+                });
+            },
+        });
+        modalOpenedCallback(container);
+        /*container.dialog({
+            autoOpen: false,
+            modal: true,
+            width: '90%',
+            buttons: {
+                "Update": function() {
+                    updateCallback(container); 
+                },
+                "Cancel": function() {
+                    cancelCallback(container);
+                },
+            },
+        });
+        container.dialog('open');*/
+    } else {
+        errorHandler();
+    }
+})
+.error(errorHandler);
+}
+
+// ordering functionality for the picture-list dialog
+function open_picture_list_order_dialog(json_url, pg_id, pg_context) {
     function pgSuccessHandler(callback) {
         $.modal.close();
-        //$('#' + pg_id).close();
-        //container.dialog("close");
         callback();
     }
     function pgErrorHandler() {
         alert("Unable to reorder list, try again!");
     }
     var inputProvider = undefined;
+    var modalOpenedCallback = function(container) {
+        container
+            .data('pg-context', pg_context)
+            .data('pg-list-selector', '#' + container.attr('id') + ' ul')
+            .data('pg-item-selector', '#' + container.attr('id') + ' li')
+            .data('pg-name', 'children');
+        inputProvider = pg_get_input_provider(
+            'order-list', container, undefined
+        );
+    };
     var updateCallback = function(container) {
         pg_update(container, inputProvider, pgSuccessHandler, pgErrorHandler);
     };
     var cancelCallback = function(container) {
         $.modal.close();
-        //$('#' + pg_id).close();
-        //container.dialog("close");
     };
-    open_picture_list_dialog(json_url, pg_id, pg_context, updateCallback)
-    $('#' + pg_id)
-        .data('pg-context', '')
-        .data('pg-list-selector', '#' + pg_id + ' ul')
-        .data('pg-item-selector', '#' + pg_id + ' li')
-        .data('pg-name', 'children');
-    inputProvider = pg_get_input_provider(
-        'order-list', $('#' + pg_id), undefined
-    );
+    open_picture_list_dialog(
+        json_url, pg_id, pg_context,
+        modalOpenedCallback,
+        updateCallback, cancelCallback
+    )
+}
+// selecting functionality for the picture-list dialog
+function open_picture_list_select_dialog(json_url, pg_id, pg_context) {
+    function pgSuccessHandler(callback) {
+        $.modal.close();
+        callback();
+    }
+    function pgErrorHandler() {
+        alert("Unable to select picture, try again!");
+    }
+    var inputProvider = undefined;
+    var modalOpenedCallback = function(container) {
+        container
+            .data('pg-context', pg_context)
+            .data('pg-list-selector', '#' + container.attr('id') + ' ul')
+            .data('pg-item-selector', '#' + container.attr('id') + ' li')
+            .data('pg-name', 'children');
+        inputProvider = pg_get_input_provider(
+            'select-picture', container, undefined
+        );
+    };
+    var updateCallback = function(container) {
+        pg_update(container, inputProvider, pgSuccessHandler, pgErrorHandler);
+    };
+    var cancelCallback = function(container) {
+        $.modal.close();
+    };
+    open_picture_list_dialog(
+        json_url, pg_id, pg_context,
+        modalOpenedCallback,
+        updateCallback, cancelCallback
+    )
 }
 
 // editing functionality
@@ -154,7 +284,7 @@ function pg_register_input_provider(pg_type, input_provider)
 }
 pg_register_input_provider('attribute-text', function (source, parent) {
     var input = $('<input/>').attr('type', 'text').addClass('pg-edit-text')
-                .val(source.html().trim());
+        .val(source.html().trim());
     if (source.data('pg-size') != undefined) {
         input.attr('size', source.data('pg-size'));
     }
@@ -178,8 +308,8 @@ pg_register_input_provider('attribute-text', function (source, parent) {
 });
 pg_register_input_provider('attribute-multiline-text', function (source, parent) {
     var input = $('<textarea/>').attr('type', 'text').attr('cols', '100')
-                .attr('rows', '8').addClass('pg-edit-multiline-text')
-                .html(source.html().trim());
+        .attr('rows', '8').addClass('pg-edit-multiline-text')
+        .html(source.html().trim());
     if (source.data('pg-cols') != undefined) {
         input.attr('cols', source.data('pg-cols'));
     }
@@ -250,6 +380,7 @@ pg_register_input_provider('attribute-date-from-to', function (source, parent) {
 pg_register_input_provider('order-list', function (source, parent) {
     var list = $(source.data('pg-list-selector')).first();
     list.sortable();
+    console.log('sortable');
     return {
         method:
             'POST',
@@ -273,13 +404,8 @@ pg_register_input_provider('select-picture', function (source, parent) {
     var list = $(source.data('pg-list-selector')).first();
     // make only one item selectable
     list.selectable({
-        /*selected: function(event, ui) {
-            $(event.target).data('pg-selected-id', $(this).data('pg-id'));
-        },*/
         stop: function(event, ui) {
             $(event.target).children('.ui-selected').not(':first').removeClass('ui-selected');
-            var first = $(event.target).children('.ui-selected').first();
-            list.data('pg-selected-id', first.data('pg-id'));
         },
     });
     return {
@@ -289,7 +415,7 @@ pg_register_input_provider('select-picture', function (source, parent) {
             'select-picture',
         data:
             function() {
-                return list.data('pg-selected-ig');
+                return list.children('.ui-selected').first().data('pg-context')
             },
         update:
             function(json_data) {
@@ -367,9 +493,9 @@ function pg_init_editing(json_url)
                 var cancel = $('<a/>').html('Cancel')
                     .addClass('pg-edit-cancel-button');
                 var status = $('<a/>').hide().html(
-                        '&nbsp;|&nbsp;Failed'
-                    )
-                    .addClass('pg-edit-status-field');
+                    '&nbsp;|&nbsp;Failed'
+                )
+                .addClass('pg-edit-status-field');
                 container.hide().html(
                     input_div.after('&nbsp;').after(
                         action_div.html(

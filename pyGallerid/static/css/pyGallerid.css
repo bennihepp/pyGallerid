@@ -26,6 +26,7 @@ div.content-header {
     padding: 5px 0px 0px 0px;
 }
     .content-title {
+		display: inline;
         margin-top: 0;
         color: #8CCA1E;
         font-size: 18px;
@@ -246,6 +247,10 @@ div.albums {
 
     div.children-order-edit {
     }
+		div.children-order-edit p {
+			text-align: center;
+			display: inline;
+		}
 
     div.preview-picture-edit {
         margin: 0px 0px 0px 0px;
@@ -278,6 +283,88 @@ div.albums {
             font-size: 14px;
             text-align: left;
         }
+
+
+#picture-lightbox {
+	vertical-align: middle;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
+	display: table;
+	color: white;
+}
+	#picture-lightbox a:link { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox a:visited { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox a:hover { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox a:active { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox a:focus { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox div.control-box {
+		display: table-row;
+	}
+		#picture-lightbox div.control-bar {
+			margin: 0px 0px 10px 0px;
+			padding: 0px 0px 10px 0px;
+			font-weight: normal;
+			display: table-cell;
+		}
+	#picture-lightbox div.content-box {
+		vertical-align: middle;
+		text-align: center;
+		display: table-row;
+	}
+	#picture-lightbox div.content-box div {
+		vertical-align: middle;
+		display: table-cell;
+		color: grey;
+		font-size: 30px;
+	}
+	#picture-lightbox div.picture img {
+		background: #060606;
+		padding: 10px;
+		border: 2px solid #666;
+		border-radius: 15px;
+	}
+
+#picture-order-list-dialog,
+#select-preview-picture-dialog {
+	vertical-align: middle;
+	text-align: center;
+	margin: 10px;
+	padding: 10px;
+	border: 2px solid #666;
+	border-radius: 15px;
+	background: #222;
+}
+	#picture-order-list-dialog div.control-bar,
+	#select-preview-picture-dialog div.control-bar {
+		margin: 10px;
+		color: white;
+		font-weight: bold;
+	}
+	#picture-order-list-dialog ul,
+	#select-preview-picture-dialog ul {
+		display: block;
+		margin: 0px;
+		padding: 0px;
+	}
+		#picture-order-list-dialog ul li,
+		#select-preview-picture-dialog ul li {
+			display: inline-block;
+			margin: 5px;
+			border: 1px solid #444;
+			border-radius: 6px;
+			color: white;
+			font-weight: normal;
+			font-size: 12px;
+			padding: 5px;
+		}
+			#select-preview-picture-dialog ul li.ui-selected {
+				background: #aa0;
+			}
+
+.pg-editable {
+	display: inline;
+}
 
 .pg-edit-container {
     font-size: 14px;

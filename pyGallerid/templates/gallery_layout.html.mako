@@ -29,7 +29,7 @@
                 $('#pg-edit-order').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
-                    open_picture_list_sorting_dialog(
+                    open_picture_list_order_dialog(
                         '${request.resource_url(request.context, '@@retrieve') | n}',
                         pg_id,
                         pg_context
@@ -38,7 +38,7 @@
                 $('#pg-edit-select-preview-picture').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
-                    open_picture_list_dialog(
+                    open_picture_list_select_dialog(
                         '${request.resource_url(request.context, '@@retrieve') | n}',
                         pg_id,
                         pg_context
