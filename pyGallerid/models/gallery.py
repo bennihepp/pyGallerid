@@ -94,15 +94,25 @@ class Gallery(GalleryContainer):
 
 
 class GalleryAlbum(GalleryContainer):
-    def __init__(self, name, description=None, long_description=None,
-                 location=None,
+    def __init__(self, name, album_path, description=None, \
+                 long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
                  parent=None):
         GalleryContainer.__init__(self, name, description, parent=parent)
+        self.__album_path = album_path
         self.long_description = long_description
         self.location = location
         self.date_from = date_from
         self.date_to = date_to
+
+    @property
+    def album_path(self):
+        return self.__album_path
+
+    @album_path.setter
+    def album_path(self, path):
+        # TODO: implement
+        self._album_path = path
 
     pictures_iter = property(lambda self: self.children_iter)
     pictures = property(lambda self: self.children)
