@@ -21,22 +21,20 @@ from ..models.gallery import Gallery, GalleryContainer, \
 
 def picture_item(method):
     def new_method(item):
-        print 'item:', item.name, type(item)
         if isinstance(item, GalleryContainer):
             item = item.preview_picture
-        if item is None:
-            return ""
+        #if item is None:
+            #return ""
         return method(item)
     return new_method
 
 
 def picture_request_item(method):
     def new_method(request, item):
-        print 'item:', item.name, type(item)
         if isinstance(item, GalleryContainer):
             item = item.preview_picture
-        if item is None:
-            return ""
+        #if item is None:
+            #return ""
         return method(request, item)
     return new_method
 
