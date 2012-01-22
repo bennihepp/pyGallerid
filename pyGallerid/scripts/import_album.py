@@ -72,7 +72,7 @@ def import_album(zodb_root, settings, username, category_name, album_path):
     gallery = retrieve_gallery(user)
     category = retrieve_gallery_child(gallery, category_name)
 
-    album = import_gallery_album(album_path, settings, move_files=False)
+    album = import_gallery_album(album_path, settings, move_files=True)
     category.append(album)
     albums = category.children
     albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
