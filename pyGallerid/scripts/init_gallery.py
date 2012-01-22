@@ -19,7 +19,7 @@ from pyramid.paster import (
 
 from ..models import appmaker, retrieve_user, retrieve_gallery
 from ..models.user import User
-from ..models.gallery import Gallery
+from ..models.gallery import Gallery, GalleryDocument
 
 
 def usage(argv):
@@ -65,6 +65,10 @@ def create_gallery(zodb_root, settings, username,
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     if user is not None:
+        gallery = retrieve_gallery(user)
+        about = GalleryDocument('about', 'About', 'Description')
+        user.add(about)
+        transaction.commit()
         raise ValueError("A user with name %s already exists" % username)
     password_hash, password_salt = User.hash_password(password)
     user = User(username, email, password_hash, password_salt)
@@ -74,3 +78,8 @@ def create_gallery(zodb_root, settings, username,
         raise ValueError("The user %s already has a gallery" % username)
     gallery = Gallery(description, user=user)
     user.add(gallery)
+    about = retrieve_about(user)
+    if about is not None:
+        raise ValueError("The user %s already has an about page" % username)
+    about = GalleryDocument('about', 'About', 'Description')
+    user.add(about)

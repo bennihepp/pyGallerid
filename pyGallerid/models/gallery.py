@@ -5,6 +5,14 @@ from persistent import Persistent
 from . import PersistentLocationAware, PersistentOrderedContainer
 
 
+class GalleryDocument(Persistent, PersistentLocationAware):
+    def __init__(self, name, description, long_description, parent=None):
+        Persistent.__init__(self)
+        PersistentLocationAware.__init__(self, name, parent)
+        self.description = description
+        self.long_description = long_description
+
+
 class GalleryContainer(PersistentOrderedContainer):
     def __init__(self, name, description=None,
                  preview_picture=None, parent=None):
@@ -90,8 +98,6 @@ class GalleryPicture(Persistent, PersistentLocationAware):
                  date=datetime.datetime.now(), parent=None):
         Persistent.__init__(self)
         PersistentLocationAware.__init__(self, name, parent)
-        self.__name__ = name
-        self.__parent__ = parent
         if isinstance(big_image_view, GalleryImageFile):
             self.big_image_view = GalleryImageView(big_image_view)
         else:

@@ -102,10 +102,11 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
                            small_filename, default_date=None, move_file=True,
                            use_image_magick=True):
 
-    if move_file:
-        shutil.move(original_filename, big_filename)
-    else:
-        shutil.copy2(original_filename, big_filename)
+    if original_filename != big_filename:
+        if move_file:
+            shutil.move(original_filename, big_filename)
+        else:
+            shutil.copy2(original_filename, big_filename)
 
     img, tags = open_picture(big_filename)
 
@@ -190,6 +191,9 @@ def import_gallery_album(album_path, settings, move_files=True,
                 regular_filename, small_filename,
                 move_file=move_files)
             pictures.append(picture)
+
+    if len(pictures) == 0:
+        return None
 
     album = GalleryAlbum(album_name, album_name, album_name,
                          None, date_from, date_to)

@@ -59,7 +59,8 @@ Untitled Document
   <div class="footer">
 	<%block name="footer">
 	  <div class="copyright">
-		© Copyright 2011-2012 Benjamin Hepp
+		© Copyright 2011-2012 &nbsp; Benjamin Hepp<br \>
+		benjamin ( at ) hepp.webfactional.com
 	  </div>
 	</%block>
   </div>

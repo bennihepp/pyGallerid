@@ -2,6 +2,7 @@ import os
 import datetime
 import json
 import urllib
+import itertools
 
 from pyramid.location import lineage
 from pyramid.view import view_config
@@ -12,8 +13,10 @@ from pyramid.httpexceptions import (
 )
 from pyramid.traversal import find_resource
 
+from ..models import retrieve_about, retrieve_gallery
+from ..models.user import User
 from ..models.gallery import Gallery, GalleryContainer, \
-     GalleryAlbum, GalleryPicture
+     GalleryAlbum, GalleryPicture, GalleryDocument
 
 
 def picture_item(method):
@@ -106,9 +109,23 @@ def small_height(item):
 
 def render_resource(resource):
     if isinstance(resource, Gallery):
-        return 'Home'
+        return 'Gallery'
     else:
-        return resource.name
+        return unicode(resource.name).capitalize()
+
+
+def find_gallery_resource(resource):
+    user = itertools.ifilter(
+        lambda r: isinstance(r, User), lineage(resource)
+    ).next()
+    return retrieve_gallery(user)
+
+
+def find_about_resource(resource):
+    user = itertools.ifilter(
+        lambda r: isinstance(r, User), lineage(resource)
+    ).next()
+    return retrieve_about(user)
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update',
@@ -151,9 +168,14 @@ def update_gallery_select_picture(context, request):
     return result
 
 
+@view_config(context=GalleryDocument, xhr=True, name='update',
+             renderer='json',
+             request_param='pg-type=attribute-multiline-text')
 @view_config(context=GalleryContainer, xhr=True, name='update',
              renderer='json',
              request_param='pg-type=attribute-multiline-text')
+@view_config(context=GalleryDocument, xhr=True, name='update',
+             renderer='json', request_param='pg-type=attribute-text')
 @view_config(context=GalleryContainer, xhr=True, name='update',
              renderer='json', request_param='pg-type=attribute-text')
 def update_gallery_attribute_text(context, request):
@@ -347,14 +369,18 @@ def view_gallery(context, request):
     preview_width = lambda item: small_width(item)
     preview_height = lambda item: small_height(item)
 
-    return {'gallery': context,
-            'items': items,
-            'editing': False,
-            'lineage_list': list(lineage(context))[:-2],
-            'render_resource': render_resource,
-            'preview_url': preview_url,
-            'preview_width': preview_width,
-            'preview_height': preview_height,
+    about_url = request.resource_url(find_about_resource(context))
+
+    return {
+        'gallery': context,
+        'items': items,
+        'editing': False,
+        'lineage_list': list(lineage(context))[:-2],
+        'about_url': about_url,
+        'render_resource': render_resource,
+        'preview_url': preview_url,
+        'preview_width': preview_width,
+        'preview_height': preview_height,
     }
 
 
@@ -407,17 +433,48 @@ def view_album(context, request):
         display_width = lambda item: small_width(item)
         display_height = lambda item: small_height(item)
 
-    return {'album': context,
-            'editing': False,
-            'lineage_list': list(lineage(context))[:-2],
-            'pictures': pictures,
-            'display_mode': display_mode,
-            'page': page,
-            'num_of_pages': num_of_pages,
-            'total_num_of_pictures': len(context),
-            'render_resource': render_resource,
-            'fullsize_url': fullsize_url,
-            'display_url': display_url,
-            'display_width': display_width,
-            'display_height': display_height,
-        }
+    about_url = request.resource_url(find_about_resource(context))
+
+    return {
+        'album': context,
+        'editing': False,
+        'lineage_list': list(lineage(context))[:-2],
+        'about_url': about_url,
+        'render_resource': render_resource,
+        'pictures': pictures,
+        'display_mode': display_mode,
+        'page': page,
+        'num_of_pages': num_of_pages,
+        'total_num_of_pictures': len(context),
+        'fullsize_url': fullsize_url,
+        'display_url': display_url,
+        'display_width': display_width,
+        'display_height': display_height,
+    }
+
+
+@view_config(context=GalleryDocument, name='edit',
+             renderer='view_document.html.mako')
+def view_document_edit(context, request):
+    d = view_document(context, request)
+    if request.registry.settings.get('allow_editing', 'false') == 'true':
+        d.update({'editing': True})
+    return d
+
+
+@view_config(context=GalleryDocument, renderer='view_document.html.mako')
+def view_document(context, request):
+    about_resource = find_about_resource(context)
+    if about_resource != context:
+        about_url = request.resource_url(about_resource)
+    else:
+        about_url = None
+
+    lineage_list = [context, find_gallery_resource(context)]
+    return {
+        'document': context,
+        'editing': False,
+        'lineage_list': lineage_list,
+        'about_url': about_url,
+        'render_resource': render_resource,
+    }

@@ -1,17 +1,6 @@
 importing:
 + create a thumbnail
-  - called "thumbnail" image
-  - scale to 400x400px (smallest side should be 400px)
   - allow to select JPEG-quality
-+ keep the original image
-  - called "big" image
-+ create a scaled down version
-  - called "regular" image
-  - scale to 50% of the original size
-
-for each image save:
-+ the default size for displaying the image, called "display" size
-+ the default size for previewing the image, called "preview" size
 
 CSS:
 div {

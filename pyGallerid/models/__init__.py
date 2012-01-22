@@ -120,7 +120,7 @@ class PersistentOrderedContainer(PersistentContainer):
     def __iter__(self):
         return self.__children.__iter__()
 
-    
+
 def retrieve_user(app, username):
     if username in app:
         return app[username]
@@ -132,7 +132,13 @@ def retrieve_gallery(user):
     if 'gallery' in user:
         return user['gallery']
     return None
-    
+
+
+def retrieve_about(user):
+    if 'about' in user:
+        return user['about']
+    return None
+
 
 def bootstrap_db():
     return PersistentContainer('', None)

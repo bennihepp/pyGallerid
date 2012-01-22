@@ -1,0 +1,2 @@
+I've written this gallery in Python using the Pyramid framework on the server side and in Javascript using the jQuery library on the client side. It is running on a NoSQL database (ZODB) and supports advanced inline editing of the gallery content. If you're interested see my <a href="https://github.com/bennihepp/pyGallerid">GitHub</a> page.
+

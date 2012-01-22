@@ -101,6 +101,13 @@
                 % endif
                 &nbsp;|&nbsp;
             % endif
+            % if about_url is not None:
+                <a class="navigation" \
+                    href="${about_url}">
+                    About
+                </a>
+                &nbsp;|&nbsp;
+            % endif
         </div>
     </div>
 
