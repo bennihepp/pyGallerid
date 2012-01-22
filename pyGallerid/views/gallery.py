@@ -18,16 +18,22 @@ from ..models.gallery import Gallery, GalleryContainer, \
 
 def picture_item(method):
     def new_method(item):
+        print 'item:', item.name, type(item)
         if isinstance(item, GalleryContainer):
             item = item.preview_picture
+        if item is None:
+            return ""
         return method(item)
     return new_method
 
 
 def picture_request_item(method):
     def new_method(request, item):
+        print 'item:', item.name, type(item)
         if isinstance(item, GalleryContainer):
             item = item.preview_picture
+        if item is None:
+            return ""
         return method(request, item)
     return new_method
 
@@ -330,7 +336,12 @@ def view_gallery_edit(context, request):
 
 @view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
 def view_gallery(context, request):
-    items = list(enumerate(context))
+    items = []
+    for item in context:
+        if len(item) > 0:
+            items.append(item)
+    items = list(enumerate(items))
+    #items = list(enumerate(context))
 
     preview_url = lambda item: small_url(request, item)
     preview_width = lambda item: small_width(item)
