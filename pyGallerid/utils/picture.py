@@ -178,7 +178,7 @@ def import_gallery_album(album_path, settings, move_files=True,
     pictures = []
     for filename in os.listdir(album_path):
         picture_name, picture_ext = os.path.splitext(filename)
-        if picture_ext.lower() in \
+        if (not filename.startswith('.')) and picture_ext.lower() in \
             ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
             print '  importing %s' % filename
             rel_filename = os.path.join(rel_album_path, filename)

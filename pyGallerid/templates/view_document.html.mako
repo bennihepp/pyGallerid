@@ -11,7 +11,7 @@
         data-pg-context="" \
         data-pg-type="attribute-multiline-text" \
         data-pg-name="long_description">
-        ${document.long_description}
+        ${document.long_description | n}
     </p>
 </div>
 <div class="content-description-bottom-line">
