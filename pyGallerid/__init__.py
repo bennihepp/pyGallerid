@@ -29,18 +29,18 @@ def main(global_config, **settings):
         cache_max_age=3600
     )
     config.add_static_view(
-        'pictures/original',
-        settings['original_picture_dir'],
+        'pictures/big',
+        settings['big_image_dir'],
         cache_max_age=3600
     )
     config.add_static_view(
-        'pictures/display',
-        settings['display_picture_dir'],
+        'pictures/regular',
+        settings['regular_image_dir'],
         cache_max_age=3600
     )
     config.add_static_view(
-        'pictures/thumbnails',
-        settings['thumbnail_picture_dir'],
+        'pictures/small',
+        settings['small_image_dir'],
         cache_max_age=3600
     )
     config.scan()

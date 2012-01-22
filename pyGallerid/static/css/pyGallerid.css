@@ -285,6 +285,10 @@ div.albums {
         }
 
 
+.simplemodal-container {
+	padding: 0px;
+	overflow: auto;
+}
 #picture-lightbox {
 	vertical-align: middle;
 	text-align: center;
@@ -293,28 +297,53 @@ div.albums {
 	display: table;
 	color: white;
 }
-	#picture-lightbox a:link { text-decoration:none; font-weight:normal; color:white; }
-	#picture-lightbox a:visited { text-decoration:none; font-weight:normal; color:white; }
-	#picture-lightbox a:hover { text-decoration:none; font-weight:normal; color:white; }
-	#picture-lightbox a:active { text-decoration:none; font-weight:normal; color:white; }
-	#picture-lightbox a:focus { text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox .control-bar a:link
+		{ text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox .control-bar a:visited
+		{ text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox .control-bar a:hover
+		{ text-decoration:none; font-weight:bold; color:white; }
+	#picture-lightbox .control-bar a:active
+		{ text-decoration:none; font-weight:bold; color:white; }
+	#picture-lightbox .control-bar a:focus
+		{ text-decoration:none; font-weight:normal; color:white; }
+
+	#picture-lightbox .navigate:link,
+	#picture-lightbox .navigate a:link
+		{ text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox .navigate:visited,
+	#picture-lightbox .navigate a:visited
+		{ text-decoration:none; font-weight:normal; color:white; }
+	#picture-lightbox .navigate:hover,
+	#picture-lightbox .navigate a:hover
+		{ text-decoration:none; font-weight:bold; color:white; }
+	#picture-lightbox .navigate:active,
+	#picture-lightbox .navigate a:active
+		{ text-decoration:none; font-weight:bold; color:white; }
+	#picture-lightbox .navigate:focus,
+	#picture-lightbox .navigate a:focus
+		{ text-decoration:none; font-weight:normal; color:white; }
+
 	#picture-lightbox div.control-box {
-		display: table-row;
 	}
 		#picture-lightbox div.control-bar {
-			margin: 0px 0px 10px 0px;
-			padding: 0px 0px 10px 0px;
+			margin: 5px 0px 5px 0px;
+			padding: 5px 0px 5px 0px;
 			font-weight: normal;
-			display: table-cell;
+			color: #666666;
 		}
+			#picture-lightbox div.control-bar a {
+				color: white;
+			}
+			#picture-lightbox div.control-bar a.pg-disabled {
+				color: #666666;
+			}
 	#picture-lightbox div.content-box {
 		vertical-align: middle;
 		text-align: center;
-		display: table-row;
 	}
 	#picture-lightbox div.content-box div {
 		vertical-align: middle;
-		display: table-cell;
 		color: grey;
 		font-size: 30px;
 	}
@@ -399,28 +428,3 @@ div.albums {
     font-size: 13px;
     color: #444;
 }
-
-#simplemodal-container a.modalCloseImg {
-	background:url(/static/js/jquery/x.png) no-repeat;
-	width:25px;
-	height:29px;
-	display:inline;
-	z-index:3200;
-	position:absolute;
-	top:-15px;
-	right:-18px;
-	cursor:pointer;
-}
-<!--[if lt IE 7]>
-<style type='text/css'>
-	#simplemodal-container a.modalCloseImg {
-		background:none;
-		right:-14px;
-		width:22px;
-		height:26px;
-		filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(
-			src='/static/js/jquery/x.png', sizingMethod='scale'
-		);
-	}
-</style>
-<![endif]-->

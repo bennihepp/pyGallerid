@@ -1,29 +1,27 @@
 import os
-import sys
 import re
-import datetime
 import dateutil.parser
-import hashlib
 import subprocess
 import shutil
 import Image
 from ExifTags import TAGS
 
-from ..models import appmaker
-from ..models.user import User
-from ..models.gallery import GalleryContainer, Gallery, GalleryAlbum, \
-     GalleryPicture, GalleryImageView, GalleryImageFile
+from ..models.gallery import GalleryAlbum, GalleryPicture, GalleryImageFile
 
 DEFAULT_MIN_THUMBNAIL_SIZE = 400
 DEFAULT_DISPLAY_SCALE = 0.5
-#MAX_DISPLAY_WIDTH = 1024
-#MAX_DISPLAY_HEIGHT = 536
+
+MAX_REGULAR_VIEW_WIDTH = 1024
+MAX_REGULAR_VIEW_HEIGHT = 536
+
+MAX_SMALL_VIEW_WIDTH = 300
+MAX_SMALL_VIEW_HEIGHT = 300
 
 
 def open_picture(filename, return_tags=True):
     img = Image.open(filename)
     if return_tags:
-        from ExifTags import TAGS
+        #from ExifTags import TAGS
         info = img._getexif()
         tags = {}
         for tag, value in info.items():
@@ -34,6 +32,15 @@ def open_picture(filename, return_tags=True):
     return img, tags
 
 
+def get_scaled_size(width, height, max_width, max_height):
+    scale = max_width / float(width)
+    if round(height * scale) > max_height:
+        scale = max_height / float(height)
+    width = int(round(width * scale))
+    height = int(round(height * scale))
+    return (width, height)
+
+
 def create_gallery_image_file(filename, tags=None):
     img, new_tags = open_picture(filename, return_tags=(tags is None))
     if tags is None:
@@ -42,7 +49,7 @@ def create_gallery_image_file(filename, tags=None):
     image = GalleryImageFile(
         filename,
         image_size=(width, height),
-        tags
+        tags=tags
     )
     return image
 
@@ -50,20 +57,21 @@ def create_gallery_image_file(filename, tags=None):
 def create_regular_gallery_image_file(filename, output_filename,
                                       width, height, tags,
                                       use_image_magick=True):
+    new_size = get_scaled_size(
+        width, height,
+        MAX_REGULAR_VIEW_WIDTH, MAX_REGULAR_VIEW_HEIGHT)
     if use_image_magick:
         try:
-            ret = subprocess.check_output(['convert', filename, '-resize',
-                                   '%d%%' % round(100 * DEFAULT_DISPLAY_SCALE),
+            subprocess.check_call(['convert', filename, '-resize',
+                                   '%dx%d!' % new_size,
                                    output_filename])
         except subprocess.CalledProcessError as e:
             print 'ImageMagick failed with errorcode %d' % e.returncode
             print '\n'.join(['  %s' % line for line in '\n'.split(e.output)])
             raise
     else:
-        new_width = round(DEFAULT_DISPLAY_SCALE * width)
-        new_height = round(DEFAULT_DISPLAY_SCALE * height)
         img = Image.open(filename)
-        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        img = img.resize(new_size, Image.ANTIALIAS)
         img.save(output_filename)
     return create_gallery_image_file(output_filename, tags)
 
@@ -71,18 +79,13 @@ def create_regular_gallery_image_file(filename, output_filename,
 def create_small_gallery_image_file(filename, output_filename,
                                     width, height, tags,
                                     use_image_magick=True):
-    aspect_ratio = float(width) / height
-    if width < height:
-        new_width = 400
-        new_height = 400 / aspect_ratio
-    else:
-        new_height = 400
-        new_width = 400 * aspect_ratio
-
+    new_size = get_scaled_size(
+        width, height,
+        MAX_SMALL_VIEW_WIDTH, MAX_SMALL_VIEW_HEIGHT)
     if use_image_magick:
         try:
-            ret = subprocess.check_output(['convert', filename, '-resize',
-                                   '%dx%d!' % (new_width, new_height),
+            subprocess.check_call(['convert', filename, '-resize',
+                                   '%dx%d!' % new_size,
                                    output_filename])
         except subprocess.CalledProcessError as e:
             print 'ImageMagick failed with errorcode %d' % e.returncode
@@ -90,19 +93,19 @@ def create_small_gallery_image_file(filename, output_filename,
             raise
     else:
         img = Image.open(filename)
-        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        img = img.resize(new_size, Image.ANTIALIAS)
         img.save(output_filename)
     return create_gallery_image_file(output_filename, tags)
 
 
 def import_gallery_picture(original_filename, big_filename, regular_filename,
-                           small_filename, default_date=None, move_file=False,
+                           small_filename, default_date=None, move_file=True,
                            use_image_magick=True):
 
     if move_file:
-        shutil.move(filename, big_filename
+        shutil.move(original_filename, big_filename)
     else:
-        shutil.copy2(filename, big_filename)
+        shutil.copy2(original_filename, big_filename)
 
     img, tags = open_picture(big_filename)
 
@@ -114,120 +117,94 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
     small_image = create_small_gallery_image_file(
         big_filename, small_filename, width, height, use_image_magick)
 
-    name = os.path.basename(filename)
-    description = name
-
-    picture = GalleryPicture(
-        name, big_image, regular_image, small_image, description,
-        location, date
-    )
-
     if 'DateTimeOriginal' in tags:
         date = dateutil.parser.parse(tags['DateTimeOriginal'])
     elif 'DateTime' in tags:
         date = dateutil.parser.parse(tags['DateTime'])
     else:
         if default_date is not None:
-            print 'WARNING: No date found!! Listing all tags:'
-            for k,v in tags.items():
+            print 'WARNING: No date found:', original_filename
+            print 'Listing all tags:'
+            for k, v in tags.items():
                 print '  %s: %s' % (k, v)
             # TODO: handle this case
-            import sys
-            sys.exit(1)
             #date = datetime.datetime.now()
+            raise
         date = default_date
 
+    name = os.path.splitext(os.path.basename(original_filename))[0]
+    description = name
+    location = None
+
     picture = GalleryPicture(name, big_image, regular_image, small_image,
-                             description, None, date)
+                             description, location, date)
+
+    return picture
 
 
-def import_gallery_album(root, move_files=False, use_image_magick=True):
+def import_gallery_album(album_path, settings, move_files=True,
+                         use_image_magick=True):
+
+    rel_album_path = os.path.basename(album_path)
+
+    datematcher = re.compile(
+        r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')
+    try:
+        mo = datematcher.match(rel_album_path)
+        year, month, day_from, day_to, album_name = mo.groups()
+        date_from = dateutil.parser.parse(
+            '%s %s %s' % (year, month, day_from)).date()
+        date_to = dateutil.parser.parse(
+            '%s %s %s' % (year, month, day_to)).date()
+        print '  album date: from %s to %s' % (date_from, date_to)
+    except (AttributeError, ValueError):
+        print 'WARNING: Unable to extract dates:', album_path
+        # TODO
+        #album_name = album_path
+        #date_from = None
+        #date_to = None
+        raise
 
     big_image_dir = settings['big_image_dir']
     regular_image_dir = settings['regular_image_dir']
     small_image_dir = settings['small_image_dir']
+    for directory in (big_image_dir, regular_image_dir, small_image_dir):
+        path = os.path.join(directory, rel_album_path)
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-    # TODO: remove
-    #files = os.listdir(albumpath)
-    #files.sort()
+    print 'scanning %s' % album_path
+    pictures = []
+    for filename in os.listdir(album_path):
+        picture_name, picture_ext = os.path.splitext(filename)
+        if picture_ext.lower() in \
+            ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
+            print '  importing %s' % filename
+            rel_filename = os.path.join(rel_album_path, filename)
+            big_filename = os.path.join(big_image_dir, rel_filename)
+            regular_filename = os.path.join(regular_image_dir, rel_filename)
+            small_filename = os.path.join(small_image_dir, rel_filename)
+            original_filename = os.path.join(album_path, filename)
+            picture = import_gallery_picture(
+                original_filename, big_filename,
+                regular_filename, small_filename,
+                move_file=move_files)
+            pictures.append(picture)
 
-    gallery_pictures = []
+    album = GalleryAlbum(album_name, album_name, album_name,
+                         None, date_from, date_to)
+    pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
+    for picture in pictures:
+        # make image file paths relative
+        for image, image_dir in ( \
+            (picture.big_image_view.image, big_image_dir),
+            (picture.regular_image_view.image, regular_image_dir),
+            (picture.small_image_view.image, small_image_dir),
+        ):
+            path = image.image_file
+            rel_path = os.path.relpath(path, image_dir)
+            image.image_file = rel_path
+        # add picture to album container
+        album.append(picture)
 
-    album_datematcher = re.compile(
-        r'^([\d]{4}) ([a-zA-Z0-9]{1,9}) ([\d]{1,2})(?:\-([\d]{1,2}))? (.+)$')
-
-    print 'scanning %s' % root
-    for file in os.listdir(root):
-        arr = os.path.splitext(file)
-        if len(arr) > 1:
-            if arr[-1].lower() in \
-                ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
-                print '  importing %s' % file
-                album_path = os.path.relpath(albumpath, picture_dir)
-                try:
-                    match = datematcher.match(album_path)
-                    year, month, day_from, day_to, album_name = match.groups()
-                    print year, month, day_from
-                    date_from = dateutil.parser.parse(
-                        '%s %s %s' % (year, month, day_from)).date()
-                    date_to = dateutil.parser.parse(
-                        '%s %s %s' % (year, month, day_to)).date()
-                except (AttributeError, ValueError):
-                    album_name = album_path
-                    date_from = None
-                    date_to = None
-                picture_name = arr[0]
-                abs_file = os.path.join(root, file)
-                original_file = os.path.relpath(abs_file, picture_dir)
-                thumbnail_file = original_file
-                abs_thumbnail_file = os.path.join(
-                    thumbnail_dir,
-                    original_file)
-                display_file = original_file
-                abs_display_file = os.path.join(
-                    display_dir,
-                    original_file)
-                print '  generating thumbnail'
-                img = Image.open(abs_file)
-                from ExifTags import TAGS
-                info = img._getexif()
-                ret = {}
-                for tag, value in info.items():
-                    decoded = TAGS.get(tag, tag)
-                    ret[decoded] = value
-                if 'DateTimeOriginal' in ret:
-                    date = dateutil.parser.parse(ret['DateTimeOriginal'])
-                elif 'DateTime' in ret:
-                    date = dateutil.parser.parse(ret['DateTime'])
-                else:
-                    print 'WARNING: No date found!!'
-                    for k,v in ret.items():
-                        print k, ':', v
-                    import sys
-                    sys.exit(1)
-                    date = None
-                #print 'info:', img.info.keys()
-                #
-                thumb_img = img.copy()
-                thumb_img.thumbnail(DEFAULT_THUMBNAIL_SIZE, Image.ANTIALIAS)
-                if not os.path.exists(os.path.split(abs_thumbnail_file)[0]):
-                    os.makedirs(os.path.split(abs_thumbnail_file)[0])
-                thumb_img.save(abs_thumbnail_file)
-                display_img = img.copy()
-                img_width, img_height = img.size
-                scale = MAX_DISPLAY_WIDTH / float(img_width)
-                if scale * img_height > MAX_DISPLAY_HEIGHT:
-                    scale = MAX_DISPLAY_HEIGHT / float(img_height)
-                display_size = (int(scale * img_width),
-                                int(scale * img_height))
-                display_img.thumbnail(display_size, Image.ANTIALIAS)
-                if not os.path.exists(os.path.split(abs_display_file)[0]):
-                    os.makedirs(os.path.split(abs_display_file)[0])
-                display_img.save(abs_display_file)
-                import_picture(
-                    category, album_name,
-                    date_from, date_to,
-                    picture_name,
-                    original_file, display_file, thumbnail_file,
-                    img.size, display_img.size, thumb_img.size,
-                    date)
+    return album

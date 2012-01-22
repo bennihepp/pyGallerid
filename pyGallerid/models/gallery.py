@@ -1,120 +1,82 @@
 import datetime
 
 from persistent import Persistent
-from persistent.dict import PersistentDict
-from persistent.list import PersistentList
+
+from . import PersistentLocationAware, PersistentOrderedContainer
 
 
-class PersistentLocationAware(object):
-    __name__ = None
-    __parent__ = None
-
-    @property
-    def name(self):
-        return self.__name__
-
-    @name.setter
-    def name(self, value):
-        print 'setting name of', self, 'to', value
-        if self.parent is not None:
-            print 'changing linkage to parent object'
-            parent = self.parent
-            del parent[self.name]
-            self.__name__ = value
-            parent[value] = self
-            print 'self.parent[name] =', self.parent[self.name]
-        else:
-            raise AttributeError('The name of a root object can\'t be changed')
-
-    @property
-    def parent(self):
-        return self.__parent__
-
-
-class GalleryContainer(PersistentDict, PersistentLocationAware):
-    def __init__(self, name, description=None, parent=None):
-        PersistentDict.__init__(self)
-        PersistentLocationAware.__init__(self)
-        self.__name__ = name
-        self.__parent__ = parent
+class GalleryContainer(PersistentOrderedContainer):
+    def __init__(self, name, description=None,
+                 preview_picture=None, parent=None):
+        PersistentOrderedContainer.__init__(self, name, parent)
         if description is None:
             self.description = name
         else:
             self.description = description
-        self.preview_picture = None
+        self.__preview_picture = None
         self.preview_size = (-1, -1)
-        self.__children = PersistentList()
 
     @property
-    def children_iter(self):
-        return self.__children.__iter__()
+    def preview_picture(self):
+        if self.__preview_picture is None and len(self) > 0:
+            child = self.get_children(0)
+            if isinstance(child, GalleryPicture):
+                return child
+            else:
+                return child.preview_picture
+        else:
+            return self.__preview_picture
 
-    @property
-    def children(self):
-        return list(self.__children)
+    @preview_picture.setter
+    def preview_picture(self, picture):
+        if self.has_picture(picture):
+            self.__preview_picture = picture
+        else:
+            raise ValueError("The container must contain it's "
+                             "own preview picture")
 
-    @children.setter
-    def children(self, children):
-        if len(children) != len(self):
-            raise ValueError('len(children) and len(self) must be equal')
-        for child in children:
-            if not child.name in self:
-                raise ValueError('children and self must ' \
-                                 'contain the same objects')
-        self.__children = PersistentList(children)
-
-    def add(self, item):
-        self[item.__name__] = item
-        item.__parent__ = self
-
-    def insert(self, index, item):
-        self.add(item)
-        self.__children.insert(index, item)
-
-    def __setitem__(self, name, item):
-        if item.__name__ != name:
-            raise ValueError('name and item.__name__ must be equal')
-        PersistentDict.__setitem__(self, name, item)
-        item.__parent__ = self
-        self.__children.append(item)
-
-    def __delitem__(self, name):
-        self.__children.remove(self[name])
-        self[name].__parent__ = None
-        PersistentDict.__delitem__(self, name)
-
-    def __iter__(self):
-        return self.values().__iter__()
+    def has_picture(self, picture):
+        found = False
+        for child in self:
+            if isinstance(child, GalleryContainer):
+                if child.has_picture(picture):
+                    found = True
+                    break
+            elif isinstance(child, GalleryPicture):
+                if picture == child:
+                    found = True
+                    break
+        return found
 
 
 class Gallery(GalleryContainer):
-    def __init__(self, description=None, user=None, parent=None):
-        GalleryContainer.__init__(self, None, description, parent)
+    def __init__(self, description=None,
+                 user=None, name='gallery', parent=None):
+        GalleryContainer.__init__(self, name, description, parent)
         self.user = user
 
 
 class GalleryAlbum(GalleryContainer):
-    def __init__(self, name, album_path, description=None, \
+    def __init__(self, name, description=None, \
                  long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
                  parent=None):
         GalleryContainer.__init__(self, name, description, parent=parent)
-        self.__album_path = album_path
+        #self.__album_path = album_path
         self.long_description = long_description
         self.location = location
         self.date_from = date_from
         self.date_to = date_to
 
-    @property
-    def album_path(self):
-        return self.__album_path
+    #@property
+    #def album_path(self):
+        #return self.__album_path
 
-    @album_path.setter
-    def album_path(self, path):
-        # TODO: implement
-        self._album_path = path
+    #@album_path.setter
+    #def album_path(self, path):
+        ## TODO: implement
+        #self._album_path = path
 
-    pictures_iter = property(lambda self: self.children_iter)
     pictures = property(lambda self: self.children)
 
     @pictures.setter
@@ -127,18 +89,18 @@ class GalleryPicture(Persistent, PersistentLocationAware):
                  small_image_view, description=None, location=None,
                  date=datetime.datetime.now(), parent=None):
         Persistent.__init__(self)
-        PersistentLocationAware.__init__(self)
+        PersistentLocationAware.__init__(self, name, parent)
         self.__name__ = name
         self.__parent__ = parent
-        if isinstance(big_image_view, GalleryImage):
+        if isinstance(big_image_view, GalleryImageFile):
             self.big_image_view = GalleryImageView(big_image_view)
         else:
             self.big_image_view = big_image_view
-        if isinstance(regular_image_view, GalleryImage):
+        if isinstance(regular_image_view, GalleryImageFile):
             self.regular_image_view = GalleryImageView(regular_image_view)
         else:
             self.regular_image_view = regular_image_view
-        if isinstance(small_image_view, GalleryImage):
+        if isinstance(small_image_view, GalleryImageFile):
             self.small_image_view = GalleryImageView(small_image_view)
         else:
             self.small_image_view = small_image_view

@@ -2,6 +2,27 @@
     $('body').fadeIn(1000);
 });*/
 
+// retrieve browser viewport size
+function get_viewport_size() {
+    var width, height;
+    if (typeof window.innerWidth != 'undefined') {
+        // the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+        width = window.innerWidth,
+        height = window.innerHeight
+    } else if (typeof document.documentElement != 'undefined'
+        // IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
+            && typeof document.documentElement.clientWidth !=
+            'undefined' && document.documentElement.clientWidth != 0) {
+        width = document.documentElement.clientWidth,
+        height = document.documentElement.clientHeight
+    } else {
+        // older versions of IE
+        width = document.getElementsByTagName('body')[0].clientWidth,
+        height = document.getElementsByTagName('body')[0].clientHeight
+    }
+    return {width: width, height: height};
+}
+
 // image loading helper
 $(document).ready(function() {
     $(".image-box")
@@ -47,131 +68,132 @@ $(document).ready(function() {
     );
 });*/
 
-// lightbox functionaliy through simplemodal
-function open_picture_lightbox(pg_id, picture, pictures)
+function retrieve_pictures(json_url, pg_context, slice, callback)
 {
+    var errorHandler = function() {
+        alert('Unable to retrieve picture');
+    };
+    // get picture data
+    $.ajax({
+        url: json_url,
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            'pg-type': 'pictures',
+            'pg-context': pg_context,
+            'pg-slice' : slice,
+        },
+    })
+    .success(function(json_data) {
+        if (json_data['pg-status'] == 'success') {
+            var pictures = $.parseJSON(json_data['pg-pictures']);
+            callback(pictures);
+        } else {
+            errorHandler();
+        }
+    })
+    .error(errorHandler);
+}
+function retrieve_picture(json_url, pg_context, index, callback)
+{
+    slice = index + ":" + (index + 1);
+    return retrieve_pictures(json_url, pg_context, slice, callback);
+}
+
+// lightbox functionaliy through simplemodal
+function open_picture_lightbox(json_url, pg_context, pg_id, click_index, pictures)
+{
+    // get size of viewport
+    var viewport_size = get_viewport_size();
     // create DOM elements
     var container = $('<div/>').attr('id', pg_id);
     var control_div = $('<div/>').addClass('control-box');
     var control_bar = $('<div/>').addClass('control-bar');
     var content_div = $('<div/>').addClass('content-box');
-    var prev_div = $('<div/>').addClass('prev');
-    var next_div = $('<div/>').addClass('next');
     var picture_div = $('<div/>').addClass('picture');
+    var picture_img = $('<img/>');
+    //var close_btn = $('<a/>').html('Close');
+    var zoom100_btn = $('<a/>').html('100&#37;');
+    var zoom125_btn = $('<a/>').html('125&#37;');
+    var zoom150_btn = $('<a/>').html('150&#37;');
+    var zoom200_btn = $('<a/>').html('200&#37;');
+    var prev_btn = $('<a/>').html('Previous');
+    var next_btn = $('<a/>').html('Next');
     var close_btn = $('<a/>').html('Close');
-    close_btn.click(function() {
-        $.modal.close();
-    });
-    container.data('pg-picture', picture);
-    console.log(pictures.index(picture));
-    var prev_btn = $('<a/>').html('&lt;&nbsp;&nbsp;');
-    prev_btn.click(function() {
-        index = pictures.index(picture);
-        if (index > 0) {
-            picture_div.html(pictures[index - 1]);
+    container.data('pg-zoom', 1.0);
+    container.data('pg-current-index', click_index);
+    console.log(click_index);
+    function update_picture_lightbox(index) {
+        if (index == undefined || isNaN(index))
+            var index = container.data('pg-current-index');
+        else {
+            if (index < 0)
+                index = 0;
+            else if (index >= pictures.length)
+                index = pictures.length - 1;
+            if (isNaN(index))
+                index = click_index;
+            container.data('pg-current-index', index);
         }
-        console.log('prev');
-    });
-    var next_btn = $('<a/>').html('&nbsp;&nbsp;&gt;');
-    next_btn.click(function() {
-        index = pictures.index(picture);
-        console.log(index);
-        if (index < (pictures.length + 1)) {
-            picture_div.html(pictures[index + 1]);
+        if (pictures[index] == undefined) {
+            retrieve_picture(json_url, pg_context, index, function(new_pictures) {
+                pictures[index] = new_pictures[0];
+                update_picture_lightbox();
+            });
+            return;
         }
-        console.log('next');
-    });
-    control_bar.append(close_btn);
-    control_div.append($('<div/>'));
-    control_div.append(control_bar);
-    control_div.append($('<div/>'));
-    prev_div.append(prev_btn);
-    next_div.append(next_btn);
-    picture_div.append(picture);
-    content_div.append(prev_div);
-    content_div.append(picture_div);
-    content_div.append(next_div);
-    container.append(control_div);
-    container.append(content_div);
-    // open modal dialog
-    container.modal({
-        closeHTML: '',
-        escClose: true,
-        opacity: 90,
-        overlayCss: {backgroundColor:"#000"},
-        overlayClose: true,
-        onOpen: function (dialog) {
-            dialog.overlay.fadeIn('fast', function () {
-                dialog.data.hide();
-                dialog.container.fadeIn('fast');
-                dialog.data.fadeIn('fast');
-            });
-        },
-        onClose: function (dialog) {
-            dialog.data.fadeOut('fast');
-            dialog.container.fadeOut('fast', function () {
-                dialog.overlay.fadeOut('fast', function () {
-                    $.modal.close();
-                });
-            });
-        },
-    });
-}
-
-// picture-list dialog
-function open_picture_list_dialog(json_url, pg_id, pg_context,
-    modalOpenedCallback,
-    updateCallback, cancelCallback) {
-var errorHandler = function() {
-    alert('Unable to retrieve thumbnails');
-};
-// get thumbnail data
-$.ajax({
-    url: json_url,
-    dataType: 'json',
-    type: 'GET',
-    data: {
-        'pg-type': 'thumbnails',
-        'pg-context': pg_context,
-    },
-})
-.success(function(json_data) {
-    if (json_data['pg-status'] == 'success') {
-        var thumbnails = $.parseJSON(json_data['pg-thumbnails']);
-        var container = $('<div/>').attr('id', pg_id);
-        var list = $('<ul/>');
-        thumbnails.forEach(function(t) {
-            var picture_name = $('<p/>').html(
-                (t['index']+1) + ': ' + t['name']
-            );
-            var picture_url = t['url'];
-            var picture = $('<img/>').attr('src', picture_url)
-                .attr('width', '150px');
-            var list_element = $('<li/>').html(picture_name.after(picture));
-            list_element
-                .data('pg-context', t['name'])
-                .data('pg-id', t['index']);
-            list.append(list_element);
-        });
-        var control_div = $('<div/>').addClass('control-bar');
-        var update_btn = $('<a/>').html('Update');
-        var cancel_btn = $('<a/>').html('Cancel');
-        update_btn.click(function() {
-            updateCallback(container);
-        });
-        cancel_btn.click(function() {
-            cancelCallback(container);
-        });
-        control_div.append(update_btn);
-        control_div.append('&nbsp;&nbsp;|&nbsp;&nbsp;');
-        control_div.append(cancel_btn);
-        container.append(control_div);
-        container.append(list);
-        //container.hide();
-        //$('body').append(container);
+        var zoom = container.data('pg-zoom');
+        var picture_width = pictures[index]['width'];
+        var picture_height = pictures[index]['height'];
+        var container_width = viewport_size['width'] - 24 - 16;
+        var container_height = viewport_size['height'] - 24 - 50;
+        var scale = container_width / picture_width;
+        if (Math.round(scale * picture_height) > container_height)
+            scale = container_height / picture_height;
+        var width = Math.round(picture_width * scale * zoom);
+        var height = Math.round(picture_height * scale * zoom);
+        picture_img.attr('width', width).attr('height', height);
+        var xoffset = (container_width - width) / 2;
+        var yoffset = (container_height - height) / 2;
+        var position = [0, 0];
+        if (xoffset >= 0)
+            xoffset += 8;
+        else
+            xoffset = 0;
+        if (yoffset < 0)
+            yoffset = 0;
+        container.css('left', xoffset + 'px')
+            .css('top', yoffset + 'px');
+        // show or hide prev and next buttons
+        if ((index - 1) < 0)
+            prev_btn.addClass('pg-disabled');
+        if ((index - 1) >= 0)
+            prev_btn.removeClass('pg-disabled');
+        if ((index + 1) >= pictures.length)
+            next_btn.addClass('pg-disabled');
+        if ((index + 1) < pictures.length)
+            next_btn.removeClass('pg-disabled');
+        // load image
+        var image_url;
+        if (width > picture_width || height > picture_height)
+            image_url = pictures[index].fullsize_url;
+        else
+            image_url = pictures[index].display_url;
+        picture_img.attr('src', image_url);
+        //picture_img.css('background-image', 'url(' + image_url + ')');
+        // open modal dialog
         container.modal({
+            closeHTML: "",
+            //closeHTML: "<a href='#' title='Close' class='modal-close'>x</a>",
+            escClose: true,
             opacity: 80,
+            minWidth: viewport_size['width'],
+            maxWidth: viewport_size['width'],
+            minHeight: viewport_size['height'],
+            maxHeight: viewport_size['height'],
+            position: position,
             overlayCss: {backgroundColor:"#000"},
+            overlayClose: true,
             onOpen: function (dialog) {
                 dialog.overlay.fadeIn('fast', function () {
                     dialog.data.hide();
@@ -188,26 +210,169 @@ $.ajax({
                 });
             },
         });
-        modalOpenedCallback(container);
-        /*container.dialog({
-            autoOpen: false,
-            modal: true,
-            width: '90%',
-            buttons: {
-                "Update": function() {
-                    updateCallback(container); 
-                },
-                "Cancel": function() {
-                    cancelCallback(container);
-                },
-            },
-        });
-        container.dialog('open');*/
-    } else {
-        errorHandler();
     }
-})
-.error(errorHandler);
+    // connect DOM elements
+    control_bar.append(zoom100_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(zoom125_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(zoom150_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(zoom200_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(prev_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(next_btn);
+    control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
+    control_bar.append(close_btn);
+    control_div.append($('<div/>'));
+    control_div.append(control_bar);
+    control_div.append($('<div/>'));
+    picture_div.append(picture_img);
+    content_div.append(picture_div);
+    container.append(control_div);
+    container.append(content_div);
+    // show dialog
+    update_picture_lightbox();
+    // connect event handlers
+    close_btn.click(function() {
+        $.modal.close();
+    });
+    zoom100_btn.click(function() {
+        container.data('pg-zoom', 1.0);
+        update_picture_lightbox();
+    });
+    zoom125_btn.click(function() {
+        container.data('pg-zoom', 1.25);
+        update_picture_lightbox();
+    });
+    zoom150_btn.click(function() {
+        container.data('pg-zoom', 1.5);
+        update_picture_lightbox();
+    });
+    zoom200_btn.click(function() {
+        container.data('pg-zoom', 2.0);
+        update_picture_lightbox();
+    });
+    function prev_callback() {
+        var index = container.data('pg-current-index');
+        if (index != undefined)
+            update_picture_lightbox(index - 1);
+    }
+    prev_btn.on("click", prev_callback);
+    function next_callback() {
+        var index = container.data('pg-current-index');
+        if (index != undefined)
+            update_picture_lightbox(index + 1);
+    }
+    next_btn.on("click", next_callback);
+    picture_div.on("click", next_callback);
+    // attach keydown event handler
+    $(document).on("keydown", function(event) {
+        if (event.which == 37) {
+            prev_callback();
+            event.preventDefault();
+        } else if (event.which == 39) {
+            next_callback();
+            event.preventDefault();
+        }
+    });
+}
+
+// picture-list dialog
+function open_picture_list_dialog(json_url, pg_id, pg_context,
+                                  modalOpenedCallback,
+                                  updateCallback, cancelCallback)
+{
+    var errorHandler = function() {
+        alert('Unable to retrieve thumbnails');
+    };
+    // get thumbnail data
+    $.ajax({
+        url: json_url,
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            'pg-type': 'thumbnails',
+            'pg-context': pg_context,
+        },
+    })
+    .success(function(json_data) {
+        if (json_data['pg-status'] == 'success') {
+            var thumbnails = $.parseJSON(json_data['pg-thumbnails']);
+            var container = $('<div/>').attr('id', pg_id);
+            var list = $('<ul/>');
+            thumbnails.forEach(function(t) {
+                var picture_name = $('<p/>').html(
+                    (t['index']+1) + ': ' + t['name']
+                );
+                var picture_url = t['url'];
+                var picture = $('<img/>').attr('src', picture_url)
+                    .attr('width', '150px');
+                var list_element = $('<li/>').html(picture_name.after(picture));
+                list_element
+                    .data('pg-context', t['name'])
+                    .data('pg-id', t['index']);
+                list.append(list_element);
+            });
+            var control_div = $('<div/>').addClass('control-bar');
+            var update_btn = $('<a/>').html('Update');
+            var cancel_btn = $('<a/>').html('Cancel');
+            update_btn.click(function() {
+                updateCallback(container);
+            });
+            cancel_btn.click(function() {
+                cancelCallback(container);
+            });
+            control_div.append(update_btn);
+            control_div.append('&nbsp;&nbsp;|&nbsp;&nbsp;');
+            control_div.append(cancel_btn);
+            container.append(control_div);
+            container.append(list);
+            //container.hide();
+            //$('body').append(container);
+            container.modal({
+                closeHTML: "",
+                escClose: true,
+                position: ["5%",],
+                opacity: 80,
+                overlayCss: {backgroundColor:"#000"},
+                onOpen: function (dialog) {
+                    dialog.overlay.fadeIn('fast', function () {
+                        dialog.data.hide();
+                        dialog.container.fadeIn('fast');
+                        dialog.data.fadeIn('fast');
+                    });
+                },
+                onClose: function (dialog) {
+                    dialog.data.fadeOut('fast');
+                    dialog.container.fadeOut('fast', function () {
+                        dialog.overlay.fadeOut('fast', function () {
+                            $.modal.close();
+                        });
+                    });
+                },
+            });
+            modalOpenedCallback(container);
+            /*container.dialog({
+                autoOpen: false,
+                modal: true,
+                width: '90%',
+                buttons: {
+                    "Update": function() {
+                        updateCallback(container); 
+                    },
+                    "Cancel": function() {
+                        cancelCallback(container);
+                    },
+                },
+            });
+            container.dialog('open');*/
+        } else {
+            errorHandler();
+        }
+    })
+    .error(errorHandler);
 }
 
 // ordering functionality for the picture-list dialog
@@ -380,7 +545,6 @@ pg_register_input_provider('attribute-date-from-to', function (source, parent) {
 pg_register_input_provider('order-list', function (source, parent) {
     var list = $(source.data('pg-list-selector')).first();
     list.sortable();
-    console.log('sortable');
     return {
         method:
             'POST',
@@ -467,7 +631,6 @@ function pg_init_editing(json_url)
 
     $(document).ready(function() {
         $(document).on("click", ".pg-editable", function() {
-            console.log('handler');
             var elem = $(this);
             // check if object is already being edited
             if (elem.data('pg-editing') == undefined) {

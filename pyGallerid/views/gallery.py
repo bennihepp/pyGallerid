@@ -10,11 +10,10 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
     HTTPForbidden,
 )
-from pyramid.response import Response
 from pyramid.traversal import find_resource
 
-from ..models.user import User
-from ..models.gallery import Gallery, GalleryContainer, GalleryAlbum, GalleryPicture
+from ..models.gallery import Gallery, GalleryContainer, \
+     GalleryAlbum, GalleryPicture
 
 
 def picture_item(method):
@@ -23,6 +22,8 @@ def picture_item(method):
             item = item.preview_picture
         return method(item)
     return new_method
+
+
 def picture_request_item(method):
     def new_method(request, item):
         if isinstance(item, GalleryContainer):
@@ -30,64 +31,86 @@ def picture_request_item(method):
         return method(request, item)
     return new_method
 
+
 @picture_request_item
-def original_url(request, item):
-    file = item.original_file
+def big_url(request, item):
     url = request.static_url(
         os.path.join(
-            request.registry.settings['original_picture_dir'],
-            item.original_file
+            request.registry.settings['big_image_dir'],
+            item.big_image_view.image.image_file
         )
     )
     url = urllib.unquote(url)
     return url
-@picture_item
-def original_width(item):
-    return item.original_width
-@picture_item
-def original_height(item):
-    return item.original_height
-@picture_request_item
-def display_url(request, item):
-    file = item.display_file
-    url = request.static_url(
-        os.path.join(
-            request.registry.settings['display_picture_dir'],
-            item.display_file
-        )
-    )
-    url = urllib.unquote(url)
-    return url
-@picture_item
-def display_width(item):
-    return item.display_width
-@picture_item
-def display_height(item):
-    return item.display_height
-@picture_request_item
-def thumbnail_url(request, item):
-    file = item.thumbnail_file
-    url = request.static_url(
-        os.path.join(
-            request.registry.settings['thumbnail_picture_dir'],
-            item.thumbnail_file
-        )
-    )
-    url = urllib.unquote(url)
-    return url
-@picture_item
-def thumbnail_width(item):
-    return item.thumbnail_width
-@picture_item
-def thumbnail_height(item):
-    return item.thumbnail_height
 
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=order-list')
+@picture_item
+def big_width(item):
+    return item.big_image_view.width
+
+
+@picture_item
+def big_height(item):
+    return item.big_image_view.height
+
+
+@picture_request_item
+def regular_url(request, item):
+    url = request.static_url(
+        os.path.join(
+            request.registry.settings['regular_image_dir'],
+            item.regular_image_view.image.image_file
+        )
+    )
+    url = urllib.unquote(url)
+    return url
+
+
+@picture_item
+def regular_width(item):
+    return item.regular_image_view.width
+
+
+@picture_item
+def regular_height(item):
+    return item.regular_image_view.height
+
+
+@picture_request_item
+def small_url(request, item):
+    url = request.static_url(
+        os.path.join(
+            request.registry.settings['small_image_dir'],
+            item.small_image_view.image.image_file
+        )
+    )
+    url = urllib.unquote(url)
+    return url
+
+
+@picture_item
+def small_width(item):
+    return item.small_image_view.width
+
+
+@picture_item
+def small_height(item):
+    return item.small_image_view.height
+
+
+def render_resource(resource):
+    if isinstance(resource, Gallery):
+        return 'Home'
+    else:
+        return resource.name
+
+
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json', request_param='pg-type=order-list')
 def update_gallery_order_list(context, request):
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
-    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_ids = json.loads(request.params['pg-value'])
     children = pg_context.children
@@ -101,11 +124,13 @@ def update_gallery_order_list(context, request):
     #result['pg-replace-url'] = request.resource_url(context)
     return result
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=select-picture')
+
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json', request_param='pg-type=select-picture')
 def update_gallery_select_picture(context, request):
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
-    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_resource = find_resource(
         pg_context,
@@ -120,13 +145,15 @@ def update_gallery_select_picture(context, request):
     return result
 
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json',
              request_param='pg-type=attribute-multiline-text')
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=attribute-text')
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json', request_param='pg-type=attribute-text')
 def update_gallery_attribute_text(context, request):
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
-    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_name = request.params['pg-name']
     pg_text = json.loads(request.params['pg-value'])
@@ -137,25 +164,29 @@ def update_gallery_attribute_text(context, request):
     result['pg-status'] = 'success'
     return result
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=attribute-date')
+
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json', request_param='pg-type=attribute-date')
 def update_gallery_attribute_date(context, request):
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
-    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_name = request.params['pg-name']
     pg_value = json.loads(request.params['pg-value'])
-    pg_date = datetime.datetime.strptime(pg_value, '%Y-%m-%d').date()
-    pg_context.__setattr__(pg_name, pg_date)
-    result['pg-date'] = '%d %s %d' % (date.day, date.strftime('%B'), date.year)    
+    date = datetime.datetime.strptime(pg_value, '%Y-%m-%d').date()
+    pg_context.__setattr__(pg_name, date)
+    result['pg-date'] = '%d %s %d' % (date.day, date.strftime('%B'), date.year)
     result['pg-status'] = 'success'
     return result
 
-@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json',
-             request_param='pg-type=attribute-date-from-to')
+
+@view_config(context=GalleryContainer, xhr=True, name='update',
+             renderer='json', request_param='pg-type=attribute-date-from-to')
 def update_gallery_attribute_date_from_to(context, request):
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
-    result = {'pg-status' : 'failed'}
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_name = request.params['pg-name']
     pg_value = json.loads(request.params['pg-value'])
@@ -175,16 +206,19 @@ def update_gallery_attribute_date_from_to(context, request):
         date_str += ' %s' % date_from.strftime('%B')
     if date_from.year != date_to.year:
         date_str += ' %d' % date_from.year
-    date_str += ' - %d %s %d' % (date_to.day, date_to.strftime('%B'), date_to.year)
+    date_str += ' - %d %s %d' % (date_to.day, date_to.strftime('%B'),
+                                 date_to.year)
     result['pg-date-from-to'] = date_str
     result['pg-status'] = 'success'
     return result
 
-#@view_config(context=GalleryContainer, xhr=True, name='update', renderer='json')
+#@view_config(context=GalleryContainer, xhr=True,
+             #name='update', renderer='json')
 #def update_gallery(context, request):
-    #result = {'pg-status' : 'failed'}
+    #result = {'pg-status': 'failed'}
     #print request.params
-    #print 'JSON request with id=%s, name=%s' % (request.params['pg-id'], request.params['pg-name'])
+    #print 'JSON request with id=%s, name=%s' \
+          #% (request.params['pg-id'], request.params['pg-name'])
     #pg_id = request.params['pg-id']
     #pg_name = request.params['pg-name']
     #pg_id = pg_id.split(':')
@@ -193,7 +227,8 @@ def update_gallery_attribute_date_from_to(context, request):
         #if pg_name in ['date_from', 'date_to']:
             #date = datetime.datetime.strptime(
                 #request.params['pg-value'], '%Y-%m-%d').date()
-            #result['pg-date'] = '%d %s %d' % (date.day, date.strftime('%B'), date.year)
+            #result['pg-date'] = '%d %s %d' \
+                #% (date.day, date.strftime('%B'), date.year)
         #if pg_name == '__date_from_to':
             #date_from = datetime.datetime.strptime(
                 #request.params['pg-value[from]'], '%Y-%m-%d').date()
@@ -208,7 +243,8 @@ def update_gallery_attribute_date_from_to(context, request):
                 #date_s += ' %s' % date_from.strftime('%B')
             #if date_from.year != date_to.year:
                 #date_s += ' %d' % date_from.year
-            #date_s += ' - %d %s %d' % (date_to.day, date_to.strftime('%B'), date_to.year)
+            #date_s += ' - %d %s %d' % (date_to.day, date_to.strftime('%B'),
+                                       #date_to.year)
             #result['pg-date-from-to'] = date_s
         #else:
             #context.__setattr__(pg_name, request.params['pg-value'])
@@ -221,62 +257,104 @@ def update_gallery_attribute_date_from_to(context, request):
             #return result
     #return result
 
-@view_config(context=GalleryContainer, xhr=True, name='retrieve', renderer='json',
-             request_param='pg-type=thumbnails')
-def retrieve_thumbnails(context, request):
-    result = {'pg-status' : 'failed'}
+
+@view_config(context=GalleryContainer, xhr=True, name='retrieve',
+             renderer='json', request_param='pg-type=pictures')
+def retrieve_pictures(context, request):
+    result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
-    children = pg_context.children
-    pg_thumbnails = []
-    for index, child in enumerate(children):
+    if 'pg-slice' in request.params:
+        pg_slice = [int(x) for x in request.params['pg-slice'].split(':')]
+        pg_slice = slice(*pg_slice)
+    else:
+        pg_slice = slice(None)
+    indices = range(len(pg_context))[pg_slice]
+    pg_pictures = []
+    for index, child in enumerate(pg_context):
+        if index not in indices:
+            continue
         if isinstance(child, GalleryContainer):
             thumbnail = child.preview_picture
         elif isinstance(child, GalleryPicture):
             thumbnail = child
         else:
-            raise Exception("Can't retrieve thumbnails for this kind of object")
+            raise Exception("Can't retrieve thumbnails "
+                            "for this kind of object")
+        pg_pictures.append({
+            'index': index,
+            'name': child.name,
+            'display_url': big_url(request, thumbnail),
+            'fullsize_url': regular_url(request, thumbnail),
+            'width': regular_width(thumbnail),
+            'height': regular_height(thumbnail),
+        })
+    result['pg-pictures'] = json.dumps(pg_pictures)
+    result['pg-status'] = 'success'
+    return result
+
+
+@view_config(context=GalleryContainer, xhr=True, name='retrieve',
+             renderer='json', request_param='pg-type=thumbnails')
+def retrieve_thumbnails(context, request):
+    result = {'pg-status': 'failed'}
+    pg_context = find_resource(context, request.params['pg-context'])
+    pg_thumbnails = []
+    for index, child in enumerate(pg_context):
+        if isinstance(child, GalleryContainer):
+            thumbnail = child.preview_picture
+        elif isinstance(child, GalleryPicture):
+            thumbnail = child
+        else:
+            raise Exception("Can't retrieve thumbnails "
+                            "for this kind of object")
         pg_thumbnails.append({
             'index': index,
             'name': child.name,
-            'url': thumbnail_url(request, thumbnail),
-            'width': thumbnail_width(thumbnail),
-            'height': thumbnail_height(thumbnail),
+            'url': small_url(request, thumbnail),
+            'width': small_width(thumbnail),
+            'height': small_height(thumbnail),
         })
     result['pg-thumbnails'] = json.dumps(pg_thumbnails)
     result['pg-status'] = 'success'
     return result
+
 
 @view_config(context=GalleryContainer, name='edit',
              renderer='view_gallery.html.mako')
 def view_gallery_edit(context, request):
     d = view_gallery(context, request)
     if request.registry.settings.get('allow_editing', 'false') == 'true':
-        d.update({'editing' : True})
+        d.update({'editing': True})
     return d
+
 
 @view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
 def view_gallery(context, request):
-    items = list(enumerate(context.children_iter))
+    items = list(enumerate(context))
 
-    local_preview_url = lambda item: thumbnail_url(request, item.preview_picture)
-    local_preview_width = lambda item: 0.5 * thumbnail_width(item.preview_picture)
-    local_preview_height = lambda item: 0.5 * thumbnail_height(item.preview_picture)
+    preview_url = lambda item: small_url(request, item)
+    preview_width = lambda item: small_width(item)
+    preview_height = lambda item: small_height(item)
 
-    return {'gallery' : context,
-            'items' : items,
-            'editing' : False,
-            'lineage_list' : list(lineage(context)),
-            'preview_url' : local_preview_url,
-            'preview_width' : local_preview_width,
-            'preview_height' : local_preview_height}
+    return {'gallery': context,
+            'items': items,
+            'editing': False,
+            'lineage_list': list(lineage(context))[:-2],
+            'render_resource': render_resource,
+            'preview_url': preview_url,
+            'preview_width': preview_width,
+            'preview_height': preview_height,
+    }
+
 
 @view_config(context=GalleryAlbum, name='edit',
              renderer='view_album.html.mako')
 def view_album_edit(context, request):
     d = view_album(context, request)
     if request.registry.settings.get('allow_editing', 'false') == 'true':
-        d.update({'editing' : True})
+        d.update({'editing': True})
     return d
+
 
 @view_config(context=GalleryAlbum, renderer='view_album.html.mako')
 def view_album(context, request):
@@ -308,26 +386,27 @@ def view_album(context, request):
         pictures
     )
 
-    local_original_url = lambda item: original_url(request, item)
-    local_display_url = lambda item: display_url(request, item)
+    fullsize_url = lambda item: big_url(request, item)
     if display_mode == 'list':
-        local_preview_url = lambda item: display_url(request, item)
-        local_preview_width = lambda item: display_width(item)
-        local_preview_height = lambda item: display_height(item)
+        display_url = lambda item: regular_url(request, item)
+        display_width = lambda item: regular_width(item)
+        display_height = lambda item: regular_height(item)
     else:
-        local_preview_url = lambda item: thumbnail_url(request, item)
-        local_preview_width = lambda item: thumbnail_width(item)
-        local_preview_height = lambda item: thumbnail_height(item)
+        display_url = lambda item: small_url(request, item)
+        display_width = lambda item: small_width(item)
+        display_height = lambda item: small_height(item)
 
-    return {'album' : context,
-            'editing' : False,
-            'lineage_list' : list(lineage(context)),
-            'pictures' : pictures,
-            'display_mode' : display_mode,
-            'page' : page,
-            'num_of_pages' : num_of_pages,
-            'original_url' : local_original_url,
-            'display_url' : local_display_url,
-            'preview_url' : local_preview_url,
-            'preview_width' : local_preview_width,
-            'preview_height' : local_preview_height}
+    return {'album': context,
+            'editing': False,
+            'lineage_list': list(lineage(context))[:-2],
+            'pictures': pictures,
+            'display_mode': display_mode,
+            'page': page,
+            'num_of_pages': num_of_pages,
+            'total_num_of_pictures': len(context),
+            'render_resource': render_resource,
+            'fullsize_url': fullsize_url,
+            'display_url': display_url,
+            'display_width': display_width,
+            'display_height': display_height,
+        }

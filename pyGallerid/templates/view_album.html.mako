@@ -20,13 +20,6 @@
         </a>
         &nbsp;|&nbsp;
     % endif
-    % if display_mode != 'gallery':
-        <a class="navigation"
-            href="${request.resource_url(request.context, '@@'+request.view_name, query=dict(page=1, display_mode='gallery')) | n}">
-            Show as slideshow
-        </a>
-        &nbsp;|&nbsp;
-    % endif
 </%block>
 
 <%block name="body">
@@ -119,18 +112,36 @@
                 },
             }
         );*/
-        $(".picture-link").click(function() {
-            var picture = $(this);
-            var pictures = [];
-            $(".picture-link").each(function() {
-                var tmp_picture = $('<img/>').attr('src', $(this).attr('href'));
-                pictures.push(tmp_picture);
-                if ($(this).is(picture)) {
-                    picture = tmp_picture;
-                }
-            });
-            open_picture_lightbox('picture-lightbox', $(picture), $(pictures));
-            return false;
+        var pictures = [];
+        var i;
+        for (i = 0; i < ${total_num_of_pictures}; i++) {
+            pictures.push(undefined);
+        }
+        $(".picture-item").each(function() {
+            var index = parseInt($(this).data('pg-index'));
+            var name = $(this).data('pg-context');
+            var display_url = $(this).data('pg-display-url');
+            var fullsize_url = $(this).data('pg-fullsize-url');
+            var width = $(this).data('pg-width');
+            var height = $(this).data('pg-height');
+            var picture = {
+                index: index,
+                name: name,
+                display_url: display_url,
+                fullsize_url: fullsize_url,
+                width: width,
+                height: height,
+            };
+            pictures[index] = picture;
+        });
+        $(".picture-link").click(function(event) {
+            event.preventDefault();
+            var item = $(this).parentsUntil(".picture-item").parent();
+            var index = parseInt(item.data('pg-index'));
+            var json_url = '${request.resource_url(request.context, '@@retrieve') | n}';
+            open_picture_lightbox(json_url, "", 'picture-lightbox',
+                                  index, pictures);
+            //return false;
         });
     });
 % elif display_mode == 'gallery':
@@ -145,86 +156,65 @@
 </script>
 
 <div class="pictures">
-    % if display_mode in ('list', 'grid'):
-        <ul class="picture-list">
-    
-            % if editing:
-                <div class="children-order-edit">
-                    <p class="pg-edit-order" \
-                        data-pg-id="picture-order-list-dialog" \
-                        data-pg-context="">
-                        Edit order
-                    </p>
-                </div>
-                ##<div class="children-order-edit">
-                ##    <p class="pg-editable" \
-                ##        data-pg-context="" \
-                ##        data-pg-type="order-list" \
-                ##        data-pg-list-selector="ul.picture-list" \
-                ##        data-pg-item-selector="li.picture-item[data-pg-context]" \
-                ##        data-pg-name="children">
-                ##        Edit order by dragging
-                ##    </p>
-                ##</div>
-            % endif
-    
-            % for picture_id, picture in pictures:
-                <li class="picture-item" \
-                    data-pg-id="${picture_id}" \
-                    data-pg-context="${picture.name}">
-                    <div class="picture-cell">
-                    <!-- max 1024x536 -->
-                        <div class="picture-container">
-                            <a class="picture-link"
-                                title="${picture.description}"
-                                href="${display_url(picture) | n}"
-                                rel="picture-gallery">
-                            <img class="image-box"
-                                alt="${picture.name}"
-                                width="${preview_width(picture)}"
-                                height="${preview_height(picture)}"
-                                src="/static/img/spacer.gif"
-                                data-src="${preview_url(picture) | n}"
-                                style="
-                                    background-repeat: no-repeat;" />
-                            </a>
+    <ul class="picture-list">
+
+        % if editing:
+            <div class="children-order-edit">
+                <p class="pg-edit-order" \
+                    data-pg-id="picture-order-list-dialog" \
+                    data-pg-context="">
+                    Edit order
+                </p>
+            </div>
+        % endif
+
+        % for index, picture in pictures:
+            <li class="picture-item" \
+                data-pg-context="${picture.name}" \
+                data-pg-index="${index}" \
+                data-pg-fullsize-url="${fullsize_url(picture) | n}" \
+                data-pg-display-url="${display_url(picture) |n}" \
+                data-pg-width="${display_width(picture)}" \
+                data-pg-height="${display_height(picture)}">
+                <div class="picture-cell">
+                <!-- max 1024x536 -->
+                    <div class="picture-container">
+                        <a class="picture-link" \
+                            title="${picture.description}" \
+                            href="${fullsize_url(picture) | n}" \
+                            rel="picture-gallery">
+                        <img class="image-box" \
+                            alt="${picture.name}" \
+                            width="${display_width(picture)}" \
+                            height="${display_height(picture)}" \
+                            src="/static/img/spacer.gif" \
+                            data-src="${display_url(picture) | n}" \
+                            data-big-src="${fullsize_url(picture) | n}" />
+                        </a>
+                    </div>
+                    % if editing:
+                        <div class="picture-edit" style="width: ${display_width(picture)}px;">
+                            <p class="pg-edit-picture" \
+                                data-pg-id="picture-dialog" \
+                                data-pg-context="${picture.name}">
+                                Edit picture
+                            </p>
                         </div>
-                        % if editing:
-                            <div class="preview-picture-edit" style="width: ${preview_width(picture)}px;">
-                                <p class="pg-edit-preview-picture" \
-                                    data-pg-id="preview-picture-dialog" \
-                                    data-pg-context="${picture.name}">
-                                    Edit preview picture
-                                </p>
-                            </div>
-                        % endif
-                        <div class="picture-info" style="width: ${preview_width(picture)}px;">
-                            <div class="picture-descr">
-                                <p class="pg-editable" \
-                                    data-pg-context="${picture.name}" \
-                                    data-pg-type="attribute-text" \
-                                    data-pg-name="description">
-                                    ${picture.description}
-                                </p>
-                            </div>
+                    % endif
+                    <div class="picture-info" style="width: ${display_width(picture)}px;">
+                        <div class="picture-descr">
+                            <p class="pg-editable" \
+                                data-pg-context="${picture.name}" \
+                                data-pg-type="attribute-text" \
+                                data-pg-name="description">
+                                ${picture.description}
+                            </p>
                         </div>
                     </div>
-                </li>
-            % endfor
-        </ul>
-    % elif display_mode == 'gallery':
-        % for picture_id, picture in pictures:
-            <a href="${display_url(picture) | n}" \
-                rel="${original_url(picture) | n}">
-            <img class="image-box" \
-                alt="${picture.name}" \
-                title="${picture.description}" \
-                ## width="${preview_width(picture)}" \
-                ## height="${preview_height(picture)}" \
-                src="${preview_url(picture) | n}" />
-            </a>
+                </div>
+            </li>
         % endfor
-    % endif
+    </ul>
 </div>
 
 <div class="album-navigation-bottom">

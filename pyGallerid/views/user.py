@@ -5,13 +5,13 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
 )
 
-from ..models import retrieve_user, retrieve_gallery, PersistentContainer
+from ..models import retrieve_gallery
+from ..models.user import User
 
 
-@view_config(context=PersistentContainer)
-def home(context, request):
-    user = retrieve_user(context, 'hepp')
-    gallery = retrieve_gallery(user)
+@view_config(context=User)
+def user(context, request):
+    gallery = retrieve_gallery(context)
     if gallery is not None:
         return HTTPFound(location=request.resource_url(gallery))
     else:

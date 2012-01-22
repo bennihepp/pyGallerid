@@ -26,6 +26,9 @@
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
 
             $(document).ready(function() {
+            console.log('ready');
+            });
+            $(document).ready(function() {
                 $('.pg-edit-order').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
@@ -117,13 +120,13 @@
     ${next.body()}
 </%block>
 
-<%def name="render_resource(resource)">
-    % if resource is request.root:
-        Home
-    % else:
-        ${resource.name}
-    % endif
-</%def>
+## <%def name="render_resource(resource)">
+##     % if resource is request.root:
+##         Home
+##     % else:
+##         ${resource.name}
+##     % endif
+## </%def>
 
 <%doc>
 (function($) {

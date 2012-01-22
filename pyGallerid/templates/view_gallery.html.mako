@@ -44,9 +44,7 @@
                             width="${preview_width(item)}"
                             height="${preview_height(item)}"
                             src="/static/img/spacer.gif"
-                            data-src="${preview_url(item) | n}"
-                            style="
-                                background-repeat: no-repeat;" />
+                            data-src="${preview_url(item) | n}" />
                         </a>
                     </div>
                     % if editing:
