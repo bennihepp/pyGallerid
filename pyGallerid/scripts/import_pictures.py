@@ -23,7 +23,7 @@ from ..utils.picture import import_gallery_container
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <username> <album_path>\n'
+    print('usage: %s <config_uri> <username> <path>\n'
           '(example: "%s development.ini "New Zealand" '
           'new_pictures")' % (cmd, cmd))
     sys.exit(1)
@@ -34,7 +34,7 @@ def main(argv=sys.argv):
         usage(argv)
     config_uri = argv[1]
     username = argv[2]
-    album_path = argv[3]
+    path = argv[3]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     # for SQLalchemy
@@ -48,19 +48,26 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_pictures(zodb_root, settings, username, album_path)
+        import_pictures(zodb_root, settings, username, path)
         transaction.commit()
 
 
-def import_pictures(zodb_root, settings, username, album_path):
+def import_pictures(zodb_root, settings, username, path):
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
 
-    container = import_gallery_container(album_path, settings, move_files=True)
+    cwd = os.getcwd()
+    os.chdir(path)
+
+    container = import_gallery_container('.', settings, move_files=False)
+
+    os.chdir(cwd)
 
     if container is not None:
-        gallery.add(container)
+        for child in container:
+            gallery.add(child)
         #albums = category.children
         #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
         #category.children = albums
+

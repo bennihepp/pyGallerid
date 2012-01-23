@@ -45,7 +45,7 @@ setup(name='pyGallerid',
       [paste.app_factory]
       main = pyGallerid:main
       [console_scripts]
-      import_album = pyGallerid.scripts.import_album:main
+      import_pictures = pyGallerid.scripts.import_pictures:main
       init_gallery = pyGallerid.scripts.init_gallery:main
       """,
       )

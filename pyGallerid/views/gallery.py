@@ -41,12 +41,7 @@ def picture_request_item(method):
 
 @picture_request_item
 def big_url(request, item):
-    url = request.static_url(
-        os.path.join(
-            request.registry.settings['big_image_dir'],
-            item.big_image_view.image.image_file
-        )
-    )
+    url = request.static_url(item.big_image_path)
     url = urllib.unquote(url)
     return url
 
@@ -63,12 +58,7 @@ def big_height(item):
 
 @picture_request_item
 def regular_url(request, item):
-    url = request.static_url(
-        os.path.join(
-            request.registry.settings['regular_image_dir'],
-            item.regular_image_view.image.image_file
-        )
-    )
+    url = request.static_url(item.regular_image_path)
     url = urllib.unquote(url)
     return url
 
@@ -85,12 +75,7 @@ def regular_height(item):
 
 @picture_request_item
 def small_url(request, item):
-    url = request.static_url(
-        os.path.join(
-            request.registry.settings['small_image_dir'],
-            item.small_image_view.image.image_file
-        )
-    )
+    url = request.static_url(item.small_image_path)
     url = urllib.unquote(url)
     return url
 

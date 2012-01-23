@@ -49,7 +49,7 @@ def create_gallery_image_file(filename, tags=None):
     width, height = img.size
     image = GalleryImageFile(
         filename,
-        image_size=(width, height),
+        size=(width, height),
         tags=tags
     )
     return image
@@ -103,7 +103,7 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
                            small_filename, default_date=None, move_file=True,
                            use_image_magick=True):
 
-    if original_filename != big_filename:
+    if os.path.abspath(original_filename) != os.path.abspath(big_filename):
         if move_file:
             shutil.move(original_filename, big_filename)
         else:
@@ -183,7 +183,7 @@ def import_gallery_album(album_path, settings, move_files=True,
 
     print 'scanning %s' % album_path
     pictures = []
-    for filename in os.listdir(album_path):
+    for filename in os.listdir('.'):
         filebase, fileext = os.path.splitext(filename)
         if os.path.isfile(filename) and fileext.lower() in \
             ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
@@ -191,9 +191,8 @@ def import_gallery_album(album_path, settings, move_files=True,
             big_filename = os.path.join(big_image_dir, filename)
             regular_filename = os.path.join(regular_image_dir, filename)
             small_filename = os.path.join(small_image_dir, filename)
-            original_filename = os.path.join(album_path, filename)
             picture = import_gallery_picture(
-                original_filename, big_filename,
+                filename, big_filename,
                 regular_filename, small_filename,
                 move_file=move_files)
             pictures.append(picture)
@@ -211,8 +210,9 @@ def import_gallery_album(album_path, settings, move_files=True,
             (picture.regular_image_view.image, regular_image_dir),
             (picture.small_image_view.image, small_image_dir),
         ):
-            path = os.path.join(os.path.split(image.image_file)[-2:])
-            image.image_file = path
+            head, tail = os.path.split(image.filename)
+            head2, tail2 = os.path.split(head)
+            image.filename = os.path.join(tail2, tail)
         # add picture to album container
         album.append(picture)
 
@@ -221,10 +221,13 @@ def import_gallery_album(album_path, settings, move_files=True,
 
 def import_gallery_container(path, settings, move_files=True,
                              use_image_magick=True):
+    cwd = os.getcwd()
+    os.chdir(os.path.split(path)[-1])
+    album = None
     containers = []
     picture_found = False
     print 'scanning %s' % path
-    for filename in os.listdir(path):
+    for filename in os.listdir('.'):
         if filename.startswith('.'):
             continue
         container = None
@@ -232,17 +235,25 @@ def import_gallery_container(path, settings, move_files=True,
         if not picture_found and os.path.isfile(filename) \
            and fileext.lower() in \
            ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
-            container = import_gallery_album(
+            album = import_gallery_album(
                 path, settings, move_files, use_image_magick)
             picture_found = True
         elif os.path.isdir(filename):
             abs_path = os.path.join(path, filename)
             container = import_gallery_container(
                 abs_path, settings, move_files, use_image_magick)
-        if container is not None:
-            containers.append(container)
+            if container is not None:
+                containers.append(container)
+    os.chdir(cwd)
     if len(containers) > 0:
-        rel_path = os.path.basename(path)
-        new_container = GalleryContainer(rel_path, rel_path, None, rel_path)
+        if album is None:
+            rel_path = os.path.basename(path)
+            new_container = GalleryContainer(
+                rel_path, rel_path, None, rel_path)
+        else:
+            new_container = album
         [new_container.add(c) for c in containers]
         return new_container
+    elif album is not None:
+        return album
+

@@ -85,12 +85,13 @@ class PersistentOrderedContainer(PersistentContainer):
                                  'contain the same objects')
         self.__children = PersistentList(children)
 
-    def append(self, item):
+    def add(self, item):
         if item.__name__ not in self:
             self.__children.append(item)
         else:
             raise ValueError('The container already contains this item')
         PersistentContainer.add(self, item)
+    append = add
 
     def insert(self, index, item):
         if item.__name__ not in self:

@@ -134,10 +134,6 @@ class GalleryAlbum(GalleryContainer):
     def pictures(self, pictures):
         self.children = pictures
 
-    def get_absolute_path(self, image_file):
-        assert isinstance(image_file, GalleryImageFile)
-        return os.path.join(self.absolute_path, image_file.filename)
-
 
 class GalleryPicture(Persistent, PersistentLocationAware):
     def __init__(self, name, big_image_view, regular_image_view,
@@ -163,6 +159,27 @@ class GalleryPicture(Persistent, PersistentLocationAware):
         self.description = description
         self.location = location
         self.date = date
+
+    @property
+    def small_image_path(self):
+        assert self.parent is not None
+        assert isinstance(self.parent, GalleryAlbum)
+        return os.path.join(self.parent.absolute_path,
+                            self.small_image_view.image.filename)
+
+    @property
+    def regular_image_path(self):
+        assert self.parent is not None
+        assert isinstance(self.parent, GalleryAlbum)
+        return os.path.join(self.parent.absolute_path,
+                            self.regular_image_view.image.filename)
+
+    @property
+    def big_image_path(self):
+        assert self.parent is not None
+        assert isinstance(self.parent, GalleryAlbum)
+        return os.path.join(self.parent.absolute_path,
+                            self.big_image_view.image.filename)
 
 
 class GalleryImageView(Persistent):
