@@ -94,7 +94,7 @@ def render_resource(resource):
     if isinstance(resource, Gallery):
         return 'Gallery'
     else:
-        return unicode(resource.name).capitalize()
+        return unicode(resource.name)
 
 
 def find_gallery_resource(resource):
