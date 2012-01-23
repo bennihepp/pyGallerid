@@ -36,7 +36,7 @@ class GalleryContainer(PersistentOrderedContainer):
         if self.__path is not None:
             try:
                 abs_path_tuple = self.absolute_path_tuple
-                abs_parent_path = os.path.join(*self.absolute_path_tuple[:-1])
+                abs_parent_path = os.path.join(*abs_path_tuple[:-1])
                 old_abs_path = os.path.join(abs_parent_path, self.path)
                 new_abs_path = os.path.join(abs_parent_path, new_path)
                 if os.path.exists(new_abs_path):
@@ -59,8 +59,8 @@ class GalleryContainer(PersistentOrderedContainer):
     def absolute_path(self):
         if self.path is None:
             raise AttributeError('The container has no valid path')
-        if isinstance(parent, GalleryContainer):
-            return os.path.join(parent.absolute_path, self.path)
+        if isinstance(self.parent, GalleryContainer):
+            return os.path.join(self.parent.absolute_path, self.path)
         else:
             return self.path
 
@@ -68,8 +68,8 @@ class GalleryContainer(PersistentOrderedContainer):
     def absolute_path_tuple(self):
         if self.path is None:
             raise AttributeError('The container has no valid path')
-        if isinstance(parent, GalleryContainer):
-            return parent.absolute_path_tuple + (self.path,)
+        if isinstance(self.parent, GalleryContainer):
+            return self.parent.absolute_path_tuple + (self.path,)
         else:
             return (self.path,)
 
@@ -111,7 +111,8 @@ class GalleryContainer(PersistentOrderedContainer):
 class Gallery(GalleryContainer):
     def __init__(self, description=None, path=None,
                  user=None, name='gallery', parent=None):
-        GalleryContainer.__init__(self, name, description, path=path, parent=parent)
+        GalleryContainer.__init__(self, name, description,
+                                  path=path, parent=parent)
         self.user = user
 
 
@@ -120,7 +121,8 @@ class GalleryAlbum(GalleryContainer):
                  long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
                  path=None, parent=None):
-        GalleryContainer.__init__(self, name, description, path=path, parent=parent)
+        GalleryContainer.__init__(self, name, description,
+                                  path=path, parent=parent)
         self.long_description = long_description
         self.location = location
         self.date_from = date_from
@@ -133,8 +135,8 @@ class GalleryAlbum(GalleryContainer):
         self.children = pictures
 
     def get_absolute_path(self, image_file):
-        assert isinstance(image, GalleryImageFile)
-        return os.path.join(self.absolute_path, image.filename)
+        assert isinstance(image_file, GalleryImageFile)
+        return os.path.join(self.absolute_path, image_file.filename)
 
 
 class GalleryPicture(Persistent, PersistentLocationAware):

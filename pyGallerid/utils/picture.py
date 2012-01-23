@@ -174,7 +174,8 @@ def import_gallery_album(album_path, settings, move_files=True,
         raise
 
     big_image_dir = os.path.join(settings['image_dir'], album_path, 'big')
-    regular_image_dir = os.path.join(settings['image_dir'], album_path, 'regular')
+    regular_image_dir = os.path.join(
+        settings['image_dir'], album_path, 'regular')
     small_image_dir = os.path.join(settings['image_dir'], album_path, 'small')
     for path in (big_image_dir, regular_image_dir, small_image_dir):
         if not os.path.exists(path):
@@ -184,8 +185,7 @@ def import_gallery_album(album_path, settings, move_files=True,
     pictures = []
     for filename in os.listdir(album_path):
         filebase, fileext = os.path.splitext(filename)
-        if not picture_found and os.path.isfile(filename) \
-           and fileext.lower() in \
+        if os.path.isfile(filename) and fileext.lower() in \
             ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
             print '  importing %s' % filename
             big_filename = os.path.join(big_image_dir, filename)
@@ -217,6 +217,7 @@ def import_gallery_album(album_path, settings, move_files=True,
         album.append(picture)
 
     return album
+
 
 def import_gallery_container(path, settings, move_files=True,
                              use_image_magick=True):

@@ -18,7 +18,6 @@ from pyramid.paster import (
 )
 
 from ..models import appmaker, retrieve_user, retrieve_gallery
-from ..models.gallery import GalleryContainer
 from ..utils.picture import import_gallery_container
 
 
@@ -50,7 +49,7 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_album(zodb_root, settings, username, category, album_path)
+        import_pictures(zodb_root, settings, username, category, album_path)
         transaction.commit()
 
 
@@ -66,4 +65,3 @@ def import_pictures(zodb_root, settings, username, album_path):
         #albums = category.children
         #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
         #category.children = albums
-
