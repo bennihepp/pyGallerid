@@ -72,6 +72,9 @@ class PersistentOrderedContainer(PersistentContainer):
         PersistentContainer.__init__(self, name, parent)
         self.__children = PersistentList()
 
+    def index(self, item):
+        return self.__children.index(item)
+
     def get_children(self, index):
         return self.__children[index]
 

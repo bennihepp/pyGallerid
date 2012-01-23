@@ -14,3 +14,8 @@ img {
   background-size: <display_width+xoffset>px <display_height+yoffset>px;
   background-repeat: no-repeat;
 }
+
+modals:
++ allow changing of resource name without changing order in a parent container
+
+
