@@ -23,19 +23,18 @@ from ..utils.picture import import_gallery_container
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <username> <category> <album_path>\n'
+    print('usage: %s <config_uri> <username> <album_path>\n'
           '(example: "%s development.ini "New Zealand" '
           'new_pictures")' % (cmd, cmd))
     sys.exit(1)
 
 
 def main(argv=sys.argv):
-    if len(argv) != 5:
+    if len(argv) != 4:
         usage(argv)
     config_uri = argv[1]
     username = argv[2]
-    category = argv[3]
-    album_path = argv[4]
+    album_path = argv[3]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     # for SQLalchemy
@@ -49,7 +48,7 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_pictures(zodb_root, settings, username, category, album_path)
+        import_pictures(zodb_root, settings, username, album_path)
         transaction.commit()
 
 
