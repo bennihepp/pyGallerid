@@ -184,6 +184,8 @@ def import_gallery_album(album_path, settings, move_files=True,
     print 'scanning %s' % album_path
     pictures = []
     for filename in os.listdir('.'):
+        if filename.startswith('.'):
+            continue
         filebase, fileext = os.path.splitext(filename)
         if os.path.isfile(filename) and fileext.lower() in \
             ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
@@ -191,10 +193,15 @@ def import_gallery_album(album_path, settings, move_files=True,
             big_filename = os.path.join(big_image_dir, filename)
             regular_filename = os.path.join(regular_image_dir, filename)
             small_filename = os.path.join(small_image_dir, filename)
-            picture = import_gallery_picture(
-                filename, big_filename,
-                regular_filename, small_filename,
-                move_file=move_files)
+            try:
+                picture = import_gallery_picture(
+                    filename, big_filename,
+                    regular_filename, small_filename,
+                    move_file=move_files)
+            except:
+                print 'Failed to import picture:', \
+                      os.path.join(album_path, filename)
+                raise
             pictures.append(picture)
 
     if len(pictures) == 0:
@@ -235,13 +242,21 @@ def import_gallery_container(path, settings, move_files=True,
         if not picture_found and os.path.isfile(filename) \
            and fileext.lower() in \
            ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
-            album = import_gallery_album(
-                path, settings, move_files, use_image_magick)
+            try:
+                album = import_gallery_album(
+                    path, settings, move_files, use_image_magick)
+            except:
+                print 'Failed to import album:', path
+                raise
             picture_found = True
         elif os.path.isdir(filename):
             abs_path = os.path.join(path, filename)
-            container = import_gallery_container(
-                abs_path, settings, move_files, use_image_magick)
+            try:
+                container = import_gallery_container(
+                    abs_path, settings, move_files, use_image_magick)
+            except:
+                print 'Failed to import container:', abs_path
+                raise
             if container is not None:
                 containers.append(container)
     os.chdir(cwd)
