@@ -19,10 +19,12 @@ class PersistentLocationAware(object):
     @name.setter
     def name(self, value):
         if self.parent is not None:
-            parent = self.parent
-            del parent[self.name]
+            p = self.parent
+            self.parent = None
+            #del parent[self.name]
             self.__name__ = value
-            parent[value] = self
+            self.parent = p
+            #p[value] = self
         else:
             raise AttributeError('The name of a root object can\'t be changed')
 
@@ -36,8 +38,9 @@ class PersistentLocationAware(object):
             p = self.parent
             self.__parent__ = None
             del p[self.name]
-        obj[self.name] = self
-        self.__parent__ = obj
+        if obj is not None:
+            obj[self.name] = self
+            self.__parent__ = obj
 
 
 class PersistentContainer(PersistentDict, PersistentLocationAware):
@@ -49,14 +52,15 @@ class PersistentContainer(PersistentDict, PersistentLocationAware):
             parent[name] = self
         self.__parent__ = parent
 
-    def add(self, item):
+    def __add(self, item):
         PersistentDict.__setitem__(self, item.__name__, item)
         item.__parent__ = self
+    add = __add
 
     def __setitem__(self, name, item):
         if item.__name__ != name:
             raise ValueError('name and item.__name__ must be equal')
-        self.add(item)
+        self.__add(item)
 
     def __delitem__(self, name):
         self[name].__parent__ = None

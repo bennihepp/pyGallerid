@@ -86,7 +86,10 @@ class GalleryContainer(PersistentOrderedContainer):
 
     @preview_picture.setter
     def preview_picture(self, picture):
-        assert isinstance(picture, GalleryPicture)
+        assert isinstance(picture, GalleryPicture) \
+               or isinstance(picture, GalleryContainer)
+        if isinstance(picture, GalleryContainer):
+            picture = picture.preview_picture
         if self.has_picture(picture):
             self.__preview_picture = picture
         else:

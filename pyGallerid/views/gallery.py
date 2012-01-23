@@ -345,8 +345,8 @@ def view_gallery(context, request):
     for item in context:
         if len(item) > 0:
             items.append(item)
-        else:
-            print 'empty album:', item.name
+        #else:
+            #print 'empty album:', item.name
     items = list(enumerate(items))
     #items = list(enumerate(context))
 
