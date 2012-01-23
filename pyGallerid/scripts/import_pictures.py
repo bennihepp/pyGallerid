@@ -19,7 +19,7 @@ from pyramid.paster import (
 
 from ..models import appmaker, retrieve_user, retrieve_gallery
 from ..models.gallery import GalleryContainer
-from ..utils.picture import import_gallery_album
+from ..utils.picture import import_gallery_container
 
 
 def usage(argv):
@@ -54,29 +54,16 @@ def main(argv=sys.argv):
         transaction.commit()
 
 
-def retrieve_gallery_child(parent, child_name, description=None):
-    if child_name in parent:
-        child = parent[child_name]
-    else:
-        print '  creating new container:', child_name
-        child = GalleryContainer(child_name, child_name)
-        parent.append(child)
-    if description is not None:
-        child.description = description
-    return child
-
-
-def import_album(zodb_root, settings, username, category_name, album_path):
+def import_pictures(zodb_root, settings, username, album_path):
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
-    category = retrieve_gallery_child(gallery, category_name)
 
-    album = import_gallery_album(album_path, settings, move_files=True)
+    container = import_gallery_container(album_path, settings, move_files=True)
 
-    if album is not None:
-        category.append(album)
-        albums = category.children
-        albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
-        category.children = albums
+    if container is not None:
+        gallery.add(container)
+        #albums = category.children
+        #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
+        #category.children = albums
 

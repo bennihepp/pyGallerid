@@ -72,7 +72,7 @@ def create_gallery(zodb_root, settings, username,
     gallery = retrieve_gallery(user)
     if gallery is not None:
         raise ValueError("The user %s already has a gallery" % username)
-    gallery = Gallery(description, user=user)
+    gallery = Gallery(description, user=user, path=settings['image_dir'])
     user.add(gallery)
     about = retrieve_about(user)
     if about is not None:

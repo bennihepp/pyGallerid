@@ -18,14 +18,11 @@ class PersistentLocationAware(object):
 
     @name.setter
     def name(self, value):
-        print 'setting name of', self, 'to', value
         if self.parent is not None:
-            print 'changing linkage to parent object'
             parent = self.parent
             del parent[self.name]
             self.__name__ = value
             parent[value] = self
-            print 'self.parent[name] =', self.parent[self.name]
         else:
             raise AttributeError('The name of a root object can\'t be changed')
 
@@ -70,10 +67,6 @@ class PersistentOrderedContainer(PersistentContainer):
     def __init__(self, name, parent=None):
         PersistentContainer.__init__(self, name, parent)
         self.__children = PersistentList()
-
-    #@property
-    #def children_iter(self):
-    #    return self.__children.__iter__()
 
     def get_children(self, index):
         return self.__children[index]

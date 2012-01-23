@@ -6,7 +6,8 @@ import shutil
 import Image
 from ExifTags import TAGS
 
-from ..models.gallery import GalleryAlbum, GalleryPicture, GalleryImageFile
+from ..models.gallery import GalleryContainer, GalleryAlbum, \
+     GalleryPicture, GalleryImageFile
 
 DEFAULT_MIN_THUMBNAIL_SIZE = 400
 DEFAULT_DISPLAY_SCALE = 0.5
@@ -118,20 +119,26 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
     small_image = create_small_gallery_image_file(
         big_filename, small_filename, width, height, use_image_magick)
 
-    if 'DateTimeOriginal' in tags:
-        date = dateutil.parser.parse(tags['DateTimeOriginal'])
-    elif 'DateTime' in tags:
-        date = dateutil.parser.parse(tags['DateTime'])
+    dates = []
+    for tag in ('DateTime', 'DateTimeOriginal', 'DateTimeDigitized'):
+        if tag in tags:
+            dates.append(dateutil.parser.parse(tags[tag]))
+    if len(dates) > 0:
+        date = min(dates)
     else:
-        if default_date is not None:
-            print 'WARNING: No date found:', original_filename
-            print 'Listing all tags:'
-            for k, v in tags.items():
-                print '  %s: %s' % (k, v)
-            # TODO: handle this case
-            #date = datetime.datetime.now()
-            raise
-        date = default_date
+        if default_date is None:
+            raise ValueError('No date found for:', original_filename)
+        else:
+            date = default_date
+        #if default_date is not None:
+            #print 'WARNING: No date found:', original_filename
+            #print 'Listing all tags:'
+            #for k, v in tags.items():
+                #print '  %s: %s' % (k, v)
+            ## TODO: handle this case
+            ##date = datetime.datetime.now()
+            #raise
+        #date = default_date
 
     name = os.path.splitext(os.path.basename(original_filename))[0]
     description = name
@@ -166,25 +173,24 @@ def import_gallery_album(album_path, settings, move_files=True,
         #date_to = None
         raise
 
-    big_image_dir = settings['big_image_dir']
-    regular_image_dir = settings['regular_image_dir']
-    small_image_dir = settings['small_image_dir']
-    for directory in (big_image_dir, regular_image_dir, small_image_dir):
-        path = os.path.join(directory, rel_album_path)
+    big_image_dir = os.path.join(settings['image_dir'], album_path, 'big')
+    regular_image_dir = os.path.join(settings['image_dir'], album_path, 'regular')
+    small_image_dir = os.path.join(settings['image_dir'], album_path, 'small')
+    for path in (big_image_dir, regular_image_dir, small_image_dir):
         if not os.path.exists(path):
             os.makedirs(path)
 
     print 'scanning %s' % album_path
     pictures = []
     for filename in os.listdir(album_path):
-        picture_name, picture_ext = os.path.splitext(filename)
-        if (not filename.startswith('.')) and picture_ext.lower() in \
+        filebase, fileext = os.path.splitext(filename)
+        if not picture_found and os.path.isfile(filename) \
+           and fileext.lower() in \
             ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
             print '  importing %s' % filename
-            rel_filename = os.path.join(rel_album_path, filename)
-            big_filename = os.path.join(big_image_dir, rel_filename)
-            regular_filename = os.path.join(regular_image_dir, rel_filename)
-            small_filename = os.path.join(small_image_dir, rel_filename)
+            big_filename = os.path.join(big_image_dir, filename)
+            regular_filename = os.path.join(regular_image_dir, filename)
+            small_filename = os.path.join(small_image_dir, filename)
             original_filename = os.path.join(album_path, filename)
             picture = import_gallery_picture(
                 original_filename, big_filename,
@@ -196,7 +202,7 @@ def import_gallery_album(album_path, settings, move_files=True,
         return None
 
     album = GalleryAlbum(album_name, album_name, album_name,
-                         None, date_from, date_to)
+                         None, date_from, date_to, rel_album_path)
     pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
     for picture in pictures:
         # make image file paths relative
@@ -205,10 +211,37 @@ def import_gallery_album(album_path, settings, move_files=True,
             (picture.regular_image_view.image, regular_image_dir),
             (picture.small_image_view.image, small_image_dir),
         ):
-            path = image.image_file
-            rel_path = os.path.relpath(path, image_dir)
-            image.image_file = rel_path
+            path = os.path.join(os.path.split(image.image_file)[-2:])
+            image.image_file = path
         # add picture to album container
         album.append(picture)
 
     return album
+
+def import_gallery_container(path, settings, move_files=True,
+                             use_image_magick=True):
+    containers = []
+    picture_found = False
+    print 'scanning %s' % path
+    for filename in os.listdir(path):
+        if filename.startswith('.'):
+            continue
+        container = None
+        filebase, fileext = os.path.splitext(filename)
+        if not picture_found and os.path.isfile(filename) \
+           and fileext.lower() in \
+           ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
+            container = import_gallery_album(
+                path, settings, move_files, use_image_magick)
+            picture_found = True
+        elif os.path.isdir(filename):
+            abs_path = os.path.join(path, filename)
+            container = import_gallery_container(
+                abs_path, settings, move_files, use_image_magick)
+        if container is not None:
+            containers.append(container)
+    if len(containers) > 0:
+        rel_path = os.path.basename(path)
+        new_container = GalleryContainer(rel_path, rel_path, None, rel_path)
+        [new_container.add(c) for c in containers]
+        return new_container

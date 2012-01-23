@@ -1,3 +1,5 @@
+import os
+import shutil
 import datetime
 
 from persistent import Persistent
@@ -14,8 +16,8 @@ class GalleryDocument(Persistent, PersistentLocationAware):
 
 
 class GalleryContainer(PersistentOrderedContainer):
-    def __init__(self, name, description=None,
-                 preview_picture=None, parent=None):
+    def __init__(self, name, description=None, preview_picture=None,
+                 path=None, parent=None):
         PersistentOrderedContainer.__init__(self, name, parent)
         if description is None:
             self.description = name
@@ -23,6 +25,53 @@ class GalleryContainer(PersistentOrderedContainer):
             self.description = description
         self.__preview_picture = None
         self.preview_size = (-1, -1)
+        self.__path = path
+
+    @property
+    def path(self):
+        return self.__path
+
+    @path.setter
+    def path(self, new_path):
+        if self.__path is not None:
+            try:
+                abs_path_tuple = self.absolute_path_tuple
+                abs_parent_path = os.path.join(*self.absolute_path_tuple[:-1])
+                old_abs_path = os.path.join(abs_parent_path, self.path)
+                new_abs_path = os.path.join(abs_parent_path, new_path)
+                if os.path.exists(new_abs_path):
+                    if os.path.isdir(new_abs_path):
+                        for file in os.listdir(old_abs_path):
+                            shutil.move(os.path.join(old_abs_path, file),
+                                        new_abs_path)
+                        os.rmdir(old_abs_path)
+                    else:
+                        raise ValueError('The new path already exists'
+                                         ' and is not a directory')
+                else:
+                    shutil.move(old_abs_path, new_abs_path)
+            except OSError, shutil.Error:
+                print 'Unable to change path of gallery container:', self.name
+                raise
+        self.__path = new_path
+
+    @property
+    def absolute_path(self):
+        if self.path is None:
+            raise AttributeError('The container has no valid path')
+        if isinstance(parent, GalleryContainer):
+            return os.path.join(parent.absolute_path, self.path)
+        else:
+            return self.path
+
+    @property
+    def absolute_path_tuple(self):
+        if self.path is None:
+            raise AttributeError('The container has no valid path')
+        if isinstance(parent, GalleryContainer):
+            return parent.absolute_path_tuple + (self.path,)
+        else:
+            return (self.path,)
 
     @property
     def preview_picture(self):
@@ -37,6 +86,7 @@ class GalleryContainer(PersistentOrderedContainer):
 
     @preview_picture.setter
     def preview_picture(self, picture):
+        assert isinstance(picture, GalleryPicture)
         if self.has_picture(picture):
             self.__preview_picture = picture
         else:
@@ -44,6 +94,7 @@ class GalleryContainer(PersistentOrderedContainer):
                              "own preview picture")
 
     def has_picture(self, picture):
+        assert isinstance(picture, GalleryPicture)
         found = False
         for child in self:
             if isinstance(child, GalleryContainer):
@@ -58,9 +109,9 @@ class GalleryContainer(PersistentOrderedContainer):
 
 
 class Gallery(GalleryContainer):
-    def __init__(self, description=None,
+    def __init__(self, description=None, path=None,
                  user=None, name='gallery', parent=None):
-        GalleryContainer.__init__(self, name, description, parent)
+        GalleryContainer.__init__(self, name, description, path=path, parent=parent)
         self.user = user
 
 
@@ -68,28 +119,22 @@ class GalleryAlbum(GalleryContainer):
     def __init__(self, name, description=None, \
                  long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
-                 parent=None):
-        GalleryContainer.__init__(self, name, description, parent=parent)
-        #self.__album_path = album_path
+                 path=None, parent=None):
+        GalleryContainer.__init__(self, name, description, path=path, parent=parent)
         self.long_description = long_description
         self.location = location
         self.date_from = date_from
         self.date_to = date_to
-
-    #@property
-    #def album_path(self):
-        #return self.__album_path
-
-    #@album_path.setter
-    #def album_path(self, path):
-        ## TODO: implement
-        #self._album_path = path
 
     pictures = property(lambda self: self.children)
 
     @pictures.setter
     def pictures(self, pictures):
         self.children = pictures
+
+    def get_absolute_path(self, image_file):
+        assert isinstance(image, GalleryImageFile)
+        return os.path.join(self.absolute_path, image.filename)
 
 
 class GalleryPicture(Persistent, PersistentLocationAware):
@@ -101,14 +146,17 @@ class GalleryPicture(Persistent, PersistentLocationAware):
         if isinstance(big_image_view, GalleryImageFile):
             self.big_image_view = GalleryImageView(big_image_view)
         else:
+            assert isinstance(big_image_view, GalleryImageView)
             self.big_image_view = big_image_view
         if isinstance(regular_image_view, GalleryImageFile):
             self.regular_image_view = GalleryImageView(regular_image_view)
         else:
+            assert isinstance(regular_image_view, GalleryImageView)
             self.regular_image_view = regular_image_view
         if isinstance(small_image_view, GalleryImageFile):
             self.small_image_view = GalleryImageView(small_image_view)
         else:
+            assert isinstance(small_image_view, GalleryImageView)
             self.small_image_view = small_image_view
         self.description = description
         self.location = location
@@ -159,18 +207,18 @@ class GalleryImageView(Persistent):
 
 
 class GalleryImageFile(Persistent):
-    def __init__(self, image_file, image_size=(-1, -1), tags=None):
-        self.image_file = image_file
-        self.image_size = image_size
+    def __init__(self, filename, size=(-1, -1), tags=None):
+        self.filename = filename
+        self.size = size
         self.tags = tags
 
     @property
     def width(self):
-        return self.image_size[0]
+        return self.size[0]
 
     @property
     def height(self):
-        return self.image_size[1]
+        return self.size[1]
 
     def __contains__(self, tag):
         return tag in self.tags
