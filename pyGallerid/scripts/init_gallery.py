@@ -17,7 +17,7 @@ from pyramid.paster import (
     setup_logging,
 )
 
-from ..models import appmaker, retrieve_user, retrieve_gallery
+from ..models import appmaker, retrieve_user, retrieve_gallery, retrieve_about
 from ..models.user import User
 from ..models.gallery import Gallery, GalleryDocument
 
@@ -65,10 +65,6 @@ def create_gallery(zodb_root, settings, username,
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     if user is not None:
-        gallery = retrieve_gallery(user)
-        about = GalleryDocument('about', 'About', 'Description')
-        user.add(about)
-        transaction.commit()
         raise ValueError("A user with name %s already exists" % username)
     password_hash, password_salt = User.hash_password(password)
     user = User(username, email, password_hash, password_salt)

@@ -159,7 +159,7 @@ def import_gallery_album(album_path, settings, move_files=True,
             '%s %s %s' % (year, month, day_to)).date()
         print '  album date: from %s to %s' % (date_from, date_to)
     except (AttributeError, ValueError):
-        print 'WARNING: Unable to extract dates:', album_path
+        print 'WARNING: Unable to extract dates:', rel_album_path
         # TODO
         #album_name = album_path
         #date_from = None

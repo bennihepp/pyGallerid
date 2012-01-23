@@ -79,3 +79,4 @@ def import_album(zodb_root, settings, username, category_name, album_path):
         albums = category.children
         albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
         category.children = albums
+

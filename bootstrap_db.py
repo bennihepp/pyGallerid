@@ -11,9 +11,9 @@ password = sys.argv[2]
 
 subprocess.call(['bin/init_gallery', config, username, email, password])
 
-for category in os.listdir('data/pictures/original'):
-    for album in os.listdir(os.path.join('data/pictures/original', category)):
-        path = os.path.join('data/pictures/original', category, album)
+for category in os.listdir('data/pictures/big'):
+    for album in os.listdir(os.path.join('data/pictures/big', category)):
+        path = os.path.join('data/pictures/big', category, album)
         try:
             subprocess.check_call([
                 'bin/import_album', config, username, category, path

@@ -356,12 +356,14 @@ def view_gallery_edit(context, request):
 
 @view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
 def view_gallery(context, request):
-    #items = []
-    #for item in context:
-        #if len(item) > 0:
-            #items.append(item)
-    #items = list(enumerate(items))
-    items = list(enumerate(context))
+    items = []
+    for item in context:
+        if len(item) > 0:
+            items.append(item)
+        else:
+            print 'empty album:', item.name
+    items = list(enumerate(items))
+    #items = list(enumerate(context))
 
     preview_url = lambda item: small_url(request, item)
     preview_width = lambda item: small_width(item)
