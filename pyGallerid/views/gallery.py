@@ -115,6 +115,10 @@ def find_about_resource(resource):
 @view_config(context=GalleryContainer, xhr=True, name='update',
              renderer='json', request_param='pg-type=order-list')
 def update_gallery_order_list(context, request):
+    # TODO: implement CSRF
+    #token = request.session.get_csrf_token()
+    #if request.params['pg-csrf'] != token:
+        #raise ValueError('CSRF token did not match!')
     #print 'JSON request with id=%s, name=%s' \
           #% (request.params['pg-id'], request.params['pg-name'])
     result = {'pg-status': 'failed'}
