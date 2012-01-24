@@ -12,6 +12,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
 )
 from pyramid.traversal import find_resource
+from pyramid.settings import asbool
 
 from ..models import retrieve_about, retrieve_gallery
 from ..models.user import User
@@ -334,7 +335,7 @@ def retrieve_thumbnails(context, request):
              renderer='view_gallery.html.mako')
 def view_gallery_edit(context, request):
     d = view_gallery(context, request)
-    if request.registry.settings.get('allow_editing', 'false') == 'true':
+    if asbool(request.registry.settings.get('allow_editing', 'false')):
         d.update({'editing': True})
     return d
 
@@ -373,7 +374,7 @@ def view_gallery(context, request):
              renderer='view_album.html.mako')
 def view_album_edit(context, request):
     d = view_album(context, request)
-    if request.registry.settings.get('allow_editing', 'false') == 'true':
+    if asbool(request.registry.settings.get('allow_editing', 'false')):
         d.update({'editing': True})
     return d
 
@@ -442,7 +443,7 @@ def view_album(context, request):
              renderer='view_document.html.mako')
 def view_document_edit(context, request):
     d = view_document(context, request)
-    if request.registry.settings.get('allow_editing', 'false') == 'true':
+    if asbool(request.registry.settings.get('allow_editing', 'false')):
         d.update({'editing': True})
     return d
 

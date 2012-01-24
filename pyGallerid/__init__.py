@@ -4,6 +4,7 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.config import Configurator
 from pyramid_zodbconn import get_connection
+from pyramid.settings import asbool
 
 from.models import appmaker
 
@@ -25,7 +26,7 @@ def favicon_view(context, request):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    if settings.get('wingdbstub', 'false') == 'true':
+    if asbool(settings.get('wingdbstub', 'false')):
         import utils.wingdbstub
 
     config = Configurator(root_factory=root_factory, settings=settings)
