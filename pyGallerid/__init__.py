@@ -1,3 +1,7 @@
+import os
+
+from pyramid.response import Response
+from pyramid.view import view_config
 from pyramid.config import Configurator
 from pyramid_zodbconn import get_connection
 
@@ -11,6 +15,11 @@ from.models import appmaker
 def root_factory(request):
     conn = get_connection(request)
     return appmaker(conn.root())
+
+
+@view_config(name='favicon.ico')
+def favicon_view(context, request):
+    return _fi_response
 
 
 def main(global_config, **settings):

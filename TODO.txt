@@ -1,6 +1,14 @@
-importing:
-+ create a thumbnail
-  - allow to select JPEG-quality
+- look into favicon issue
+- test with IE + Chrome Frame
+- combine stylesheets or use yepnopejs
+- minify pyGallerid.js and pyGallerid.css?
+- flush after HTML header?
+- remove redirections?
+- look into expiration policy and caching (Cache-Control)
+- use headJS or yepnopejs?
+
+models:
++ allow changing of resource name without changing order in a parent container
 
 CSS:
 div {
@@ -14,8 +22,4 @@ img {
   background-size: <display_width+xoffset>px <display_height+yoffset>px;
   background-repeat: no-repeat;
 }
-
-modals:
-+ allow changing of resource name without changing order in a parent container
-
 

@@ -2,6 +2,11 @@
 
 <%inherit file="layout.html.mako"/>
 
+<%block name="html_title">
+    ${lineage_list[-1].description}
+    ${next.html_title()}
+</%block>
+
 <%block name="header">
     % if len(lineage_list) > 1:
     <p class="hidden">
@@ -19,14 +24,20 @@
 ##     data-json-update-url="${request.resource_url(request.context, '@@update') | n}"
 ## </%block>
 
-<%block name="body">
-
+<%block name="scripts">
     % if editing:
+
+        ## jquery-ui
+        ##<script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+        ## jquery-jstree
+        <script type="text/javascript" src="/static/js/jquery/jquery.jstree.min.js"></script>
+
         <script type="text/javascript">
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
 
             $(document).ready(function() {
-            console.log('ready');
+                console.log('ready');
             });
             $(document).ready(function() {
                 $('.pg-edit-order').click(function() {
@@ -50,7 +61,7 @@
                 $('.pg-edit-preview-picture').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
-                    alert('not implemented yet');
+                    alert('Not implemented yet');
                     //open_picture_edit_dialog(
                     //    '${request.resource_url(request.context, '@@retrieve') | n}',
                     //    pg_id,
@@ -60,6 +71,19 @@
             });
         </script>
     % endif
+
+    ${next.scripts()}
+</%block>
+
+<%block name="stylesheets">
+    % if editing:
+        ## jquery-ui
+        <link rel="stylesheet" href="/static/js/jquery/ui-lightness/jquery-ui-1.8.17.custom.css" type="text/css" media="screen" />
+    % endif
+    ${next.stylesheets()}
+</%block>
+
+<%block name="body">
 
     <div class="content-navigation">
         &gt;&nbsp;
@@ -112,40 +136,33 @@
     </div>
 
     % if len(lineage_list) > 1:
-    <div class="content-header">
+        <div class="content-header">
     % else:
-    <div class="content-header hidden">
+        <div class="content-header hidden">
     % endif
-        <h3 class="content-title pg-editable" \
-            data-pg-context="" \
-            data-pg-type="attribute-text" \
-            data-pg-name="description">
-            ${request.context.description}
-        </h3>
-    </div>
+            <h3 class="content-title pg-editable" \
+                data-pg-context="" \
+                data-pg-type="attribute-text" \
+                data-pg-name="description">
+                ${request.context.description}
+            </h3>
+        </div>
 
     ${next.body()}
-</%block>
 
-## <%def name="render_resource(resource)">
-##     % if resource is request.root:
-##         Home
-##     % else:
-##         ${resource.name}
-##     % endif
-## </%def>
+</%block>
 
 <%doc>
 (function($) {
-  var cache = [];
-  // Arguments are image paths relative to the current page.
-  $.preLoadImages = function() {
-    var args_len = arguments.length;
-    for (var i = args_len; i--;) {
-      var cacheImage = document.createElement('img');
-      cacheImage.src = arguments[i];
-      cache.push(cacheImage);
+    var cache = [];
+    // Arguments are image paths relative to the current page.
+    $.preLoadImages = function() {
+        var args_len = arguments.length;
+        for (var i = args_len; i--;) {
+            var cacheImage = document.createElement('img');
+            cacheImage.src = arguments[i];
+            cache.push(cacheImage);
+        }
     }
-  }
 })(jQuery)
 </%doc>

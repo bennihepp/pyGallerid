@@ -23,19 +23,101 @@ function get_viewport_size() {
     return {width: width, height: height};
 }
 
+// Image preloading.
+// Adapted from http://ditio.net/2010/02/14/jquery-preload-images-tutorial-and-example/
+(function($) {
+    $.extend({
+        preloadImages: function(imageList, options) {
+            var _imageList = [];
+            var settings = $.extend({
+                init: function(nTotal) {},
+                ready: function(index, image, url, nLoaded, nTotal) {},
+                success: function(imageList) {},
+                error: function(url, event) {},
+            }, options);
+            var nTotal = imageList.length;
+            var nLoaded = 0;
+
+            settings.init(nTotal);
+            //for (var i=0; i < imageList.length; ++i) {
+            for (var i in imageList) {
+                /*img = new Image();
+                img.onLoad = (function() {
+                    ++nLoaded;
+                    settings.loaded($(this), nLoaded, nTotal);
+                    if (nLoaded == nTotal)
+                        settings.finished(_imageList);
+                })();
+                img.src = imageList[i];*/
+                img = $('<img/>');
+                img.load(function() {
+                    ++nLoaded;
+                    settings.ready(i, $(this), $(this).attr('src'),
+                                   nLoaded, nTotal);
+                    if (nLoaded == nTotal)
+                        settings.success(_imageList);
+                });
+                img.error(function(event) {
+                    settings.error($(this).attr('src'), event);
+                });
+                img.attr('src', imageList[i]);
+                _imageList.push(img);
+            }
+        }
+    });
+})(jQuery);
+
+// A simpler function for preloading a single image
+(function($) {
+    $.extend({
+        preloadImage: function(image, callback) {
+            var _imageList = [image];
+            var _options = {}
+            if (callback != undefined)
+                _options.ready = function(index, image, url,
+                                          nLoaded, nTotal) {
+                    callback(image, url);
+                };
+            $.preloadImages(_imageList, _options);
+        }
+    });
+})(jQuery);
+
 // image loading helper
 $(document).ready(function() {
-    $(".image-box")
+    var imageList = [];
+    $(".image-box").each(function(i, box) {
+        imageList.push($(box).data('src'));
+    });
+    $.preloadImages(imageList, {
+        init: function(nTotal) { console.log('starting to preload ' + nTotal + ' images'); },
+        ready: function(index, image, url, nLoaded, nTotal) {
+            console.log('loaded ' + nLoaded + '/' + nTotal + ' images: ' + url);
+            $(".image-box").get(index).css(
+                'background-image',
+                'url(' + url + ')'
+            );
+        },
+        success: function(list) {
+            console.log('loaded ' + list.length + ' images');
+        },
+        error: function(url, event) {
+            console.log('error when loading image: ' + url);
+        },
+    });
+    /*$(".image-box")
         .load(function() { console.log("image loaded correctly"); })
-        .error(function() { console.log("error loading image"); });
-});
-$(document).ready(function() {
+        .error(function() {
+            alert('error loading image: ' + $(this).data('src'));
+            console.log("error loading image: " + $(this).data('src'));
+            window.location = window.location;
+        });
     $(".image-box").each(function(i, box) {
         $(box).css(
             'background-image',
             'url(' + $(box).data('src') + ')'
         );
-    });
+    });*/
 });
 
 // Galleria
@@ -136,9 +218,17 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
             container.data('pg-current-index', index);
         }
         if (pictures[index] == undefined) {
+            // load a new picture before changing size etc.
             retrieve_picture(json_url, pg_context, index, function(new_pictures) {
-                pictures[index] = new_pictures[0];
-                update_picture_lightbox();
+                var image_url;
+                if (zoom > 1.0)
+                    image_url = new_pictures[0].fullsize_url;
+                else
+                    image_url = new_pictures[0].display_url;
+                $.preloadImage(image_url, function(image, url) {
+                    pictures[index] = new_pictures[0];
+                    update_picture_lightbox();
+                });
             });
             return;
         }
@@ -175,7 +265,8 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
             next_btn.removeClass('pg-disabled');
         // load image
         var image_url;
-        if (width > picture_width || height > picture_height)
+        //if (width > picture_width || height > picture_height)
+        if (zoom > 1.0)
             image_url = pictures[index].fullsize_url;
         else
             image_url = pictures[index].display_url;

@@ -80,80 +80,54 @@
 </%block>
 </div>
 
-<script type="text/javascript">
-% if display_mode in ('list', 'grid'):
-    /*Shadowbox.init({
-        skipSetup: true,
-    });*/
-    $(document).ready(function() {
-        /*Shadowbox.setup(".picture-link", {
-                gallery: 'album',
-                overlayOpacity: 0.9,
-                viewportPadding: 0,
-                width: 1024,
-                height: 800,
-            }
-        );*/
-        /*$(".picture-link").fancybox(
-            {
-                type : 'image',
-                openEffect	: 'fade',
-                closeEffect	: 'fade',
-                nextEffect : 'fade',
-                prevEffect : 'fade',
-                openSpeed : 'fast',
-                closeSpeed : 'fast',
-                nextSpeed : 'fast',
-                prevSpeed : 'fast',
-                helpers: {
-                    title : {
-                        type : 'float'
-                    },
-                },
-            }
-        );*/
-        var pictures = [];
-        var i;
-        for (i = 0; i < ${total_num_of_pictures}; i++) {
-            pictures.push(undefined);
-        }
-        $(".picture-item").each(function() {
-            var index = parseInt($(this).data('pg-index'));
-            var name = $(this).data('pg-context');
-            var display_url = $(this).data('pg-display-url');
-            var fullsize_url = $(this).data('pg-fullsize-url');
-            var width = $(this).data('pg-width');
-            var height = $(this).data('pg-height');
-            var picture = {
-                index: index,
-                name: name,
-                display_url: display_url,
-                fullsize_url: fullsize_url,
-                width: width,
-                height: height,
-            };
-            pictures[index] = picture;
-        });
-        $(".picture-link").click(function(event) {
-            event.preventDefault();
-            var item = $(this).parentsUntil(".picture-item").parent();
-            var index = parseInt(item.data('pg-index'));
-            var json_url = '${request.resource_url(request.context, '@@retrieve') | n}';
-            open_picture_lightbox(json_url, "", 'picture-lightbox',
-                                  index, pictures);
-            //return false;
-        });
-    });
-% elif display_mode == 'gallery':
-    Galleria.loadTheme('/static/js/galleria/themes/classic/galleria.classic.min.js');
-    $(document).ready(function() {
-        $(".pictures").galleria({
-            width: 800,
-            height: 600
-        });
-    });
-% endif
-</script>
+<%block name="scripts">
+    <script type="text/javascript">
+        % if display_mode in ('list', 'grid'):
+            $(document).ready(function() {
+                var pictures = [];
+                var i;
+                for (i = 0; i < ${total_num_of_pictures}; i++) {
+                    pictures.push(undefined);
+                }
+                $(".picture-item").each(function() {
+                    var index = parseInt($(this).data('pg-index'));
+                    var name = $(this).data('pg-context');
+                    var display_url = $(this).data('pg-display-url');
+                    var fullsize_url = $(this).data('pg-fullsize-url');
+                    var width = $(this).data('pg-width');
+                    var height = $(this).data('pg-height');
+                    var picture = {
+                        index: index,
+                        name: name,
+                        display_url: display_url,
+                        fullsize_url: fullsize_url,
+                        width: width,
+                        height: height,
+                    };
+                    pictures[index] = picture;
+                });
+                $(".picture-link").click(function(event) {
+                    event.preventDefault();
+                    var item = $(this).parentsUntil(".picture-item").parent();
+                    var index = parseInt(item.data('pg-index'));
+                    var json_url = '${request.resource_url(request.context, '@@retrieve') | n}';
+                    open_picture_lightbox(json_url, "", 'picture-lightbox',
+                                          index, pictures);
+                    //return false;
+                });
+            });
+        % elif display_mode == 'gallery':
+            Galleria.loadTheme('/static/js/galleria/themes/classic/galleria.classic.min.js');
+            $(document).ready(function() {
+                $(".pictures").galleria({
+                    width: 800,
+                    height: 600
+                });
+            });
+        % endif
+    </script>
+    ${next.scipts()}
+</%block>
 
 <div class="pictures">
     <ul class="picture-list">
