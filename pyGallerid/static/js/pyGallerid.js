@@ -221,10 +221,11 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
             // load a new picture before changing size etc.
             retrieve_picture(json_url, pg_context, index, function(new_pictures) {
                 var image_url;
-                if (zoom > 1.0)
+                /*if (zoom > 1.0)
                     image_url = new_pictures[0].fullsize_url;
                 else
-                    image_url = new_pictures[0].display_url;
+                    image_url = new_pictures[0].display_url;*/
+                image_url = new_pictures[0].fullsize_url;
                 $.preloadImage(image_url, function(image, url) {
                     pictures[index] = new_pictures[0];
                     update_picture_lightbox();

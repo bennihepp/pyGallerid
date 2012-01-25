@@ -60,5 +60,8 @@ def main(global_config, **settings):
         settings['image_dir'],
         cache_max_age=3600
     )
+
     config.scan()
+
     return config.make_wsgi_app()
+

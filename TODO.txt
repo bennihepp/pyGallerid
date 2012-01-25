@@ -1,3 +1,10 @@
+- look into URL rewriting for traversal:
+  e.g.: /gallery/*traverse -> /hepp/gallery/*traverse
+        /*traverse -> /*traverse
+  when doing config.add_route('gallery', '/gallery/*traverse')
+    views have to be configured with route_name 'gallery', but then
+    they don't match the default traversal stuff anymore.
+
 - look into favicon issue
 - test with IE + Chrome Frame
 - combine stylesheets or use yepnopejs
