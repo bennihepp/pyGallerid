@@ -95,7 +95,6 @@
         ##<script type="text/javascript" src="/static/js/galleria/galleria-1.2.6.min.js"></script>
         ## pyGallerid
         <script type="text/javascript" src="/static/js/pyGallerid.js"></script>
-        ${next.scripts()}
     </%block>
 
 </body>

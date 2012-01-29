@@ -13,7 +13,7 @@ from ..models import retrieve_user, retrieve_gallery, PersistentContainer
 
 # Load favicon.ico
 _here = os.path.dirname(__file__)
-_icon = open(os.path.join(_here, 'static', 'favicon.ico')).read()
+_icon = open(os.path.join(_here, '../static', 'favicon.ico')).read()
 _icon_response = Response(content_type='image/x-icon', body=_icon)
 
 

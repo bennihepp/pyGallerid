@@ -39,16 +39,15 @@ function get_viewport_size() {
             var nLoaded = 0;
 
             settings.init(nTotal);
-            //for (var i=0; i < imageList.length; ++i) {
-            for (var i in imageList) {
-                /*img = new Image();
-                img.onLoad = (function() {
-                    ++nLoaded;
-                    settings.loaded($(this), nLoaded, nTotal);
-                    if (nLoaded == nTotal)
-                        settings.finished(_imageList);
-                })();
-                img.src = imageList[i];*/
+            $(imageList).each(function (i) {
+                //img = new Image();
+                //img.onLoad = (function() {
+                    //++nLoaded;
+                    //settings.loaded($(this), nLoaded, nTotal);
+                    //if (nLoaded == nTotal)
+                        //settings.finished(_imageList);
+                //})();
+                //img.src = imageList[i];
                 img = $('<img/>');
                 img.load(function() {
                     ++nLoaded;
@@ -62,7 +61,7 @@ function get_viewport_size() {
                 });
                 img.attr('src', imageList[i]);
                 _imageList.push(img);
-            }
+            });
         }
     });
 })(jQuery);
@@ -93,7 +92,8 @@ $(document).ready(function() {
         init: function(nTotal) { console.log('starting to preload ' + nTotal + ' images'); },
         ready: function(index, image, url, nLoaded, nTotal) {
             console.log('loaded ' + nLoaded + '/' + nTotal + ' images: ' + url);
-            $(".image-box").get(index).css(
+            console.log('index='+index);
+            $($(".image-box")[index]).css(
                 'background-image',
                 'url(' + url + ')'
             );

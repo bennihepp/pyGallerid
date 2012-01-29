@@ -468,3 +468,4 @@ def view_document(context, request):
         'about_url': about_url,
         'render_resource': render_resource,
     }
+

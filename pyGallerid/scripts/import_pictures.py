@@ -24,8 +24,8 @@ from ..utils.picture import import_gallery_container
 def usage(argv):
     cmd = os.path.basename(argv[0])
     print('usage: %s <config_uri> <username> <path>\n'
-          '(example: "%s development.ini "New Zealand" '
-          'new_pictures")' % (cmd, cmd))
+          '(example: "%s development.ini hepp new_pictures' \
+          % (cmd, cmd))
     sys.exit(1)
 
 

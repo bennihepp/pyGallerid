@@ -4,7 +4,6 @@
 
 <%block name="html_title">
     ${lineage_list[-1].description}
-    ${next.html_title()}
 </%block>
 
 <%block name="header">
@@ -25,6 +24,7 @@
 ## </%block>
 
 <%block name="scripts">
+    ${parent.scripts()}
     % if editing:
 
         ## jquery-ui
@@ -71,16 +71,14 @@
             });
         </script>
     % endif
-
-    ${next.scripts()}
 </%block>
 
 <%block name="stylesheets">
+    ${parent.stylesheets()}
     % if editing:
         ## jquery-ui
         <link rel="stylesheet" href="/static/js/jquery/ui-lightness/jquery-ui-1.8.17.custom.css" type="text/css" media="screen" />
     % endif
-    ${next.stylesheets()}
 </%block>
 
 <%block name="body">

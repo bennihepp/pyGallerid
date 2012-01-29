@@ -20,11 +20,6 @@ def root_factory(request):
     return appmaker(conn.root())
 
 
-@view_config(name='favicon.ico')
-def favicon_view(context, request):
-    return _fi_response
-
-
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """

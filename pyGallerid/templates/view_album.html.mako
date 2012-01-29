@@ -81,6 +81,7 @@
 </div>
 
 <%block name="scripts">
+    ${parent.scripts()}
     <script type="text/javascript">
         % if display_mode in ('list', 'grid'):
             $(document).ready(function() {
@@ -126,7 +127,6 @@
             });
         % endif
     </script>
-    ${next.scipts()}
 </%block>
 
 <div class="pictures">
