@@ -11,13 +11,21 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
     HTTPForbidden,
 )
-from pyramid.traversal import find_resource
+from pyramid.traversal import find_resource, find_root
 from pyramid.settings import asbool
+from pyramid.events import subscriber, NewRequest
+from pyramid.security import authenticated_userid, remember, forget
 
-from ..models import retrieve_about, retrieve_gallery
+from ..models import retrieve_about, retrieve_gallery, retrieve_user
 from ..models.user import User
 from ..models.gallery import Gallery, GalleryContainer, \
      GalleryAlbum, GalleryPicture, GalleryDocument
+
+
+@subscriber(NewRequest)
+def newRequestSubscriber(event):
+    request = event.request
+    pass
 
 
 def picture_item(method):
@@ -335,6 +343,35 @@ def retrieve_thumbnails(context, request):
     return result
 
 
+@view_config(context=GalleryContainer, name='login',
+             renderer='view_gallery.html.mako')
+def view_gallery_login(context, request):
+    username = request.params['username']
+    password = request.params['password']
+    root = find_root(context)
+    user = retrieve_user(root, username)
+    if user.authenticate(password):
+        headers = remember(request, username)
+        request.session.flash('Hello %s' % username)
+    else:
+        headers = None
+        request.session.flash('Login failed')
+    url = request.resource_url(context)
+    return HTTPFound(location=url, headers=headers)
+    #response = view_gallery(context, request)
+    #response.headers.update(hreaders)
+    #return response
+
+
+@view_config(context=GalleryContainer, name='logout',
+             renderer='view_gallery.html.mako')
+def view_gallery_logout(context, request):
+    headers = forget(request)
+    request.session.flash('Logged out')
+    url = request.resource_url(context)
+    return HTTPFound(location=url, headers=headers)
+
+
 @view_config(context=GalleryContainer, name='edit',
              renderer='view_gallery.html.mako')
 def view_gallery_edit(context, request):
@@ -361,12 +398,18 @@ def view_gallery(context, request):
 
     about_url = request.resource_url(find_about_resource(context))
 
+    login_url = request.resource_url(context, '@@login')
+    logout_url = request.resource_url(context, '@@logout')
+
     return {
+        'user' : None,
         'gallery': context,
         'items': items,
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
         'about_url': about_url,
+        'login_url': login_url,
+        'logout_url': logout_url,
         'render_resource': render_resource,
         'preview_url': preview_url,
         'preview_width': preview_width,
@@ -426,6 +469,7 @@ def view_album(context, request):
     about_url = request.resource_url(find_about_resource(context))
 
     return {
+        'user' : None,
         'album': context,
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
@@ -462,6 +506,7 @@ def view_document(context, request):
 
     lineage_list = [context, find_gallery_resource(context)]
     return {
+        'user' : None,
         'document': context,
         'editing': False,
         'lineage_list': lineage_list,

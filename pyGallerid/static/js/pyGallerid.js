@@ -317,9 +317,7 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
     control_bar.append(next_btn);
     control_bar.append('&nbsp;&nbsp;|&nbsp;&nbsp;')
     control_bar.append(close_btn);
-    control_div.append($('<div/>'));
     control_div.append(control_bar);
-    control_div.append($('<div/>'));
     picture_div.append(picture_img);
     content_div.append(picture_div);
     container.append(control_div);

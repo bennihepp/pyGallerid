@@ -69,6 +69,22 @@
                     //);
                 });
             });
+            $(document).ready(function() {
+                $('#login-link').click(function() {
+                    var username = $('<input type="text" size="50" name="username" />');
+                    var password = $('<input type="password" size="50" name="password" />');
+                    var container = $('<div/>');
+                    var usernamerow = $('<p/>');
+                    var passwordrow = $('<p/>');
+                    usernamerow.append('Login:');
+                    usernamerow.append(username);
+                    passwordrow.append('Password:');
+                    passwordrow.append(password);
+                    container.append(usernamerow);
+                    container.append(passwordrow);
+                    container.modal();
+                });
+            });
         </script>
     % endif
 </%block>
@@ -112,7 +128,7 @@
             % if request.registry.settings.get('allow_editing', 'false') == 'true':
                 % if editing:
                     <a class="navigation"
-                        href="${request.resource_url(request.context, '@@') | n}">
+                        href="${request.resource_url(request.context) | n}">
                         Stop editing
                     </a>
                 % else:
@@ -121,6 +137,19 @@
                         Edit content
                     </a>
                 % endif
+                &nbsp;|&nbsp;
+            % endif
+            % if user is None:
+                <a id="login-link" class="navigation" \
+                    href="${login_url}">
+                    Login
+                </a>
+                &nbsp;|&nbsp;
+            % else:
+                <a class="navigation" \
+                    href="${logout_url}">
+                    Logout
+                </a>
                 &nbsp;|&nbsp;
             % endif
             % if about_url is not None:

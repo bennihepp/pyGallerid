@@ -5,10 +5,13 @@ from pyramid.view import view_config
 from pyramid.config import Configurator
 from pyramid_zodbconn import get_connection
 from pyramid.settings import asbool
+from pyramid.authentication import SessionAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid_beaker import session_factory_from_settings, \
                            set_cache_regions_from_settings
 
 from.models import appmaker
+from models.user import groupfinder
 
 # This is only needed when using SQLAlchemy
 #from sqlalchemy import engine_from_config
@@ -32,6 +35,12 @@ def main(global_config, **settings):
     set_cache_regions_from_settings(settings)
 
     config = Configurator(root_factory=root_factory, settings=settings)
+
+    # set up authentication and authorization
+    authn_policy = SessionAuthenticationPolicy(callback=groupfinder)
+    authz_policy = ACLAuthorizationPolicy()
+    config.set_authentication_policy(authn_policy)
+    config.set_authorization_policy(authz_policy)
 
     # include pyramid plugins
     config.include('pyramid_beaker')
