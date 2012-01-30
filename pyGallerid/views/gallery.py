@@ -352,6 +352,8 @@ def retrieve_thumbnails(context, request):
 
 @view_config(context=GalleryContainer, name='login',
              permission='login')
+@view_config(context=GalleryDocument, name='login',
+             permission='login')
 def login(context, request):
     username = request.params['username']
     password = request.params['password']

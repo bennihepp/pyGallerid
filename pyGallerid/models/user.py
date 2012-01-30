@@ -22,9 +22,17 @@ class User(PersistentContainer):
             (Allow, Everyone, 'login'),
             (Allow, Everyone, 'logout'),
             (Allow, name, 'edit'),
+            (Allow, name, 'update'),
         ]
 
     def authenticate(self, password):
+        self.__acl__ = [
+            (Allow, Everyone, 'view'),
+            (Allow, Everyone, 'login'),
+            (Allow, Everyone, 'logout'),
+            (Allow, self.name, 'edit'),
+            (Allow, self.name, 'update'),
+        ]
         hexhash = HASHCLASS(password + self.password_salt)
         return hexhash.hexdigest() == self.password_hash
 
