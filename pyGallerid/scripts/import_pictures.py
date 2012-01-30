@@ -56,7 +56,6 @@ def main(argv=sys.argv):
 
 
 def import_pictures(zodb_root, settings, username, path, sorting_order):
-    import misc.wingdbstub
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
