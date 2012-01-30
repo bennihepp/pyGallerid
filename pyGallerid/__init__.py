@@ -7,10 +7,13 @@ from pyramid_zodbconn import get_connection
 from pyramid.settings import asbool
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.security import authenticated_userid
+from pyramid.traversal import find_root
+
 from pyramid_beaker import session_factory_from_settings, \
                            set_cache_regions_from_settings
 
-from.models import appmaker
+from.models import appmaker, retrieve_user
 from models.user import groupfinder
 
 # This is only needed when using SQLAlchemy
@@ -27,7 +30,7 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     if asbool(settings.get('wingdbstub', 'false')):
-        import utils.wingdbstub
+        import misc.wingdbstub
 
     # set up beaker session
     session_factory = session_factory_from_settings(settings)
@@ -35,6 +38,14 @@ def main(global_config, **settings):
     set_cache_regions_from_settings(settings)
 
     config = Configurator(root_factory=root_factory, settings=settings)
+
+    # add user property to request objects
+    def get_user(request):
+        root = find_root(request.context)
+        username = authenticated_userid(request)
+        user = retrieve_user(root, username)
+        return user
+    config.set_request_property(get_user, 'user', reify=True)
 
     # set up authentication and authorization
     authn_policy = SessionAuthenticationPolicy(callback=groupfinder)

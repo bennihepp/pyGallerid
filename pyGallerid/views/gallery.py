@@ -5,13 +5,13 @@ import urllib
 import itertools
 
 from pyramid.location import lineage
-from pyramid.view import view_config
+from pyramid.view import view_config, render_view_to_response
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
     HTTPForbidden,
 )
-from pyramid.traversal import find_resource, find_root
+from pyramid.traversal import find_resource, find_root, find_interface
 from pyramid.settings import asbool
 from pyramid.events import subscriber, NewRequest
 from pyramid.security import authenticated_userid, remember, forget
@@ -22,10 +22,10 @@ from ..models.gallery import Gallery, GalleryContainer, \
      GalleryAlbum, GalleryPicture, GalleryDocument
 
 
-@subscriber(NewRequest)
-def newRequestSubscriber(event):
-    request = event.request
-    pass
+#@subscriber(NewRequest)
+#def newRequestSubscriber(event):
+    #request = event.request
+    #pass
 
 
 def picture_item(method):
@@ -121,7 +121,8 @@ def find_about_resource(resource):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json', request_param='pg-type=order-list')
+             renderer='json', permission='update',
+             request_param='pg-type=order-list')
 def update_gallery_order_list(context, request):
     # TODO: implement CSRF
     #token = request.session.get_csrf_token()
@@ -145,7 +146,8 @@ def update_gallery_order_list(context, request):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json', request_param='pg-type=select-picture')
+             renderer='json', permission='update',
+             request_param='pg-type=select-picture')
 def update_gallery_select_picture(context, request):
     #print 'JSON request with id=%s, name=%s' \
           #% (request.params['pg-id'], request.params['pg-name'])
@@ -165,15 +167,17 @@ def update_gallery_select_picture(context, request):
 
 
 @view_config(context=GalleryDocument, xhr=True, name='update',
-             renderer='json',
+             renderer='json', permission='update',
              request_param='pg-type=attribute-multiline-text')
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json',
+             renderer='json', permission='update',
              request_param='pg-type=attribute-multiline-text')
 @view_config(context=GalleryDocument, xhr=True, name='update',
-             renderer='json', request_param='pg-type=attribute-text')
+             renderer='json', permission='update',
+             request_param='pg-type=attribute-text')
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json', request_param='pg-type=attribute-text')
+             renderer='json', permission='update',
+             request_param='pg-type=attribute-text')
 def update_gallery_attribute_text(context, request):
     #print 'JSON request with id=%s, name=%s' \
           #% (request.params['pg-id'], request.params['pg-name'])
@@ -190,7 +194,8 @@ def update_gallery_attribute_text(context, request):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json', request_param='pg-type=attribute-date')
+             renderer='json', permission='update',
+             request_param='pg-type=attribute-date')
 def update_gallery_attribute_date(context, request):
     #print 'JSON request with id=%s, name=%s' \
           #% (request.params['pg-id'], request.params['pg-name'])
@@ -206,7 +211,8 @@ def update_gallery_attribute_date(context, request):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='update',
-             renderer='json', request_param='pg-type=attribute-date-from-to')
+             renderer='json', permission='update',
+             request_param='pg-type=attribute-date-from-to')
 def update_gallery_attribute_date_from_to(context, request):
     #print 'JSON request with id=%s, name=%s' \
           #% (request.params['pg-id'], request.params['pg-name'])
@@ -237,7 +243,8 @@ def update_gallery_attribute_date_from_to(context, request):
     return result
 
 #@view_config(context=GalleryContainer, xhr=True,
-             #name='update', renderer='json')
+             #name='update', permission='update',
+             #renderer='json')
 #def update_gallery(context, request):
     #result = {'pg-status': 'failed'}
     #print request.params
@@ -344,18 +351,20 @@ def retrieve_thumbnails(context, request):
 
 
 @view_config(context=GalleryContainer, name='login',
-             renderer='view_gallery.html.mako')
-def view_gallery_login(context, request):
+             permission='login')
+def login(context, request):
     username = request.params['username']
     password = request.params['password']
     root = find_root(context)
     user = retrieve_user(root, username)
-    if user.authenticate(password):
+    if user is not None and user.authenticate(password):
         headers = remember(request, username)
-        request.session.flash('Hello %s' % username)
+        request.session.flash('Logged in successfully')
     else:
         headers = None
         request.session.flash('Login failed')
+    #resp = render_view_to_response(context)
+    #return resp
     url = request.resource_url(context)
     return HTTPFound(location=url, headers=headers)
     #response = view_gallery(context, request)
@@ -364,24 +373,35 @@ def view_gallery_login(context, request):
 
 
 @view_config(context=GalleryContainer, name='logout',
-             renderer='view_gallery.html.mako')
-def view_gallery_logout(context, request):
+             permission='logout')
+def logout(context, request):
     headers = forget(request)
     request.session.flash('Logged out')
+    #resp = render_view_to_response(context)
+    #return resp
     url = request.resource_url(context)
     return HTTPFound(location=url, headers=headers)
 
 
+def allow_editing(context, request):
+    user = find_interface(context, User)
+    if user is not None \
+       and authenticated_userid(request) == user.name:
+        return True
+    else:
+        return False
+
+
 @view_config(context=GalleryContainer, name='edit',
-             renderer='view_gallery.html.mako')
-def view_gallery_edit(context, request):
+             renderer='view_gallery.html.mako', permission='edit')
+def edit_gallery(context, request):
     d = view_gallery(context, request)
-    if asbool(request.registry.settings.get('allow_editing', 'false')):
-        d.update({'editing': True})
+    d.update({'editing': True})
     return d
 
 
-@view_config(context=GalleryContainer, renderer='view_gallery.html.mako')
+@view_config(context=GalleryContainer,
+             renderer='view_gallery.html.mako', permission='view')
 def view_gallery(context, request):
     items = []
     for item in context:
@@ -402,9 +422,11 @@ def view_gallery(context, request):
     logout_url = request.resource_url(context, '@@logout')
 
     return {
-        'user' : None,
+        'messages': request.session.pop_flash(),
+        'user' : request.user,
         'gallery': context,
         'items': items,
+        'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
         'about_url': about_url,
@@ -418,15 +440,15 @@ def view_gallery(context, request):
 
 
 @view_config(context=GalleryAlbum, name='edit',
-             renderer='view_album.html.mako')
-def view_album_edit(context, request):
+             renderer='view_album.html.mako', permission='edit')
+def edit_album(context, request):
     d = view_album(context, request)
-    if asbool(request.registry.settings.get('allow_editing', 'false')):
-        d.update({'editing': True})
+    d.update({'editing': True})
     return d
 
 
-@view_config(context=GalleryAlbum, renderer='view_album.html.mako')
+@view_config(context=GalleryAlbum,
+             renderer='view_album.html.mako', permission='view')
 def view_album(context, request):
     display_mode = request.params.get('display_mode', 'list')
     if display_mode == 'list':
@@ -468,12 +490,19 @@ def view_album(context, request):
 
     about_url = request.resource_url(find_about_resource(context))
 
+    login_url = request.resource_url(context, '@@login')
+    logout_url = request.resource_url(context, '@@logout')
+
     return {
-        'user' : None,
+        'messages': request.session.pop_flash(),
+        'user' : request.user,
         'album': context,
+        'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
         'about_url': about_url,
+        'login_url': login_url,
+        'logout_url': logout_url,
         'render_resource': render_resource,
         'pictures': pictures,
         'display_mode': display_mode,
@@ -488,29 +517,36 @@ def view_album(context, request):
 
 
 @view_config(context=GalleryDocument, name='edit',
-             renderer='view_document.html.mako')
-def view_document_edit(context, request):
+             renderer='view_document.html.mako', permission='edit')
+def edit_document(context, request):
     d = view_document(context, request)
-    if asbool(request.registry.settings.get('allow_editing', 'false')):
-        d.update({'editing': True})
+    d.update({'editing': True})
     return d
 
 
-@view_config(context=GalleryDocument, renderer='view_document.html.mako')
+@view_config(context=GalleryDocument,
+             renderer='view_document.html.mako', permission='view')
 def view_document(context, request):
     about_resource = find_about_resource(context)
     if about_resource != context:
         about_url = request.resource_url(about_resource)
     else:
         about_url = None
+    
+    login_url = request.resource_url(context, '@@login')
+    logout_url = request.resource_url(context, '@@logout')
 
     lineage_list = [context, find_gallery_resource(context)]
     return {
-        'user' : None,
+        'messages': request.session.pop_flash(),
+        'user' : request.user,
         'document': context,
+        'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': lineage_list,
         'about_url': about_url,
+        'login_url': login_url,
+        'logout_url': logout_url,
         'render_resource': render_resource,
     }
 

@@ -25,6 +25,62 @@
 
 <%block name="scripts">
     ${parent.scripts()}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#login-link').click(function(event) {
+                event.preventDefault();
+                var form = $('<form method="post" action="${login_url}" />')
+                var username = $('<input type="text" size="20" name="username" />');
+                var password = $('<input type="password" size="20" name="password" />');
+                var container = $('<div />').attr('id', 'login-lightbox');
+                var usernamelabel = $('<span>Login:&nbsp;</span>');
+                var passwordlabel = $('<span>Password:&nbsp;</span>');
+                var usernamerow = $('<p />');
+                var passwordrow = $('<p />');
+                var login_button = $('<a>Login</a>');
+                var cancel_button = $('<a>Cancel</a>');
+                var button_row = $('<p />');
+                usernamerow.append(usernamelabel);
+                usernamerow.append(username);
+                passwordrow.append(passwordlabel);
+                passwordrow.append(password);
+                button_row.append(login_button);
+                button_row.append('&nbsp;&nbsp;');
+                button_row.append(cancel_button);
+                form.append(usernamerow);
+                form.append(passwordrow);
+                container.append(form);
+                container.append(button_row);
+                container.modal({
+                    escClose: true,
+                    opacity: 80,
+                    overlayCss: {backgroundColor:"#000"},
+                    onOpen: function (dialog) {
+                        dialog.overlay.fadeIn('fast', function () {
+                            dialog.data.hide();
+                            dialog.container.fadeIn('fast');
+                            dialog.data.fadeIn('fast');
+                        });
+                    },
+                    onClose: function (dialog) {
+                        dialog.data.fadeOut('fast');
+                        dialog.container.fadeOut('fast', function () {
+                            dialog.overlay.fadeOut('fast', function () {
+                                $.modal.close();
+                            });
+                        });
+                    },
+                });
+                login_button.click(function() {
+                    form.submit();
+                    return false;
+                });
+                cancel_button.click(function() {
+                    $.modal.close();
+                });
+            });
+        });
+    </script>
     % if editing:
 
         ## jquery-ui
@@ -69,22 +125,6 @@
                     //);
                 });
             });
-            $(document).ready(function() {
-                $('#login-link').click(function() {
-                    var username = $('<input type="text" size="50" name="username" />');
-                    var password = $('<input type="password" size="50" name="password" />');
-                    var container = $('<div/>');
-                    var usernamerow = $('<p/>');
-                    var passwordrow = $('<p/>');
-                    usernamerow.append('Login:');
-                    usernamerow.append(username);
-                    passwordrow.append('Password:');
-                    passwordrow.append(password);
-                    container.append(usernamerow);
-                    container.append(passwordrow);
-                    container.modal();
-                });
-            });
         </script>
     % endif
 </%block>
@@ -125,7 +165,7 @@
             <%block name="navigation_options">
             </%block>
             ## TODO
-            % if request.registry.settings.get('allow_editing', 'false') == 'true':
+            % if allow_editing:
                 % if editing:
                     <a class="navigation"
                         href="${request.resource_url(request.context) | n}">
@@ -161,6 +201,14 @@
             % endif
         </div>
     </div>
+
+    % if len(messages) > 0:
+        % for message in messages:
+            <p class="content-message">
+                ${message}
+            </p>
+        % endfor
+    % endif
 
     % if len(lineage_list) > 1:
         <div class="content-header">

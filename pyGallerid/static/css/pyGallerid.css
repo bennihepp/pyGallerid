@@ -1,6 +1,10 @@
 @charset "UTF-8";
 /* CSS Document */
 
+p.content-message {
+	color: #CA8C1E;
+}
+
 div.content-navigation {
     margin: 10px 10px 10px 10px;
     padding: 5px 0px 0px 0px;
@@ -284,6 +288,24 @@ div.albums {
             text-align: left;
         }
 
+
+#login-lightbox {
+	vertical-align: middle;
+	text-align: center;
+	margin: 0px;
+	padding: 20px;
+	display: table;
+	color: white;
+	border: 2px solid #666;
+	border-radius: 15px;
+}
+#login-lightbox p {
+	display: table-row;
+}
+#login-lightbox span,
+#login-lightbox input {
+	display: table-cell;
+}
 
 .simplemodal-container {
 	padding: 0px;

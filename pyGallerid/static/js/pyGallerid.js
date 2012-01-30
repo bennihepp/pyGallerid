@@ -89,21 +89,22 @@ $(document).ready(function() {
         imageList.push($(box).data('src'));
     });
     $.preloadImages(imageList, {
-        init: function(nTotal) { console.log('starting to preload ' + nTotal + ' images'); },
+        //init: function(nTotal) {
+            //console.log('starting to preload ' + nTotal + ' images');
+        //},
         ready: function(index, image, url, nLoaded, nTotal) {
-            console.log('loaded ' + nLoaded + '/' + nTotal + ' images: ' + url);
-            console.log('index='+index);
+            //console.log('loaded ' + nLoaded + '/' + nTotal + ' images: ' + url);
             $($(".image-box")[index]).css(
                 'background-image',
-                'url(' + url + ')'
+                'url("' + url + '")'
             );
         },
-        success: function(list) {
-            console.log('loaded ' + list.length + ' images');
-        },
-        error: function(url, event) {
-            console.log('error when loading image: ' + url);
-        },
+        //success: function(list) {
+            //console.log('loaded ' + list.length + ' images');
+        //},
+        //error: function(url, event) {
+            //console.log('error when loading image: ' + url);
+        //},
     });
     /*$(".image-box")
         .load(function() { console.log("image loaded correctly"); })

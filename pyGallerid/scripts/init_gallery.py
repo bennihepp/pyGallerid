@@ -66,8 +66,9 @@ def create_gallery(zodb_root, settings, username,
     user = retrieve_user(app, username)
     if user is not None:
         raise ValueError("A user with name %s already exists" % username)
-    password_hash, password_salt = User.hash_password(password)
-    user = User(username, email, password_hash, password_salt)
+    #password_hash, password_salt = User.hash_password(password)
+    #user = User(username, email, password_hash, password_salt)
+    user = User(username, email, password)
     app.add(user)
     gallery = retrieve_gallery(user)
     if gallery is not None:

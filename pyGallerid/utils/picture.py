@@ -151,7 +151,7 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
 
 
 def import_gallery_album(album_path, settings, move_files=True,
-                         use_image_magick=True):
+                         use_image_magick=True, sorting_order='number'):
 
     rel_album_path = os.path.basename(album_path)
 
@@ -209,7 +209,24 @@ def import_gallery_album(album_path, settings, move_files=True,
 
     album = GalleryAlbum(album_name, album_name, album_name,
                          None, date_from, date_to, rel_album_path)
-    pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
+    if sorting_order == 'date':
+        pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
+    elif sorting_order == 'number':
+        pattern = re.compile('(.+?)([0-9]+).*?')
+        def match_picture(picture):
+            mo = pattern.match(picture.name)
+            return mo.group(1), int(mo.group(2))
+        def cmp_pictures(picture1, picture2):
+            prefix1, num1 = match_picture(picture1)
+            prefix2, num2 = match_picture(picture2)
+            if cmp(prefix1, prefix2) != 0:
+                return cmp(prefix1, prefix2)
+            else:
+                return cmp(num1, num2)
+        pictures.sort(cmp=cmp_pictures)
+    else:
+        pictures.sort(cmp=lambda x, y: cmp(x.name, y.name))
+
     for picture in pictures:
         # make image file paths relative
         for image, image_dir in ( \
@@ -227,7 +244,7 @@ def import_gallery_album(album_path, settings, move_files=True,
 
 
 def import_gallery_container(path, settings, move_files=True,
-                             use_image_magick=True):
+                             use_image_magick=True, sorting_order='number'):
     cwd = os.getcwd()
     os.chdir(os.path.split(path)[-1])
     album = None
@@ -253,7 +270,8 @@ def import_gallery_container(path, settings, move_files=True,
             abs_path = os.path.join(path, filename)
             try:
                 container = import_gallery_container(
-                    abs_path, settings, move_files, use_image_magick)
+                    abs_path, settings, move_files,
+                    use_image_magick, sorting_order)
             except:
                 print 'Failed to import container:', abs_path
                 raise

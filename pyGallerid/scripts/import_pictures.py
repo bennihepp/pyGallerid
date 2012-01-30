@@ -23,8 +23,8 @@ from ..utils.picture import import_gallery_container
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <username> <path>\n'
-          '(example: "%s development.ini hepp new_pictures' \
+    print('usage: %s <config_uri> <username> <path> <sorting_order>\n'
+          '(example: "%s development.ini hepp new_pictures [text|number|date]' \
           % (cmd, cmd))
     sys.exit(1)
 
@@ -35,6 +35,9 @@ def main(argv=sys.argv):
     config_uri = argv[1]
     username = argv[2]
     path = argv[3]
+    sorting_order = 'number'
+    if len(argv) > 4:
+        sorting_order = argv[4]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     # for SQLalchemy
@@ -48,11 +51,12 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_pictures(zodb_root, settings, username, path)
+        import_pictures(zodb_root, settings, username, path, sorting_order)
         transaction.commit()
 
 
-def import_pictures(zodb_root, settings, username, path):
+def import_pictures(zodb_root, settings, username, path, sorting_order):
+    import misc.wingdbstub
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
@@ -60,7 +64,7 @@ def import_pictures(zodb_root, settings, username, path):
     cwd = os.getcwd()
     os.chdir(path)
 
-    container = import_gallery_container('.', settings, move_files=False)
+    container = import_gallery_container('.', settings, move_files=False, sorting_order=sorting_order)
 
     os.chdir(cwd)
 
