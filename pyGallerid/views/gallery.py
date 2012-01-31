@@ -1,7 +1,20 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides views for the gallery resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import datetime
 import json
 import urllib
 import itertools
+import logging
 
 from pyramid.location import lineage
 from pyramid.view import view_config
@@ -19,8 +32,10 @@ from persistent.list import PersistentList
 
 from ..models import retrieve_about, retrieve_gallery, retrieve_user
 from ..models.user import User
-from ..models.gallery import Gallery, GalleryContainer, \
+from ..models.gallery import GalleryContainer, \
      GalleryAlbum, GalleryPicture, GalleryDocument
+
+logger = logging.getLogger(__name__)
 
 
 #from pyramid.events import subscriber, NewRequest
@@ -102,12 +117,9 @@ def small_height(item):
 
 
 def render_resource(resource):
-    if isinstance(resource, Gallery):
-        return 'Gallery'
-    else:
-        name = resource.name
-        name = name[0].upper() + name[1:]
-        return unicode(name)
+    name = resource.name
+    name = name[0].upper() + name[1:]
+    return unicode(name)
 
 
 def find_gallery_resource(resource):
@@ -189,6 +201,14 @@ def update_gallery_attribute_text(context, request):
     pg_context = find_resource(context, request.params['pg-context'])
     pg_name = request.params['pg-name']
     pg_text = json.loads(request.params['pg-value'])
+    if find_gallery_resource(pg_context) == pg_context and pg_name == 'name':
+        logger.info('Attempt to change name of gallery resource: %s' \
+                    % pg_context)
+        return result
+    if find_about_resource(pg_context) == pg_context and pg_name == 'name':
+        logger.info('Attempt to change name of about resource: %s' \
+                    % pg_context)
+        return result
     pg_context.__setattr__(pg_name, pg_text)
     if pg_context == context and pg_name == 'name':
         result['pg-redirect-url'] = request.resource_url(context, '@@edit')
@@ -336,7 +356,7 @@ def retrieve_thumbnails(context, request):
     result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
     pg_thumbnails = []
-    for index, child in enumerate(pg_context):
+    for index, child in enumerate(pg_context.itervalues()):
         if isinstance(child, GalleryContainer):
             thumbnail = child.preview_picture
         elif isinstance(child, GalleryPicture):
@@ -384,8 +404,14 @@ def retrieve_resource_lineage(context, request):
     def convert_lineage_to_json(resource, descendants):
         json_resource = convert_resource_to_json(
             resource, state='open')
+        if isinstance(resource, PersistentDict):
+            iterator = resource.itervalues()
+        elif isinstance(resource, PersistentList):
+            iterator = resource.__iter__()
+        else:
+            iterator = ().__iter__()
         children = []
-        for child in resource.itervalues():
+        for child in iterator:
             if len(descendants) > 0 and child == descendants[0]:
                 json_child = convert_lineage_to_json(
                     child, descendants[1:])
@@ -477,7 +503,8 @@ def allow_editing(context, request):
 def about_url(context, request):
     about_resource = find_about_resource(context)
     if about_resource != context:
-        about_url = request.resource_url(about_resource)
+        about_url = request.resource_url(about_resource,
+                                         '@@' + request.view_name)
     else:
         about_url = None
     return about_url

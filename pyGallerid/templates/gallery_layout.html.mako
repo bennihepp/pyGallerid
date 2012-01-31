@@ -33,22 +33,22 @@
                 var username = $('<input type="text" size="20" name="username" />');
                 var password = $('<input type="password" size="20" name="password" />');
                 var container = $('<div />').attr('id', 'login-lightbox');
-                var usernamelabel = $('<span>Login:&nbsp;</span>');
-                var passwordlabel = $('<span>Password:&nbsp;</span>');
-                var usernamerow = $('<p />');
-                var passwordrow = $('<p />');
+                var username_label = $('<span>Login:&nbsp;</span>');
+                var password_label = $('<span>Password:&nbsp;</span>');
+                var username_row = $('<p />');
+                var password_row = $('<p />');
                 var login_button = $('<a>Login</a>');
                 var cancel_button = $('<a>Cancel</a>');
                 var button_row = $('<p />');
-                usernamerow.append(usernamelabel);
-                usernamerow.append(username);
-                passwordrow.append(passwordlabel);
-                passwordrow.append(password);
+                username_row.append(username_label);
+                username_row.append(username);
+                password_row.append(password_label);
+                password_row.append(password);
                 button_row.append(login_button);
                 button_row.append('&nbsp;&nbsp;');
                 button_row.append(cancel_button);
-                form.append(usernamerow);
-                form.append(passwordrow);
+                form.append(username_row);
+                form.append(password_row);
                 container.append(form);
                 container.append(button_row);
                 container.modal({
@@ -82,130 +82,16 @@
         });
     </script>
     % if editing:
-
         ## jquery-ui
         ##<script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
         ## jquery-jstree
         <script type="text/javascript" src="/static/js/jquery/jquery.jstree.min.js"></script>
-
+        ## pyGallerid editing functionality
+        <script type="text/javascript" src="/static/js/pyGalleridEditing.js"></script>
         <script type="text/javascript">
-            pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
-
-            $(document).ready(function() {
-                $('.pg-edit-order').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    open_picture_list_order_dialog(
-                        '${request.resource_url(request.context, '@@retrieve') | n}',
-                        pg_id,
-                        pg_context
-                    );
-                });
-                $('.pg-edit-select-preview-picture').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    open_picture_list_select_dialog(
-                        '${request.resource_url(request.context, '@@retrieve') | n}',
-                        pg_id,
-                        pg_context
-                    );
-                });
-                $('.pg-edit-preview-picture').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    alert('Not implemented yet');
-                    //open_picture_edit_dialog(
-                    //    '${request.resource_url(request.context, '@@retrieve') | n}',
-                    //    pg_id,
-                    //    pg_context
-                    //);
-                });
-            });
-
-            $(document).ready(function() {
-                $('#tree-link').click(function(event) {
-                    event.preventDefault();
-                    var json_url = '${request.resource_url(request.context, '@@retrieve') | n}';
-                    var container = $('<div />').attr('id', 'resource-tree-lightbox');
-                    var tree_div = $('<div />').attr('class', 'tree');
-                    var list_div = $('<div />').attr('class', 'attributes');
-                    tree_div.jstree({
-                        core: {
-                        },
-                        json_data: {
-                            ajax: {
-                                url: json_url,
-                                dataType: 'json',
-                                type: 'GET',
-                                data: function(n) {
-                                    if (n == -1)
-                                        return {'pg-type': 'resource-lineage'}
-                                    else
-                                        return {'pg-type': 'resource-children', 'pg-path': n.attr('pg-path')}
-                                },
-                                success: function(json_data) {
-                                    return $.parseJSON(json_data['pg-data']);
-                                }
-                            },
-                            progressive_render: true,
-                        },
-                        themes: {
-                            'theme': 'apple',
-                            'dots': true,
-                            'icons': false,
-                        },
-                        plugins: ['json_data', 'themes', 'ui'],
-                    })
-                    .bind('select_node.jstree', function(e, data) {
-                        var json_data = [];
-                        var attributes = data.rslt.obj.data();
-                        for (index in attributes) {
-                            json_data.push({'data': index, 'state': 'open', 'children': [attributes[index]]});
-                        }
-                        list_div.jstree({
-                            core: {
-                            },
-                            json_data: {
-                                data: json_data,
-                            },
-                            themes: {
-                                'theme': 'apple',
-                                'dots': false,
-                                'icons': false,
-                            },
-                            plugins: ['json_data', 'themes'],
-                        });
-                    });
-                    container.append(tree_div);
-                    container.append(list_div);
-                    var viewport_size = get_viewport_size();
-                    container.modal({
-                        escClose: true,
-                        opacity: 80,
-                        overlayCss: {backgroundColor:"#000"},
-                        minWidth: 0.9 * viewport_size['width'],
-                        maxWidth: 0.9 * viewport_size['width'],
-                        minHeight: 0.9 * viewport_size['height'],
-                        maxHeight: 0.9 * viewport_size['height'],
-                        onOpen: function (dialog) {
-                            dialog.overlay.fadeIn('fast', function () {
-                                dialog.data.hide();
-                                dialog.container.fadeIn('fast');
-                                dialog.data.fadeIn('fast');
-                            });
-                        },
-                        onClose: function (dialog) {
-                            dialog.data.fadeOut('fast');
-                            dialog.container.fadeOut('fast', function () {
-                                dialog.overlay.fadeOut('fast', function () {
-                                    $.modal.close();
-                                });
-                            });
-                        },
-                    });
-                });
-            });
+            pg_init_editing('${request.resource_url(request.context, '@@update') | n}',
+                            '${request.resource_url(request.context, '@@retrieve') | n}');
         </script>
     % endif
 </%block>
@@ -224,7 +110,7 @@
         &gt;&nbsp;
         % for elem in lineage_list[1:][::-1]:
             <a class="navigation"
-                href="${request.resource_url(elem, '@@'+request.view_name) | n}">
+                href="${request.resource_url(elem, '@@' + request.view_name) | n}">
                     ${render_resource(elem)}
             </a>
             &nbsp;&gt;&nbsp;

@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides tests for the models of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import unittest
 import transaction
 

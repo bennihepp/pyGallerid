@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides common models and helpers for resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 from persistent.dict import PersistentDict
 from persistent.list import PersistentList
 

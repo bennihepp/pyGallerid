@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides models for the gallery resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import os
 import shutil
 import datetime

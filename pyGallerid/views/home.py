@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides views for the root resource and the favicon of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import os
 
 from pyramid.response import Response

@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+repoze.evolution package for the pyGallerid database.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 from collections import deque
 
 from persistent import Persistent

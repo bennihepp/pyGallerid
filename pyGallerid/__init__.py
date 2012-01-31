@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+
+"""
+Creates the pyGallerid WSGI application instance.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
 from pyramid.config import Configurator
 from pyramid_zodbconn import get_connection, db_from_uri
 from pyramid.settings import asbool

@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+repoze.evolution script for the pyGallerid database.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 from . import walk_resources
 
 def evolve(context):

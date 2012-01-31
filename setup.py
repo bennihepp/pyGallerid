@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Setuptools setup.py file for pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import os
 
 from setuptools import setup, find_packages
@@ -11,13 +23,10 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_beaker',
     'pyramid_tm',
-    #'pyramid_handlers',
     'ZODB3',
     'pyramid_zodbconn',
     #'repoze.zodbconn',
     'transaction',
-    #'zope.sqlalchemy',
-    #'SQLAlchemy',
     'PIL',
     'python-dateutil==1.5',
     'repoze.evolution',
@@ -36,7 +45,7 @@ setup(name='pyGallerid',
       author='',
       author_email='',
       url='',
-      keywords='web pyramid pylons',
+      keywords='web pyramid pylons python gallery photo',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
@@ -47,8 +56,8 @@ setup(name='pyGallerid',
       [paste.app_factory]
       main = pyGallerid:main
       [console_scripts]
-      import_pictures = pyGallerid.scripts.import_pictures:main
       init_gallery = pyGallerid.scripts.init_gallery:main
+      import_pictures = pyGallerid.scripts.import_pictures:main
       """,
       )
 
