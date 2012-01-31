@@ -116,7 +116,7 @@ class GalleryContainer(PersistentOrderedContainer):
     def has_picture(self, picture):
         assert isinstance(picture, GalleryPicture)
         found = False
-        for child in self:
+        for child in self.itervalues():
             if isinstance(child, GalleryContainer):
                 if child.has_picture(picture):
                     found = True
@@ -220,9 +220,6 @@ class GalleryImageView(Persistent):
 
     def __str__(self):
         return self.image.filename
-
-    def __repr__(self):
-        return '%s [%dx%d]' % (self.image.filename, self.width, self.height)
 
     @property
     def width(self):

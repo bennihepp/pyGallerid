@@ -29,12 +29,6 @@ class PersistentLocationAware(object):
     def __str__(self):
         return self.name
 
-    def __repr__(self):
-        if self.parent is None:
-            return '%s(%s)' % (self.name, type(self))
-        else:
-            return '%s(%s)[%s]' % (self.name, type(self), self.parent.name)
-
     @property
     def name(self):
         return self.__name__
