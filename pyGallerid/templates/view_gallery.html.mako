@@ -28,7 +28,7 @@
                 ##    </p>
                 ##</div>
             % endif
-    
+
         % for item_id, item in items:
             <li class="album-item" \
                 data-pg-id="${item_id}" \
@@ -41,14 +41,14 @@
                             href="${request.resource_url(item, '@@'+request.view_name) | n}">
                         <img class="image-box"
                             alt="${item.name}"
-                            width="${preview_width(item)}"
-                            height="${preview_height(item)}"
+                            width="${small_width(item)}"
+                            height="${small_height(item)}"
                             src="/static/img/spacer.gif"
-                            data-src="${preview_url(item) | n}" />
+                            data-src="${small_url(item) | n}" />
                         </a>
                     </div>
                     % if editing:
-                        <div class="preview-picture-edit" style="width: ${preview_width(item)}px;">
+                        <div class="preview-picture-edit" style="width: ${small_width(item)}px;">
                             <p class="pg-edit-select-preview-picture" \
                                 data-pg-id="select-preview-picture-dialog" \
                                 data-pg-context="${item.name}">
@@ -61,7 +61,7 @@
                             </p>
                         </div>
                     % endif
-                    <div class="album-info" style="width: ${preview_width(item)}px;">
+                    <div class="album-info" style="width: ${small_width(item)}px;">
                         <div class="album-descr">
                             <p class="pg-editable" \
                                 data-pg-context="${item.name}" \

@@ -1,5 +1,19 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides common models and helpers for resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 from persistent.dict import PersistentDict
 from persistent.list import PersistentList
+
+__sw_version__ = 1
 
 
 class PersistentLocationAware(object):
@@ -11,6 +25,9 @@ class PersistentLocationAware(object):
         self.__parent__ = parent
         if parent is not None:
             parent[name] = self
+
+    def __str__(self):
+        return self.name
 
     @property
     def name(self):
@@ -119,7 +136,28 @@ class PersistentOrderedContainer(PersistentContainer):
         PersistentContainer.__delitem__(self, name)
 
     def __iter__(self):
-        return self.__children.__iter__()
+        return self.iterkeys()
+
+    def keys(self):
+        return [child.name for child in self.__children]
+
+    def values(self):
+        return [child for child in self.__children]
+
+    def items(self):
+        return [(child.name, child) for child in self.__children]
+
+    def iterkeys(self):
+        for child in self.__children:
+            yield child.name
+
+    def itervalues(self):
+        for child in self.__children:
+            yield child
+
+    def iteritems(self):
+        for child in self.__children:
+            yield child.name, child
 
 
 def retrieve_user(app, username):

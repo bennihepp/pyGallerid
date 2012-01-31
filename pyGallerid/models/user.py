@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides models for the user resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import random
 import hashlib
 import string
@@ -13,6 +25,8 @@ SALTSIZE = HASHSIZE
 
 
 class User(PersistentContainer):
+    __attributes__ = ['email', 'password_hash', 'password_salt']
+
     def __init__(self, name, email, password, parent=None):
         PersistentContainer.__init__(self, name, parent)
         self.email = email
@@ -44,12 +58,12 @@ class User(PersistentContainer):
         hexhash = HASHCLASS(password + password_salt)
         return hexhash.hexdigest(), password_salt
 
+
 def groupfinder(username, request):
     root = find_root(request.context)
     if username in root:
-        user = root[username]
+        return ()
     else:
         #raise KeyError('Unknown user: %s' % username)
         return None
-    return ()
     #return username

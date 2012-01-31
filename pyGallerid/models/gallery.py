@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides models for the gallery resources of pyGallerid.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import os
 import shutil
 import datetime
@@ -8,6 +20,8 @@ from . import PersistentLocationAware, PersistentOrderedContainer
 
 
 class GalleryDocument(Persistent, PersistentLocationAware):
+    __attributes__ = ('description', 'long_description')
+
     def __init__(self, name, description, long_description, parent=None):
         Persistent.__init__(self)
         PersistentLocationAware.__init__(self, name, parent)
@@ -16,6 +30,9 @@ class GalleryDocument(Persistent, PersistentLocationAware):
 
 
 class GalleryContainer(PersistentOrderedContainer):
+    __attributes__ = ('path', 'absolute_path', 'description',
+                       'preview_picture', 'preview_size')
+
     def __init__(self, name, description=None, preview_picture=None,
                  path=None, parent=None):
         PersistentOrderedContainer.__init__(self, name, parent)
@@ -99,7 +116,7 @@ class GalleryContainer(PersistentOrderedContainer):
     def has_picture(self, picture):
         assert isinstance(picture, GalleryPicture)
         found = False
-        for child in self:
+        for child in self.itervalues():
             if isinstance(child, GalleryContainer):
                 if child.has_picture(picture):
                     found = True
@@ -112,6 +129,9 @@ class GalleryContainer(PersistentOrderedContainer):
 
 
 class Gallery(GalleryContainer):
+    __attributes__ = ['user']
+    __attributes__.extend(GalleryContainer.__attributes__)
+
     def __init__(self, description=None, path=None,
                  user=None, name='gallery', parent=None):
         GalleryContainer.__init__(self, name, description,
@@ -120,6 +140,9 @@ class Gallery(GalleryContainer):
 
 
 class GalleryAlbum(GalleryContainer):
+    __attributes__ = ['long_description', 'location', 'date_from', 'date_to']
+    __attributes__.extend(GalleryContainer.__attributes__)
+
     def __init__(self, name, description=None, \
                  long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
@@ -139,6 +162,10 @@ class GalleryAlbum(GalleryContainer):
 
 
 class GalleryPicture(Persistent, PersistentLocationAware):
+    __attributes__ = ['big_image_view', 'regular_image_view',
+                      'small_image_view', 'description', 'location',
+                      'date']
+
     def __init__(self, name, big_image_view, regular_image_view,
                  small_image_view, description=None, location=None,
                  date=datetime.datetime.now(), parent=None):
@@ -190,6 +217,9 @@ class GalleryImageView(Persistent):
         self.image = image
         self.view_size = view_size
         self.crop_rect = crop_rect
+
+    def __str__(self):
+        return self.image.filename
 
     @property
     def width(self):

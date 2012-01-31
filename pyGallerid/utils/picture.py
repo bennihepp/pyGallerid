@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Provides helpers for handling and importing image files.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 import os
 import re
 import dateutil.parser
@@ -129,16 +141,8 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
         if default_date is None:
             raise ValueError('No date found for:', original_filename)
         else:
+            logging.warning('No date found: %s' % original_filename)
             date = default_date
-        #if default_date is not None:
-            #print 'WARNING: No date found:', original_filename
-            #print 'Listing all tags:'
-            #for k, v in tags.items():
-                #print '  %s: %s' % (k, v)
-            ## TODO: handle this case
-            ##date = datetime.datetime.now()
-            #raise
-        #date = default_date
 
     name = os.path.splitext(os.path.basename(original_filename))[0]
     description = name
@@ -166,11 +170,7 @@ def import_gallery_album(album_path, settings, move_files=True,
             '%s %s %s' % (year, month, day_to)).date()
         print '  album date: from %s to %s' % (date_from, date_to)
     except (AttributeError, ValueError):
-        print 'WARNING: Unable to extract dates:', rel_album_path
-        # TODO
-        #album_name = album_path
-        #date_from = None
-        #date_to = None
+        logging.warning('Unable to extract dates: %s' % rel_album_path)
         raise
 
     big_image_dir = os.path.join(settings['image_dir'], album_path, 'big')
@@ -213,9 +213,11 @@ def import_gallery_album(album_path, settings, move_files=True,
         pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
     elif sorting_order == 'number':
         pattern = re.compile('(.+?)([0-9]+).*?')
+
         def match_picture(picture):
             mo = pattern.match(picture.name)
             return mo.group(1), int(mo.group(2))
+
         def cmp_pictures(picture1, picture2):
             prefix1, num1 = match_picture(picture1)
             prefix2, num2 = match_picture(picture2)
@@ -289,4 +291,3 @@ def import_gallery_container(path, settings, move_files=True,
         return new_container
     elif album is not None:
         return album
-

@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""
+Script for bootstrapping the pyGallerid database.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
+
 #!/bin/env python
 
 import os

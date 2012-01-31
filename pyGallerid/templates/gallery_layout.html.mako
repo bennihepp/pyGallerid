@@ -29,26 +29,26 @@
         $(document).ready(function() {
             $('#login-link').click(function(event) {
                 event.preventDefault();
-                var form = $('<form method="post" action="${login_url}" />')
+                var form = $('<form method="post" action="${request.resource_url(request.context, '@@login') | n}" />')
                 var username = $('<input type="text" size="20" name="username" />');
                 var password = $('<input type="password" size="20" name="password" />');
                 var container = $('<div />').attr('id', 'login-lightbox');
-                var usernamelabel = $('<span>Login:&nbsp;</span>');
-                var passwordlabel = $('<span>Password:&nbsp;</span>');
-                var usernamerow = $('<p />');
-                var passwordrow = $('<p />');
+                var username_label = $('<span>Login:&nbsp;</span>');
+                var password_label = $('<span>Password:&nbsp;</span>');
+                var username_row = $('<p />');
+                var password_row = $('<p />');
                 var login_button = $('<a>Login</a>');
                 var cancel_button = $('<a>Cancel</a>');
                 var button_row = $('<p />');
-                usernamerow.append(usernamelabel);
-                usernamerow.append(username);
-                passwordrow.append(passwordlabel);
-                passwordrow.append(password);
+                username_row.append(username_label);
+                username_row.append(username);
+                password_row.append(password_label);
+                password_row.append(password);
                 button_row.append(login_button);
                 button_row.append('&nbsp;&nbsp;');
                 button_row.append(cancel_button);
-                form.append(usernamerow);
-                form.append(passwordrow);
+                form.append(username_row);
+                form.append(password_row);
                 container.append(form);
                 container.append(button_row);
                 container.modal({
@@ -82,49 +82,16 @@
         });
     </script>
     % if editing:
-
         ## jquery-ui
         ##<script type="text/javascript" src="/static/js/jquery/jquery-ui-1.8.17.custom.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
         ## jquery-jstree
         <script type="text/javascript" src="/static/js/jquery/jquery.jstree.min.js"></script>
-
+        ## pyGallerid editing functionality
+        <script type="text/javascript" src="/static/js/pyGalleridEditing.js"></script>
         <script type="text/javascript">
-            pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
-
-            $(document).ready(function() {
-                console.log('ready');
-            });
-            $(document).ready(function() {
-                $('.pg-edit-order').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    open_picture_list_order_dialog(
-                        '${request.resource_url(request.context, '@@retrieve') | n}',
-                        pg_id,
-                        pg_context
-                    );
-                });
-                $('.pg-edit-select-preview-picture').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    open_picture_list_select_dialog(
-                        '${request.resource_url(request.context, '@@retrieve') | n}',
-                        pg_id,
-                        pg_context
-                    );
-                });
-                $('.pg-edit-preview-picture').click(function() {
-                    pg_context = $(this).data('pg-context');
-                    pg_id = $(this).data('pg-id');
-                    alert('Not implemented yet');
-                    //open_picture_edit_dialog(
-                    //    '${request.resource_url(request.context, '@@retrieve') | n}',
-                    //    pg_id,
-                    //    pg_context
-                    //);
-                });
-            });
+            pg_init_editing('${request.resource_url(request.context, '@@update') | n}',
+                            '${request.resource_url(request.context, '@@retrieve') | n}');
         </script>
     % endif
 </%block>
@@ -143,7 +110,7 @@
         &gt;&nbsp;
         % for elem in lineage_list[1:][::-1]:
             <a class="navigation"
-                href="${request.resource_url(elem, '@@'+request.view_name) | n}">
+                href="${request.resource_url(elem, '@@' + request.view_name) | n}">
                     ${render_resource(elem)}
             </a>
             &nbsp;&gt;&nbsp;
@@ -162,11 +129,14 @@
             </p>
         </span>
         <div class="content-navigation-options">
-            <%block name="navigation_options">
-            </%block>
-            ## TODO
+            <%block name="navigation_options" />
             % if allow_editing:
                 % if editing:
+                    <a id="tree-link" class="navigation"
+                        href="#">
+                        Resource tree
+                    </a>
+                    &nbsp;|&nbsp;
                     <a class="navigation"
                         href="${request.resource_url(request.context) | n}">
                         Stop editing
@@ -174,20 +144,20 @@
                 % else:
                     <a class="navigation"
                         href="${request.resource_url(request.context, '@@edit') | n}">
-                        Edit content
+                        Edit
                     </a>
                 % endif
                 &nbsp;|&nbsp;
             % endif
             % if user is None:
                 <a id="login-link" class="navigation" \
-                    href="${login_url}">
+                    href="#">
                     Login
                 </a>
                 &nbsp;|&nbsp;
             % else:
                 <a class="navigation" \
-                    href="${logout_url}">
+                    href="${request.resource_url(request.context, '@@logout') | n}">
                     Logout
                 </a>
                 &nbsp;|&nbsp;

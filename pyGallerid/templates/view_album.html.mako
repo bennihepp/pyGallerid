@@ -93,15 +93,15 @@
                 $(".picture-item").each(function() {
                     var index = parseInt($(this).data('pg-index'));
                     var name = $(this).data('pg-context');
-                    var display_url = $(this).data('pg-display-url');
-                    var fullsize_url = $(this).data('pg-fullsize-url');
+                    var regular_url = $(this).data('pg-regular-url');
+                    var big_url = $(this).data('pg-big-url');
                     var width = $(this).data('pg-width');
                     var height = $(this).data('pg-height');
                     var picture = {
                         index: index,
                         name: name,
-                        display_url: display_url,
-                        fullsize_url: fullsize_url,
+                        regular_url: regular_url,
+                        big_url: big_url,
                         width: width,
                         height: height,
                     };
@@ -146,28 +146,36 @@
             <li class="picture-item" \
                 data-pg-context="${picture.name}" \
                 data-pg-index="${index}" \
-                data-pg-fullsize-url="${fullsize_url(picture) | n}" \
-                data-pg-display-url="${display_url(picture) |n}" \
-                data-pg-width="${display_width(picture)}" \
-                data-pg-height="${display_height(picture)}">
+                data-pg-regular-url="${regular_url(picture) | n}" \
+                data-pg-big-url="${big_url(picture) |n}" \
+                data-pg-width="${regular_width(picture)}" \
+                data-pg-height="${regular_height(picture)}">
                 <div class="picture-cell">
                 <!-- max 1024x536 -->
                     <div class="picture-container">
                         <a class="picture-link" \
                             title="${picture.description}" \
-                            href="${fullsize_url(picture) | n}" \
+                            href="${big_url(picture) | n}" \
                             rel="picture-gallery">
                         <img class="image-box" \
                             alt="${picture.name}" \
-                            width="${display_width(picture)}" \
-                            height="${display_height(picture)}" \
                             src="/static/img/spacer.gif" \
-                            data-src="${display_url(picture) | n}" \
-                            data-big-src="${fullsize_url(picture) | n}" />
+                            % if display_mode == 'list':
+                                width="${regular_width(picture)}" \
+                                height="${regular_height(picture)}" \
+                                data-src="${regular_url(picture) | n}" \
+                            % else:
+                                width="${small_width(picture)}" \
+                                height="${small_height(picture)}" \
+                                data-src="${small_url(picture) | n}" \
+                            % endif
+                            />
                         </a>
                     </div>
                     % if editing:
-                        <div class="picture-edit" style="width: ${display_width(picture)}px;">
+                        <div class="picture-edit" style="width: \
+                                ${regular_width(picture) if display_mode == 'list' else small_width(picture)}\
+                            px;">
                             <p class="pg-edit-picture" \
                                 data-pg-id="picture-dialog" \
                                 data-pg-context="${picture.name}">
@@ -175,7 +183,9 @@
                             </p>
                         </div>
                     % endif
-                    <div class="picture-info" style="width: ${display_width(picture)}px;">
+                    <div class="picture-info" style="width: \
+                            ${regular_width(picture) if display_mode == 'list' else small_width(picture)}\
+                        px;">
                         <div class="picture-descr">
                             <p class="pg-editable" \
                                 data-pg-context="${picture.name}" \

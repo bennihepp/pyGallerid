@@ -1,9 +1,16 @@
-import os
+# -*- coding: utf-8 -*-
 
-from pyramid.response import Response
-from pyramid.view import view_config
+"""
+Creates the pyGallerid WSGI application instance.
+"""
+
+# This software is distributed under the FreeBSD License.
+# See the accompanying file LICENSE for details.
+#
+# Copyright 2012 Benjamin Hepp
+
 from pyramid.config import Configurator
-from pyramid_zodbconn import get_connection
+from pyramid_zodbconn import get_connection, db_from_uri
 from pyramid.settings import asbool
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -11,7 +18,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid_beaker import session_factory_from_settings, \
                            set_cache_regions_from_settings
 
-from.models import appmaker
+from models import appmaker, __sw_version__
 
 # This is only needed when using SQLAlchemy
 #from sqlalchemy import engine_from_config
@@ -23,11 +30,27 @@ def root_factory(request):
     return appmaker(conn.root())
 
 
+def evolve_database(root, sw_version, initial_db_version=0):
+    from repoze.evolution import ZODBEvolutionManager, evolve_to_latest
+    manager = ZODBEvolutionManager(
+        root, evolve_packagename='pyGallerid.evolve',
+        sw_version=sw_version,
+        initial_db_version=initial_db_version
+    )
+    evolve_to_latest(manager)
+
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     if asbool(settings.get('wingdbstub', 'false')):
         import misc.wingdbstub
+
+    # evolve ZODB database to latest version
+    db = db_from_uri(settings['zodbconn.uri'])
+    conn = db.open()
+    evolve_database(appmaker(conn.root()), __sw_version__)
+    db.close()
 
     # set up beaker session
     session_factory = session_factory_from_settings(settings)
@@ -41,12 +64,10 @@ def main(global_config, **settings):
     config.include(add_user_property)
 
     # include pyramid plugins
-    import pyramid_rewrite
     config.include('pyramid_beaker')
     config.include('pyramid_tm')
     config.include('pyramid_zodbconn')
     #config.include('pyramid_rewrite')
-    config.include(pyramid_rewrite)
 
     # register beaker session factory
     config.set_session_factory(session_factory)
@@ -66,6 +87,7 @@ def add_user_property(config):
     from pyramid.traversal import find_root
     from pyramid.security import authenticated_userid
     from models import retrieve_user
+
     # add user property to request objects
     def get_user(request):
         root = find_root(request.context)
@@ -74,6 +96,7 @@ def add_user_property(config):
         return user
     config.set_request_property(get_user, 'user', reify=True)
 
+
 def set_auth_policies(config):
     from models.user import groupfinder
     # set up authentication and authorization
@@ -81,6 +104,7 @@ def set_auth_policies(config):
     authz_policy = ACLAuthorizationPolicy()
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
+
 
 def add_views(config):
     settings = config.registry.settings
@@ -94,4 +118,3 @@ def add_views(config):
         settings['image_dir'],
         cache_max_age=3600
     )
-
