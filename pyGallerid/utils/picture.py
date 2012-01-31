@@ -167,10 +167,6 @@ def import_gallery_album(album_path, settings, move_files=True,
         print '  album date: from %s to %s' % (date_from, date_to)
     except (AttributeError, ValueError):
         print 'WARNING: Unable to extract dates:', rel_album_path
-        # TODO
-        #album_name = album_path
-        #date_from = None
-        #date_to = None
         raise
 
     big_image_dir = os.path.join(settings['image_dir'], album_path, 'big')
@@ -213,9 +209,11 @@ def import_gallery_album(album_path, settings, move_files=True,
         pictures.sort(cmp=lambda x, y: cmp(x.date, y.date))
     elif sorting_order == 'number':
         pattern = re.compile('(.+?)([0-9]+).*?')
+
         def match_picture(picture):
             mo = pattern.match(picture.name)
             return mo.group(1), int(mo.group(2))
+
         def cmp_pictures(picture1, picture2):
             prefix1, num1 = match_picture(picture1)
             prefix2, num2 = match_picture(picture2)
@@ -289,4 +287,3 @@ def import_gallery_container(path, settings, move_files=True,
         return new_container
     elif album is not None:
         return album
-

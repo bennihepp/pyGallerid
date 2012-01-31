@@ -1,20 +1,21 @@
-import os
 import datetime
 import json
 import urllib
 import itertools
 
 from pyramid.location import lineage
-from pyramid.view import view_config, render_view_to_response
+from pyramid.view import view_config
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
     HTTPForbidden,
 )
-from pyramid.traversal import find_resource, find_root, find_interface
-from pyramid.settings import asbool
-from pyramid.events import subscriber, NewRequest
+from pyramid.traversal import find_resource, find_root, find_interface, \
+     resource_path
 from pyramid.security import authenticated_userid, remember, forget
+
+from persistent.dict import PersistentDict
+from persistent.list import PersistentList
 
 from ..models import retrieve_about, retrieve_gallery, retrieve_user
 from ..models.user import User
@@ -22,6 +23,7 @@ from ..models.gallery import Gallery, GalleryContainer, \
      GalleryAlbum, GalleryPicture, GalleryDocument
 
 
+#from pyramid.events import subscriber, NewRequest
 #@subscriber(NewRequest)
 #def newRequestSubscriber(event):
     #request = event.request
@@ -103,7 +105,9 @@ def render_resource(resource):
     if isinstance(resource, Gallery):
         return 'Gallery'
     else:
-        return unicode(resource.name)
+        name = resource.name
+        name = name[0].upper() + name[1:]
+        return unicode(name)
 
 
 def find_gallery_resource(resource):
@@ -290,7 +294,8 @@ def update_gallery_attribute_date_from_to(context, request):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='retrieve',
-             renderer='json', request_param='pg-type=pictures')
+             renderer='json', request_param='pg-type=pictures',
+             permission='view')
 def retrieve_pictures(context, request):
     result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
@@ -301,7 +306,7 @@ def retrieve_pictures(context, request):
         pg_slice = slice(None)
     indices = range(len(pg_context))[pg_slice]
     pg_pictures = []
-    for index, child in enumerate(pg_context):
+    for index, child in enumerate(pg_context.itervalues()):
         if index not in indices:
             continue
         if isinstance(child, GalleryContainer):
@@ -314,8 +319,8 @@ def retrieve_pictures(context, request):
         pg_pictures.append({
             'index': index,
             'name': child.name,
-            'display_url': big_url(request, thumbnail),
-            'fullsize_url': regular_url(request, thumbnail),
+            'big_url': big_url(request, thumbnail),
+            'regular_url': regular_url(request, thumbnail),
             'width': regular_width(thumbnail),
             'height': regular_height(thumbnail),
         })
@@ -325,7 +330,8 @@ def retrieve_pictures(context, request):
 
 
 @view_config(context=GalleryContainer, xhr=True, name='retrieve',
-             renderer='json', request_param='pg-type=thumbnails')
+             renderer='json', request_param='pg-type=thumbnails',
+             permission='view')
 def retrieve_thumbnails(context, request):
     result = {'pg-status': 'failed'}
     pg_context = find_resource(context, request.params['pg-context'])
@@ -346,6 +352,80 @@ def retrieve_thumbnails(context, request):
             'height': small_height(thumbnail),
         })
     result['pg-thumbnails'] = json.dumps(pg_thumbnails)
+    result['pg-status'] = 'success'
+    return result
+
+
+def convert_resource_to_json(resource, state='closed'):
+    json_resource = {}
+    json_resource['state'] = state
+    if resource == find_root(resource):
+        json_resource['data'] = '<root>'
+    else:
+        json_resource['data'] = str(resource)
+    json_resource['attr'] = {'pg-path': resource_path(resource)}
+    metadata = {}
+    if hasattr(resource, '__attributes__'):
+        for attr_name in resource.__attributes__:
+            metadata[attr_name] = str(getattr(resource, attr_name))
+    json_resource['metadata'] = metadata
+    return json_resource
+
+
+@view_config(context=GalleryDocument, name='retrieve',
+             renderer='json', request_param='pg-type=resource-lineage',
+             permission='edit')
+@view_config(context=GalleryContainer, name='retrieve',
+             renderer='json', request_param='pg-type=resource-lineage',
+             permission='edit')
+def retrieve_resource_lineage(context, request):
+    result = {'pg-status': 'failed'}
+
+    def convert_lineage_to_json(resource, descendants):
+        json_resource = convert_resource_to_json(
+            resource, state='open')
+        children = []
+        for child in resource.itervalues():
+            if len(descendants) > 0 and child == descendants[0]:
+                json_child = convert_lineage_to_json(
+                    child, descendants[1:])
+            else:
+                json_child = convert_resource_to_json(
+                    child, state='closed')
+            children.append(json_child)
+        json_resource['children'] = children
+        return json_resource
+
+    descendants = list(lineage(context))[::-1]
+    root = descendants[0]
+    pg_lineage = convert_lineage_to_json(root, descendants[1:])
+    result['pg-data'] = json.dumps(pg_lineage)
+    result['pg-status'] = 'success'
+    return result
+
+
+@view_config(context=GalleryDocument, name='retrieve',
+             renderer='json', request_param='pg-type=resource-children',
+             permission='edit')
+@view_config(context=GalleryContainer, name='retrieve',
+             renderer='json', request_param='pg-type=resource-children',
+             permission='edit')
+def retrieve_resource_children(context, request):
+    result = {'pg-status': 'failed'}
+    resource = find_resource(find_root(context), request.params['pg-path'])
+    if isinstance(resource, PersistentDict):
+        pg_children = [ \
+            convert_resource_to_json(child) \
+                for child in resource.itervalues()
+        ]
+    elif isinstance(resource, PersistentList):
+        pg_children = [ \
+            convert_resource_to_json(child) \
+                for child in resource
+        ]
+    else:
+        pg_children = []
+    result['pg-data'] = json.dumps(pg_children)
     result['pg-status'] = 'success'
     return result
 
@@ -394,6 +474,15 @@ def allow_editing(context, request):
         return False
 
 
+def about_url(context, request):
+    about_resource = find_about_resource(context)
+    if about_resource != context:
+        about_url = request.resource_url(about_resource)
+    else:
+        about_url = None
+    return about_url
+
+
 @view_config(context=GalleryContainer, name='edit',
              renderer='view_gallery.html.mako', permission='edit')
 def edit_gallery(context, request):
@@ -405,8 +494,9 @@ def edit_gallery(context, request):
 @view_config(context=GalleryContainer,
              renderer='view_gallery.html.mako', permission='view')
 def view_gallery(context, request):
+    # TODO: do something else about empty containers
     items = []
-    for item in context:
+    for item in context.itervalues():
         if len(item) > 0:
             items.append(item)
         #else:
@@ -414,30 +504,21 @@ def view_gallery(context, request):
     items = list(enumerate(items))
     #items = list(enumerate(context))
 
-    preview_url = lambda item: small_url(request, item)
-    preview_width = lambda item: small_width(item)
-    preview_height = lambda item: small_height(item)
-
-    about_url = request.resource_url(find_about_resource(context))
-
-    login_url = request.resource_url(context, '@@login')
-    logout_url = request.resource_url(context, '@@logout')
+    local_small_url = lambda item: small_url(request, item)
 
     return {
         'messages': request.session.pop_flash(),
-        'user' : request.user,
+        'user': request.user,
         'gallery': context,
         'items': items,
         'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
-        'about_url': about_url,
-        'login_url': login_url,
-        'logout_url': logout_url,
+        'about_url': about_url(context, request),
         'render_resource': render_resource,
-        'preview_url': preview_url,
-        'preview_width': preview_width,
-        'preview_height': preview_height,
+        'small_url': local_small_url,
+        'small_width': small_width,
+        'small_height': small_height,
     }
 
 
@@ -480,41 +561,31 @@ def view_album(context, request):
         pictures
     )
 
-    fullsize_url = lambda item: big_url(request, item)
-    if display_mode == 'list':
-        display_url = lambda item: regular_url(request, item)
-        display_width = lambda item: regular_width(item)
-        display_height = lambda item: regular_height(item)
-    else:
-        display_url = lambda item: small_url(request, item)
-        display_width = lambda item: small_width(item)
-        display_height = lambda item: small_height(item)
-
-    about_url = request.resource_url(find_about_resource(context))
-
-    login_url = request.resource_url(context, '@@login')
-    logout_url = request.resource_url(context, '@@logout')
+    local_big_url = lambda item: big_url(request, item)
+    local_regular_url = lambda item: regular_url(request, item)
+    local_small_url = lambda item: small_url(request, item)
 
     return {
         'messages': request.session.pop_flash(),
-        'user' : request.user,
+        'user': request.user,
         'album': context,
         'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': list(lineage(context))[:-2],
-        'about_url': about_url,
-        'login_url': login_url,
-        'logout_url': logout_url,
+        'about_url': about_url(context, request),
         'render_resource': render_resource,
         'pictures': pictures,
         'display_mode': display_mode,
         'page': page,
         'num_of_pages': num_of_pages,
         'total_num_of_pictures': len(context),
-        'fullsize_url': fullsize_url,
-        'display_url': display_url,
-        'display_width': display_width,
-        'display_height': display_height,
+        'small_url': local_small_url,
+        'small_width': small_width,
+        'small_height': small_height,
+        'regular_url': local_regular_url,
+        'regular_width': regular_width,
+        'regular_height': regular_height,
+        'big_url': local_big_url,
     }
 
 
@@ -529,26 +600,14 @@ def edit_document(context, request):
 @view_config(context=GalleryDocument,
              renderer='view_document.html.mako', permission='view')
 def view_document(context, request):
-    about_resource = find_about_resource(context)
-    if about_resource != context:
-        about_url = request.resource_url(about_resource)
-    else:
-        about_url = None
-    
-    login_url = request.resource_url(context, '@@login')
-    logout_url = request.resource_url(context, '@@logout')
-
     lineage_list = [context, find_gallery_resource(context)]
     return {
         'messages': request.session.pop_flash(),
-        'user' : request.user,
+        'user': request.user,
         'document': context,
         'allow_editing': allow_editing(context, request),
         'editing': False,
         'lineage_list': lineage_list,
-        'about_url': about_url,
-        'login_url': login_url,
-        'logout_url': logout_url,
+        'about_url': about_url(context, request),
         'render_resource': render_resource,
     }
-

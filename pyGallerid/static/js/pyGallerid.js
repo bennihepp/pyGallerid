@@ -205,7 +205,6 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
     var close_btn = $('<a/>').html('Close');
     container.data('pg-zoom', 1.0);
     container.data('pg-current-index', click_index);
-    console.log(click_index);
     function update_picture_lightbox(index) {
         if (index == undefined || isNaN(index))
             var index = container.data('pg-current-index');
@@ -223,10 +222,10 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
             retrieve_picture(json_url, pg_context, index, function(new_pictures) {
                 var image_url;
                 /*if (zoom > 1.0)
-                    image_url = new_pictures[0].fullsize_url;
+                    image_url = new_pictures[0].big_url;
                 else
-                    image_url = new_pictures[0].display_url;*/
-                image_url = new_pictures[0].fullsize_url;
+                    image_url = new_pictures[0].regular_url;*/
+                image_url = new_pictures[0].big_url;
                 $.preloadImage(image_url, function(image, url) {
                     pictures[index] = new_pictures[0];
                     update_picture_lightbox();
@@ -269,9 +268,9 @@ function open_picture_lightbox(json_url, pg_context, pg_id, click_index, picture
         var image_url;
         //if (width > picture_width || height > picture_height)
         if (zoom > 1.0)
-            image_url = pictures[index].fullsize_url;
+            image_url = pictures[index].big_url;
         else
-            image_url = pictures[index].display_url;
+            image_url = pictures[index].regular_url;
         picture_img.attr('src', image_url);
         //picture_img.css('background-image', 'url(' + image_url + ')');
         // open modal dialog
@@ -808,7 +807,6 @@ function pg_init_editing(json_url)
                     pg_update(elem, inputProvider, successHandler, errorHandler);
                 });
             } else {
-                // TODO: show some useful error message
                 alert('Unknown input type: ' + pg_type);
             }
             // prevent default click action

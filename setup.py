@@ -20,6 +20,7 @@ requires = [
     #'SQLAlchemy',
     'PIL',
     'python-dateutil==1.5',
+    'repoze.evolution',
 ]
 
 setup(name='pyGallerid',

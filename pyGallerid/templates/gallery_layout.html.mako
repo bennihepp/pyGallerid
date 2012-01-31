@@ -29,7 +29,7 @@
         $(document).ready(function() {
             $('#login-link').click(function(event) {
                 event.preventDefault();
-                var form = $('<form method="post" action="${login_url}" />')
+                var form = $('<form method="post" action="${request.resource_url(request.context, '@@login') | n}" />')
                 var username = $('<input type="text" size="20" name="username" />');
                 var password = $('<input type="password" size="20" name="password" />');
                 var container = $('<div />').attr('id', 'login-lightbox');
@@ -93,9 +93,6 @@
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}');
 
             $(document).ready(function() {
-                console.log('ready');
-            });
-            $(document).ready(function() {
                 $('.pg-edit-order').click(function() {
                     pg_context = $(this).data('pg-context');
                     pg_id = $(this).data('pg-id');
@@ -123,6 +120,90 @@
                     //    pg_id,
                     //    pg_context
                     //);
+                });
+            });
+
+            $(document).ready(function() {
+                $('#tree-link').click(function(event) {
+                    event.preventDefault();
+                    var json_url = '${request.resource_url(request.context, '@@retrieve') | n}';
+                    var container = $('<div />').attr('id', 'resource-tree-lightbox');
+                    var tree_div = $('<div />').attr('class', 'tree');
+                    var list_div = $('<div />').attr('class', 'attributes');
+                    tree_div.jstree({
+                        core: {
+                        },
+                        json_data: {
+                            ajax: {
+                                url: json_url,
+                                dataType: 'json',
+                                type: 'GET',
+                                data: function(n) {
+                                    if (n == -1)
+                                        return {'pg-type': 'resource-lineage'}
+                                    else
+                                        return {'pg-type': 'resource-children', 'pg-path': n.attr('pg-path')}
+                                },
+                                success: function(json_data) {
+                                    return $.parseJSON(json_data['pg-data']);
+                                }
+                            },
+                            progressive_render: true,
+                        },
+                        themes: {
+                            'theme': 'apple',
+                            'dots': true,
+                            'icons': false,
+                        },
+                        plugins: ['json_data', 'themes', 'ui'],
+                    })
+                    .bind('select_node.jstree', function(e, data) {
+                        var json_data = [];
+                        var attributes = data.rslt.obj.data();
+                        for (index in attributes) {
+                            json_data.push({'data': index, 'state': 'open', 'children': [attributes[index]]});
+                        }
+                        list_div.jstree({
+                            core: {
+                            },
+                            json_data: {
+                                data: json_data,
+                            },
+                            themes: {
+                                'theme': 'apple',
+                                'dots': false,
+                                'icons': false,
+                            },
+                            plugins: ['json_data', 'themes'],
+                        });
+                    });
+                    container.append(tree_div);
+                    container.append(list_div);
+                    var viewport_size = get_viewport_size();
+                    container.modal({
+                        escClose: true,
+                        opacity: 80,
+                        overlayCss: {backgroundColor:"#000"},
+                        minWidth: 0.9 * viewport_size['width'],
+                        maxWidth: 0.9 * viewport_size['width'],
+                        minHeight: 0.9 * viewport_size['height'],
+                        maxHeight: 0.9 * viewport_size['height'],
+                        onOpen: function (dialog) {
+                            dialog.overlay.fadeIn('fast', function () {
+                                dialog.data.hide();
+                                dialog.container.fadeIn('fast');
+                                dialog.data.fadeIn('fast');
+                            });
+                        },
+                        onClose: function (dialog) {
+                            dialog.data.fadeOut('fast');
+                            dialog.container.fadeOut('fast', function () {
+                                dialog.overlay.fadeOut('fast', function () {
+                                    $.modal.close();
+                                });
+                            });
+                        },
+                    });
                 });
             });
         </script>
@@ -162,11 +243,14 @@
             </p>
         </span>
         <div class="content-navigation-options">
-            <%block name="navigation_options">
-            </%block>
-            ## TODO
+            <%block name="navigation_options" />
             % if allow_editing:
                 % if editing:
+                    <a id="tree-link" class="navigation"
+                        href="#">
+                        Resource tree
+                    </a>
+                    &nbsp;|&nbsp;
                     <a class="navigation"
                         href="${request.resource_url(request.context) | n}">
                         Stop editing
@@ -174,20 +258,20 @@
                 % else:
                     <a class="navigation"
                         href="${request.resource_url(request.context, '@@edit') | n}">
-                        Edit content
+                        Edit
                     </a>
                 % endif
                 &nbsp;|&nbsp;
             % endif
             % if user is None:
                 <a id="login-link" class="navigation" \
-                    href="${login_url}">
+                    href="#">
                     Login
                 </a>
                 &nbsp;|&nbsp;
             % else:
                 <a class="navigation" \
-                    href="${logout_url}">
+                    href="${request.resource_url(request.context, '@@logout') | n}">
                     Logout
                 </a>
                 &nbsp;|&nbsp;

@@ -1,6 +1,8 @@
 from persistent.dict import PersistentDict
 from persistent.list import PersistentList
 
+__sw_version__ = 1
+
 
 class PersistentLocationAware(object):
     __name__ = None
@@ -11,6 +13,15 @@ class PersistentLocationAware(object):
         self.__parent__ = parent
         if parent is not None:
             parent[name] = self
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        if self.parent is None:
+            return '%s(%s)' % (self.name, type(self))
+        else:
+            return '%s(%s)[%s]' % (self.name, type(self), self.parent.name)
 
     @property
     def name(self):
@@ -119,7 +130,28 @@ class PersistentOrderedContainer(PersistentContainer):
         PersistentContainer.__delitem__(self, name)
 
     def __iter__(self):
-        return self.__children.__iter__()
+        return self.iterkeys()
+
+    def keys(self):
+        return [child.name for child in self.__children]
+
+    def values(self):
+        return [child for child in self.__children]
+
+    def items(self):
+        return [(child.name, child) for child in self.__children]
+
+    def iterkeys(self):
+        for child in self.__children:
+            yield child.name
+
+    def itervalues(self):
+        for child in self.__children:
+            yield child
+
+    def iteritems(self):
+        for child in self.__children:
+            yield child.name, child
 
 
 def retrieve_user(app, username):
