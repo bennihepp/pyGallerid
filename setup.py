@@ -33,7 +33,7 @@ requires = [
 ]
 
 setup(name='pyGallerid',
-      version='0.1',
+      version='0.2',
       description='python web photo gallery based on pyramid',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

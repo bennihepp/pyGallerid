@@ -10,3 +10,10 @@
 
   Basic functionality existing.
 
+0.2
+---
+
+- Mature version of pyGallerid.
+
+  Almost ready for prime time.
+

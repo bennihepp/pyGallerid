@@ -24,6 +24,8 @@ from models import appmaker, __sw_version__
 #from sqlalchemy import engine_from_config
 #from .models import DBSession
 
+__version__ = 0.2
+
 
 def root_factory(request):
     conn = get_connection(request)
@@ -67,7 +69,8 @@ def main(global_config, **settings):
     config.include('pyramid_beaker')
     config.include('pyramid_tm')
     config.include('pyramid_zodbconn')
-    #config.include('pyramid_rewrite')
+    import pyramid_rewrite
+    config.include(pyramid_rewrite)
 
     # register beaker session factory
     config.set_session_factory(session_factory)
