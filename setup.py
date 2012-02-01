@@ -33,31 +33,35 @@ requires = [
 ]
 
 setup(name='pyGallerid',
-      version='0.2',
-      description='python web photo gallery based on pyramid',
-      long_description=README + '\n\n' +  CHANGES,
-      classifiers=[
+    version='0.2',
+    description='python web photo gallery based on pyramid',
+    long_description=README + '\n\n' +  CHANGES,
+    classifiers=[
+        "Operating System :: OS Independent",
+        "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
+        "Development Status :: 4 - Beta",
         "Framework :: Pylons",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        ],
-      author='',
-      author_email='',
-      url='',
-      keywords='web pyramid pylons python gallery photo',
-      packages=find_packages(),
-      include_package_data=True,
-      zip_safe=False,
-      install_requires=requires,
-      tests_require=requires,
-      test_suite="pyGallerid",
-      entry_points = """\
-      [paste.app_factory]
-      main = pyGallerid:main
-      [console_scripts]
-      init_gallery = pyGallerid.scripts.init_gallery:main
-      import_pictures = pyGallerid.scripts.import_pictures:main
-      """,
-      )
+      ],
+    author='Benjamin Hepp',
+    author_email='benjamin.hepp@gmail.com',
+    license='BSD',
+    url='https://github.com/bennihepp/pyGallerid',
+    keywords='web pyramid pylons gallery photo',
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
+    install_requires=requires,
+    tests_require=requires,
+    test_suite="pyGallerid",
+    entry_points = """\
+    [paste.app_factory]
+    main = pyGallerid:main
+    [console_scripts]
+    init_gallery = pyGallerid.scripts.init_gallery:main
+    import_pictures = pyGallerid.scripts.import_pictures:main
+    """,
+)
 

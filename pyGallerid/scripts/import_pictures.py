@@ -35,21 +35,20 @@ from ..utils.picture import import_gallery_container
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <username> <path> <sorting_order>\n'
-          '(example: "%s development.ini hepp new_pictures [text|number|date]' \
+    print('usage: %s <config_uri> <path> <sorting_order>\n'
+          '(example: "%s development.ini new_pictures [text|number|date]' \
           % (cmd, cmd))
     sys.exit(1)
 
 
 def main(argv=sys.argv):
-    if len(argv) != 4:
+    if len(argv) != 3:
         usage(argv)
     config_uri = argv[1]
-    username = argv[2]
-    path = argv[3]
+    path = argv[2]
     sorting_order = 'number'
-    if len(argv) > 4:
-        sorting_order = argv[4]
+    if len(argv) > 3:
+        sorting_order = argv[3]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     # for SQLalchemy
@@ -63,11 +62,12 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_pictures(zodb_root, settings, username, path, sorting_order)
+        import_pictures(zodb_root, settings, path, sorting_order)
         transaction.commit()
 
 
-def import_pictures(zodb_root, settings, username, path, sorting_order):
+def import_pictures(zodb_root, settings, path, sorting_order):
+    username = settings['default_user']
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)

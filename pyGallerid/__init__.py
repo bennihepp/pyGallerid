@@ -69,8 +69,7 @@ def main(global_config, **settings):
     config.include('pyramid_beaker')
     config.include('pyramid_tm')
     config.include('pyramid_zodbconn')
-    import pyramid_rewrite
-    config.include(pyramid_rewrite)
+    config.include('pyramid_rewrite')
 
     # register beaker session factory
     config.set_session_factory(session_factory)
@@ -79,10 +78,16 @@ def main(global_config, **settings):
     #engine = engine_from_config(settings, 'sqlalchemy.')
     #DBSession.configure(bind=engine)
 
-    config.include(add_views)
+    # add static views
+    config.include(add_static_views)
 
+    # scan for declarative configurations
     config.scan()
 
+    # add url rewriting rules
+    config.include(add_rewrite_rules)
+
+    # return WSGI application instance
     return config.make_wsgi_app()
 
 
@@ -109,7 +114,26 @@ def set_auth_policies(config):
     config.set_authorization_policy(authz_policy)
 
 
-def add_views(config):
+def add_rewrite_rules(config):
+    # add rewrite rule for /
+    pattern = r'/'
+    target = '/%s/gallery/' % config.registry.settings['default_user']
+    config.add_rewrite_rule(pattern, target)
+    # add rewrite rule for /favicon.ico
+    pattern = r'/favicon.ico'
+    target = '/static/favicon.ico'
+    config.add_rewrite_rule(pattern, target)
+    # add rewrite rule for /about
+    pattern = r'/about'
+    target = '/%s/about/' % config.registry.settings['default_user']
+    config.add_rewrite_rule(pattern, target)
+    # add rewrite rule for /gallery/*/
+    pattern = r'/gallery/(?P<subpath>.*)'
+    target = '/%s/gallery/%%(subpath)s' % config.registry.settings['default_user']
+    config.add_rewrite_rule(pattern, target)
+
+
+def add_static_views(config):
     settings = config.registry.settings
     config.add_static_view(
         'static',

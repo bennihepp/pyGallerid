@@ -1,2 +1,4 @@
 include *.txt *.ini *.cfg *.rst
 recursive-include pyGallerid *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
+exclude bin build dist include lib local pictures data pyGallerid.egg-info setup.cfg
+

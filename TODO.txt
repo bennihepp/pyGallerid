@@ -1,32 +1,15 @@
-- look into URL rewriting for traversal:
-  e.g.: /gallery/*traverse -> /hepp/gallery/*traverse
-        /*traverse -> /*traverse
-  when doing config.add_route('gallery', '/gallery/*traverse')
-    views have to be configured with route_name 'gallery', but then
-    they don't match the default traversal stuff anymore.
-
-- look into favicon issue
+browser:
 - test with IE + Chrome Frame
+
+javascript and stylesheets:
 - combine stylesheets or use yepnopejs
 - minify pyGallerid.js and pyGallerid.css?
-- flush after HTML header?
-- remove redirections?
-- look into expiration policy and caching (Cache-Control)
 - use headJS or yepnopejs?
 
-models:
-+ allow changing of resource name without changing order in a parent container
+views:
+- remove redirections?
+- look into expiration policy and caching (Cache-Control)
 
-CSS:
-div {
-  width: <display_width>px;
-  height: <display_height>px;
-}
-img {
-  width: 100%;
-  height: 100%;
-  background: url('abc.jpeg') -<xoffset>px -<yoffset>px;
-  background-size: <display_width+xoffset>px <display_height+yoffset>px;
-  background-repeat: no-repeat;
-}
+models:
+- allow changing of resource name without changing order in a parent container
 

@@ -36,7 +36,7 @@ from ..models.gallery import Gallery, GalleryDocument
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <username> <email> '
+    print('usage: %s <config_uri> <email> '
           '<password> [<description>]\n'
           '(example: "%s development.ini myname '
           'mymail@mydomain.com qwerty)' % (cmd, cmd))
@@ -44,14 +44,13 @@ def usage(argv):
 
 
 def main(argv=sys.argv):
-    if len(argv) < 5:
+    if len(argv) < 4:
         usage(argv)
     config_uri = argv[1]
-    username = argv[2]
-    email = argv[3]
-    password = argv[4]
-    if len(argv) > 5:
-        description = argv[5]
+    email = argv[2]
+    password = argv[3]
+    if len(argv) > 4:
+        description = argv[4]
     else:
         description = "Benjamin Hepp's Photography"
     setup_logging(config_uri)
@@ -67,13 +66,14 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        create_gallery(zodb_root, settings, username,
-                       email, password, description)
+        create_gallery(zodb_root, settings, email,
+                       password, description)
         transaction.commit()
 
 
-def create_gallery(zodb_root, settings, username,
-                   email, password, description):
+def create_gallery(zodb_root, settings, email,
+                   password, description):
+    username = settings['default_user']
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     if user is not None:
