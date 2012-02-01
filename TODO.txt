@@ -13,3 +13,6 @@ views:
 models:
 - allow changing of resource name without changing order in a parent container
 
+deployment:
+- use varnish cache?
+
