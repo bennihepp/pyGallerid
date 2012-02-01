@@ -30,6 +30,7 @@ requires = [
     'PIL',
     'python-dateutil==1.5',
     'repoze.evolution',
+    'pyramid_rewrite',
 ]
 
 setup(name='pyGallerid',
