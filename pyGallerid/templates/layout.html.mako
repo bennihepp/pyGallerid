@@ -42,7 +42,7 @@
         <div id="prompt">
         </div>
 
-        <script>
+        <script type="text/javascript">
             window.attachEvent("onload", function() {
                 CFInstall.check({
                     mode: "inline",
