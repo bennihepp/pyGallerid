@@ -15,8 +15,8 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.txt')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
+readme = open(os.path.join(here, 'README.rst')).read()
+changes = open(os.path.join(here, 'CHANGES.rst')).read()
 
 requires = [
     'pyramid',
@@ -36,7 +36,7 @@ requires = [
 setup(name='pyGallerid',
     version='0.2',
     description='python web photo gallery based on pyramid',
-    long_description=README + '\n\n' +  CHANGES,
+    long_description=readme + '\n' +  changes,
     classifiers=[
         "Operating System :: OS Independent",
         "License :: OSI Approved :: BSD License",
