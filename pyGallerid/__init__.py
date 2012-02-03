@@ -129,7 +129,8 @@ def add_rewrite_rules(config):
     config.add_rewrite_rule(pattern, target)
     # add rewrite rule for /gallery/*/
     pattern = r'/gallery/(?P<subpath>.*)'
-    target = '/%s/gallery/%%(subpath)s' % config.registry.settings['default_user']
+    target = '/%s/gallery/%%(subpath)s' \
+        % config.registry.settings['default_user']
     config.add_rewrite_rule(pattern, target)
 
 
