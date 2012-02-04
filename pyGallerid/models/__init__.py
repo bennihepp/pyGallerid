@@ -13,7 +13,7 @@ Provides common models and helpers for resources of pyGallerid.
 from persistent.dict import PersistentDict
 from persistent.list import PersistentList
 
-__sw_version__ = 1
+__sw_version__ = 2
 
 
 class PersistentLocationAware(object):

@@ -34,19 +34,12 @@ class User(PersistentContainer):
         self.__acl__ = [
             (Allow, Everyone, 'view'),
             (Allow, Everyone, 'login'),
-            (Allow, Everyone, 'logout'),
+            (Allow, name, 'logout'),
             (Allow, name, 'edit'),
             (Allow, name, 'update'),
         ]
 
     def authenticate(self, password):
-        self.__acl__ = [
-            (Allow, Everyone, 'view'),
-            (Allow, Everyone, 'login'),
-            (Allow, Everyone, 'logout'),
-            (Allow, self.name, 'edit'),
-            (Allow, self.name, 'update'),
-        ]
         hexhash = HASHCLASS(password + self.password_salt)
         return hexhash.hexdigest() == self.password_hash
 
@@ -62,8 +55,7 @@ class User(PersistentContainer):
 def groupfinder(username, request):
     root = find_root(request.context)
     if username in root:
-        return ()
+        return username
     else:
         #raise KeyError('Unknown user: %s' % username)
         return None
-    #return username

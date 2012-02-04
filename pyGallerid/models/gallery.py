@@ -19,7 +19,12 @@ from persistent import Persistent
 from . import PersistentLocationAware, PersistentOrderedContainer
 
 
-class GalleryDocument(Persistent, PersistentLocationAware):
+# dummy class for marking gallery resources
+class GalleryResource(object):
+    pass
+
+
+class GalleryDocument(GalleryResource, Persistent, PersistentLocationAware):
     __attributes__ = ('description', 'long_description')
 
     def __init__(self, name, description, long_description, parent=None):
@@ -29,7 +34,7 @@ class GalleryDocument(Persistent, PersistentLocationAware):
         self.long_description = long_description
 
 
-class GalleryContainer(PersistentOrderedContainer):
+class GalleryContainer(GalleryResource, PersistentOrderedContainer):
     __attributes__ = ('path', 'absolute_path', 'description',
                        'preview_picture', 'preview_size')
 
@@ -161,7 +166,7 @@ class GalleryAlbum(GalleryContainer):
         self.children = pictures
 
 
-class GalleryPicture(Persistent, PersistentLocationAware):
+class GalleryPicture(GalleryResource, Persistent, PersistentLocationAware):
     __attributes__ = ['big_image_view', 'regular_image_view',
                       'small_image_view', 'description', 'location',
                       'date']

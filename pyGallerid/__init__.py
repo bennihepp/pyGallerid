@@ -9,6 +9,10 @@ Creates the pyGallerid WSGI application instance.
 #
 # Copyright 2012 Benjamin Hepp
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pyramid.config import Configurator
 from pyramid_zodbconn import get_connection, db_from_uri
 from pyramid.settings import asbool
@@ -39,14 +43,21 @@ def evolve_database(root, sw_version, initial_db_version=0):
         sw_version=sw_version,
         initial_db_version=initial_db_version
     )
+    db_version = manager.get_db_version()
+    sw_version = manager.get_sw_version()
+    if db_version < sw_version:
+        logger.info('Evolving database from %d to %d ...' \
+                    % (db_version, sw_version))
     evolve_to_latest(manager)
+    if db_version < sw_version:
+        logger.info('Finished evolving of the database.')
 
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     if asbool(settings.get('wingdbstub', 'false')):
-        import misc.wingdbstub
+        import wingdbstub
 
     # evolve ZODB database to latest version
     db = db_from_uri(settings['zodbconn.uri'])
