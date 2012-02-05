@@ -287,7 +287,8 @@ def import_gallery_container(path, settings, move_files=True,
                 rel_path, rel_path, None, rel_path)
         else:
             new_container = album
-        [new_container.add(c) for c in containers.values()]
+        [new_container.add(c) for c in containers]
         return new_container
     elif album is not None:
         return album
+
