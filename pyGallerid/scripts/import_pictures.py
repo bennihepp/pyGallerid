@@ -80,7 +80,7 @@ def import_pictures(zodb_root, settings, path, sorting_order):
     os.chdir(cwd)
 
     if container is not None:
-        for child in container:
+        for child in container.values():
             gallery.add(child)
         #albums = category.children
         #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
