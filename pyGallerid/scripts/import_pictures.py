@@ -48,13 +48,14 @@ def usage(argv):
 
 
 def main(argv=sys.argv):
-    if len(argv) != 3:
+    if len(argv) != 4:
         usage(argv)
     config_uri = argv[1]
-    path = argv[2]
+    resource_path = argv[2]
+    path = argv[3]
     sorting_order = 'number'
-    if len(argv) > 3:
-        sorting_order = argv[3]
+    if len(argv) > 4:
+        sorting_order = argv[4]
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     # for SQLalchemy
@@ -68,7 +69,8 @@ def main(argv=sys.argv):
     conn = db.open()
     zodb_root = conn.root()
     with transaction.manager:
-        import_pictures(zodb_root, settings, path, sorting_order)
+        import_pictures(zodb_root, settings, resource_path,
+                        path, sorting_order)
         transaction.commit()
 
 
