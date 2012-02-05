@@ -21,11 +21,13 @@ config = sys.argv[2]
 password = sys.argv[3]
 path = sys.argv[4]
 
+resource_path = ''
+
 subprocess.call(['bin/init_gallery', config, email, password])
 
 try:
     subprocess.check_call([
-        'bin/import_pictures', config, path
+        'bin/import_pictures', config, resource_path, path
     ])
 except subprocess.CalledProcessError:
     print 'Unable to import pictures:', path

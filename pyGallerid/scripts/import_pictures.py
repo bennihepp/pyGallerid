@@ -12,6 +12,7 @@ Script for importing pictures into the pyGallerid database.
 
 import os
 import sys
+import logging
 
 # this is not documented in the pyramid 1.3 documentation,
 # so if it disappears at some point just use repoze.zodbconn
@@ -28,15 +29,20 @@ from pyramid.paster import (
     get_appsettings,
     setup_logging,
 )
+from pyramid.traversal import find_resource
 
 from ..models import appmaker, retrieve_user, retrieve_gallery
+from ..models.gallery import GalleryContainer
 from ..utils.picture import import_gallery_container
+
+logger = logging.getLogger(__name__)
 
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> <path> <sorting_order>\n'
-          '(example: "%s development.ini new_pictures [text|number|date]' \
+    print('usage: %s <config_uri> <resource_path> <path> <sorting_order>\n'
+          '(example: "%s development.ini Europe new_pictures'
+          ' [text|number|date]' \
           % (cmd, cmd))
     sys.exit(1)
 
@@ -66,11 +72,14 @@ def main(argv=sys.argv):
         transaction.commit()
 
 
-def import_pictures(zodb_root, settings, path, sorting_order):
+def import_pictures(zodb_root, settings, resource_path, path, sorting_order):
     username = settings['default_user']
     app = appmaker(zodb_root)
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
+    resource = find_resource(gallery, resource_path)
+    print 'found resource: %s' % resource.name
+    assert isinstance(resource, GalleryContainer)
 
     cwd = os.getcwd()
     os.chdir(path)
@@ -81,7 +90,7 @@ def import_pictures(zodb_root, settings, path, sorting_order):
 
     if container is not None:
         for child in container.values():
-            gallery.add(child)
+            resource.add(child)
         #albums = category.children
         #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
         #category.children = albums
