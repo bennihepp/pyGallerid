@@ -92,7 +92,7 @@ class GalleryHandlerMixin(object):
         url = urllib.unquote(url)
         return url
 
-    @staticmethod    
+    @staticmethod
     @picture_item
     def regular_width(item):
         return item.regular_image_view.width
@@ -113,7 +113,7 @@ class GalleryHandlerMixin(object):
     def small_width(item):
         return item.small_image_view.width
 
-    @staticmethod    
+    @staticmethod
     @picture_item
     def small_height(item):
         return item.small_image_view.height
@@ -140,6 +140,8 @@ class GalleryHandlerMixin(object):
 
 
 class GalleryHandler(ViewHandler, GalleryHandlerMixin):
+
+    __metaclass__ = ABCMeta
 
     def __init__(self, context, request):
         super(GalleryHandler, self).__init__(context, request)
@@ -195,11 +197,13 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         pg_context = find_resource(context, request.params['pg-context'])
         pg_name = request.params['pg-name']
         pg_text = json.loads(request.params['pg-value'])
-        if self.find_gallery_resource(pg_context) == pg_context and pg_name == 'name':
+        if self.find_gallery_resource(pg_context) == pg_context \
+           and pg_name == 'name':
             logger.info('Attempt to change name of gallery resource: %s' \
                         % pg_context)
             return result
-        if self.find_about_resource(pg_context) == pg_context and pg_name == 'name':
+        if self.find_about_resource(pg_context) == pg_context \
+           and pg_name == 'name':
             logger.info('Attempt to change name of about resource: %s' \
                         % pg_context)
             return result
@@ -210,10 +214,11 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(#context=GalleryContainer,
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=attribute-date')
     def update_gallery_attribute_date(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         #print 'JSON request with id=%s, name=%s' \
               #% (request.params['pg-id'], request.params['pg-name'])
         result = {'pg-status': 'failed'}
@@ -222,14 +227,16 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         pg_value = json.loads(request.params['pg-value'])
         date = datetime.datetime.strptime(pg_value, '%Y-%m-%d').date()
         pg_context.__setattr__(pg_name, date)
-        result['pg-date'] = '%d %s %d' % (date.day, date.strftime('%B'), date.year)
+        result['pg-date'] = '%d %s %d' \
+            % (date.day, date.strftime('%B'), date.year)
         result['pg-status'] = 'success'
         return result
 
-    @view_config(#context=GalleryContainer,
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=attribute-date-from-to')
     def update_gallery_attribute_date_from_to(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         #print 'JSON request with id=%s, name=%s' \
               #% (request.params['pg-id'], request.params['pg-name'])
         result = {'pg-status': 'failed'}
@@ -257,11 +264,12 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-date-from-to'] = date_str
         result['pg-status'] = 'success'
         return result
-    
-    @view_config(#context=GalleryContainer,
+
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=order-list')
     def update_gallery_order_list(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         # TODO: implement CSRF
         #token = request.session.get_csrf_token()
         #if request.params['pg-csrf'] != token:
@@ -282,10 +290,11 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         #result['pg-replace-url'] = request.resource_url(context)
         return result
 
-    @view_config(#context=GalleryContainer,
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=select-picture')
     def update_gallery_select_picture(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         #print 'JSON request with id=%s, name=%s' \
               #% (request.params['pg-id'], request.params['pg-name'])
         result = {'pg-status': 'failed'}
@@ -307,10 +316,11 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
                renderer='json', permission='view')
 class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
 
-    @view_config(#context=GalleryContainer,
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=pictures')
     def retrieve_pictures(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         result = {'pg-status': 'failed'}
         pg_context = find_resource(context, request.params['pg-context'])
         if 'pg-slice' in request.params:
@@ -342,11 +352,12 @@ class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(#context=GalleryContainer,
+    @view_config(  # context=GalleryContainer,
                  request_param='pg-type=thumbnails',
                  permission='view')
     def retrieve_thumbnails(self):
         context, request = self.context, self.request
+        assert isinstance(context, GalleryContainer)
         result = {'pg-status': 'failed'}
         pg_context = find_resource(context, request.params['pg-context'])
         pg_thumbnails = []
@@ -383,6 +394,9 @@ class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
             for attr_name in resource.__attributes__:
                 metadata[attr_name] = str(getattr(resource, attr_name))
         json_resource['metadata'] = metadata
+        if not isinstance(resource, PersistentDict) \
+           and not isinstance(resource, PersistentList):
+            del json_resource['state']
         return json_resource
 
     @classmethod
@@ -418,7 +432,6 @@ class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-data'] = json.dumps(pg_lineage)
         result['pg-status'] = 'success'
         return result
-
 
     @view_config(request_param='pg-type=resource-children', permission='edit')
     def retrieve_resource_children(self):
@@ -563,7 +576,7 @@ class GalleryAlbumHandler(GalleryHandler):
         self.tpl_context['regular_width'] = self.regular_width
         self.tpl_context['regular_height'] = self.regular_height
         self.tpl_context['big_url'] = self.big_url
-    
+
     @view_config(name='edit', permission='edit')
     def edit(self):
         return super(GalleryAlbumHandler, self).edit()

@@ -4,6 +4,8 @@ pictures
 app.yaml
 gae
 
+log/*
+
 *.wp[ru]
 *.py[oc]
 
