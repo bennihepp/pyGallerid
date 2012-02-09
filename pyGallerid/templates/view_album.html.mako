@@ -181,6 +181,10 @@
                                 data-pg-context="${picture.name}">
                                 Edit picture
                             </p>
+                            <p class="pg-edit-remove" \
+                                data-pg-context="${picture.name}">
+                                Remove
+                            </p>
                         </div>
                     % endif
                     <div class="picture-info" style="width: \

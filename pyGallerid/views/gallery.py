@@ -15,7 +15,10 @@ import json
 import urllib
 import itertools
 import logging
+import os
+
 from abc import ABCMeta, abstractmethod
+from zope.interface.interface import InterfaceClass
 
 from pyramid.location import lineage
 from pyramid.view import view_config, view_defaults
@@ -138,6 +141,31 @@ class GalleryHandlerMixin(object):
         ).next()
         return retrieve_about(user)
 
+    @classmethod
+    def remove_resource_files_recursive(cls, resource):
+        if isinstance(resource, GalleryAlbum):
+            for child in resource:
+                if isinstance(child, GalleryPicture):
+                    for path in (child.big_image_path,
+                                 child.regular_image_path,
+                                 child.small_image_path):
+                        os.remove(path)
+        # the elif is really important here,
+        # because GalleryAlbum inherits from GalleryContainer
+        elif isinstance(resource, GalleryContainer):
+            for child in resource.itervalues():
+                cls.remove_resource_files_recursive(child)
+
+    @classmethod
+    def remove_resource_files(cls, resource):
+        try:
+            cls.remove_resource_files_recursive(resource)
+        except OSError as exc:
+            import traceback
+            logging.warn('Error while removing files: ' \
+                         + traceback.format_exc())
+            raise
+
 
 class GalleryHandler(ViewHandler, GalleryHandlerMixin):
 
@@ -183,6 +211,43 @@ class GalleryHandler(ViewHandler, GalleryHandlerMixin):
         return about_url
 
 
+def context_pred(context_type, return_as_tuple=True):
+    def context_pred_interface(context, request):
+        return context_type.providedBy(context)
+    def context_pred_class(context, request):
+        return isinstance(context, context_type)
+    if isinstance(context_type, InterfaceClass):
+        pred = context_pred_interface
+    else:
+        pred = context_pred_class
+    if return_as_tuple:
+        return (pred,)
+    else:
+        return pred
+
+
+@view_defaults(context=GalleryResource, xhr=True, name='remove',
+               renderer='json', permission='remove')
+class GalleryXHRRemoveHandler(ViewHandler, GalleryHandlerMixin):
+
+    @view_config()
+    def remove_item(self):
+        context, request = self.context, self.request
+        result = {'pg-status': 'failed'}
+        pg_context = find_resource(context, request.params['pg-context'])
+        # TODO: introduce acl for removal control into models
+        if pg_context == retrieve_about(request.user):
+            return result
+        elif pg_context == retrieve_gallery(request.user):
+            return result
+        pg_context.parent = None
+        self.remove_resource_files(pg_context)
+        request.session.flash('Item "%s" removed.' % pg_context.name)
+        result['pg-redirect-url'] = request.resource_url(context, '@@edit')
+        result['pg-status'] = 'success'
+        return result
+
+
 @view_defaults(context=GalleryResource, xhr=True, name='update',
                renderer='json', permission='update')
 class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
@@ -214,7 +279,7 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=attribute-date')
     def update_gallery_attribute_date(self):
         context, request = self.context, self.request
@@ -232,7 +297,7 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=attribute-date-from-to')
     def update_gallery_attribute_date_from_to(self):
         context, request = self.context, self.request
@@ -265,7 +330,7 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=order-list')
     def update_gallery_order_list(self):
         context, request = self.context, self.request
@@ -290,7 +355,7 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
         #result['pg-replace-url'] = request.resource_url(context)
         return result
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=select-picture')
     def update_gallery_select_picture(self):
         context, request = self.context, self.request
@@ -316,7 +381,7 @@ class GalleryXHRUpdateHandler(ViewHandler, GalleryHandlerMixin):
                renderer='json', permission='view')
 class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=pictures')
     def retrieve_pictures(self):
         context, request = self.context, self.request
@@ -352,7 +417,7 @@ class GalleryXHRRetrieveHandler(ViewHandler, GalleryHandlerMixin):
         result['pg-status'] = 'success'
         return result
 
-    @view_config(  # context=GalleryContainer,
+    @view_config(custom_predicates=context_pred(GalleryContainer),
                  request_param='pg-type=thumbnails',
                  permission='view')
     def retrieve_thumbnails(self):

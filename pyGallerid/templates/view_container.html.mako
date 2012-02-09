@@ -59,6 +59,10 @@
                                 data-pg-context="${item.name}">
                                 Edit preview picture
                             </p>
+                            <p class="pg-edit-remove" \
+                                data-pg-context="${item.name}">
+                                Remove
+                            </p>
                         </div>
                     % endif
                     <div class="album-info" style="width: ${small_width(item)}px;">

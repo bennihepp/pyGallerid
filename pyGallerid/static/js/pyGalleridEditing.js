@@ -7,6 +7,45 @@ See the accompanying file LICENSE for details.
 Copyright 2012 Benjamin Hepp
 */
 
+// check wether the json response contains instructions
+// to reload the page or change the url of the page
+function check_for_redirect(json_data)
+{
+    // redirect to new page if necessary
+    //if ('pg-replace-url' in json_data) {
+    if (json_data.hasOwnProperty('pg-replace-url')) {
+        window.location.replace(json_data['pg-replace-url']);
+    }
+    //if ('pg-redirect-url' in json_data) {
+    if (json_data.hasOwnProperty('pg-redirect-url')) {
+        window.location = json_data['pg-redirect-url'];
+    }
+}
+
+// remove an item (container or picture) from the gallery
+function remove_item(json_url, pg_context)
+{
+    var errorHandler = function() {
+        alert('Unable to remove item');
+    };
+    $.ajax({
+        url: json_url,
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            'pg-context': pg_context,
+        },
+    })
+    .success(function(json_data) {
+        if (json_data['pg-status'] == 'success') {
+            check_for_redirect(json_data);
+        } else {
+            errorHandler();
+        }
+    })
+    .error(errorHandler);
+}
+
 // picture-list dialog
 function open_picture_list_dialog(json_url, pg_id, pg_context,
                                   modalOpenedCallback,
@@ -336,15 +375,7 @@ function pg_update(source, inputProvider, successHandler, errorHandler)
         if (json_data['pg-status'] == 'success') {
             inputProvider.update(json_data);
             successHandler(function() {
-                // redirect to new page if necessary
-                //if ('pg-replace-url' in json_data) {
-                if (json_data.hasOwnProperty('pg-replace-url')) {
-                    window.location.replace(json_data['pg-replace-url']);
-                }
-                //if ('pg-redirect-url' in json_data) {
-                if (json_data.hasOwnProperty('pg-redirect-url')) {
-                    window.location = json_data['pg-redirect-url'];
-                }
+                check_for_redirect(json_data);
             });
         } else {
             errorHandler();
@@ -353,12 +384,13 @@ function pg_update(source, inputProvider, successHandler, errorHandler)
     .error(errorHandler);
 }
 
-function pg_init_editing(update_json_url, retrieve_json_url)
+function pg_init_editing(update_json_url, retrieve_json_url, remove_json_url)
 {
     pg_update_json_url = update_json_url;
 
     pg_init_resource_tree(retrieve_json_url);
     pg_init_dialogs(retrieve_json_url);
+    pg_init_remove(remove_json_url);
 
     $(document).ready(function() {
         $(document).on("click", ".pg-editable", function() {
@@ -572,6 +604,17 @@ function pg_init_dialogs(json_url)
             //    pg_id,
             //    pg_context
             //);
+        });
+    });
+}
+
+function pg_init_remove(json_url)
+{
+    $(document).ready(function() {
+        $('.pg-edit-remove').click(function(event) {
+            event.preventDefault();
+            pg_context = $(this).data('pg-context');
+            remove_item(json_url, pg_context);
         });
     });
 }

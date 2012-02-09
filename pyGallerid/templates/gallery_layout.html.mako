@@ -91,7 +91,8 @@
         <script type="text/javascript" src="/static/js/pyGalleridEditing.js"></script>
         <script type="text/javascript">
             pg_init_editing('${request.resource_url(request.context, '@@update') | n}',
-                            '${request.resource_url(request.context, '@@retrieve') | n}');
+                            '${request.resource_url(request.context, '@@retrieve') | n}',
+                            '${request.resource_url(request.context, '@@remove') | n}');
         </script>
     % endif
 </%block>

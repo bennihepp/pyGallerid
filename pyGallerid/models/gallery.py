@@ -47,7 +47,7 @@ class GalleryContainer(GalleryResource, PersistentOrderedContainer):
             self.description = description
         self.__preview_picture = None
         self.preview_size = (-1, -1)
-        self.__path = path
+        self.__path = os.path.normpath(path)
 
     @property
     def path(self):
@@ -138,10 +138,26 @@ class Gallery(GalleryContainer):
     __attributes__.extend(GalleryContainer.__attributes__)
 
     def __init__(self, description=None, path=None,
-                 user=None, name='gallery', parent=None):
-        GalleryContainer.__init__(self, name, description,
-                                  path=path, parent=parent)
-        self.user = user
+                 user=None, parent=None):
+        name = 'gallery'
+        super(Gallery, self).__init__(name, description,
+                                      path=path, parent=parent)
+
+    @property
+    def name(self):
+        return self.__name__
+
+class GalleryAbout(GalleryDocument):
+
+    def __init__(self, description, long_description, parent=None):
+        name = 'about'
+        super(GalleryAbout, self).__init__(name, description,
+                                           long_description,
+                                           parent)
+
+    @property
+    def name(self):
+        return self.__name__
 
 
 class GalleryAlbum(GalleryContainer):
@@ -152,8 +168,8 @@ class GalleryAlbum(GalleryContainer):
                  long_description=None, location=None, \
                  date_from=datetime.datetime.now(), date_to=None,
                  path=None, parent=None):
-        GalleryContainer.__init__(self, name, description,
-                                  path=path, parent=parent)
+        super(GalleryAlbum, self).__init__(name, description,
+                                           path=path, parent=parent)
         self.long_description = long_description
         self.location = location
         self.date_from = date_from
@@ -197,24 +213,30 @@ class GalleryPicture(GalleryResource, Persistent, PersistentLocationAware):
 
     @property
     def small_image_path(self):
-        assert self.parent is not None
-        assert isinstance(self.parent, GalleryAlbum)
-        return os.path.join(self.parent.absolute_path,
-                            self.small_image_view.image.filename)
+        path = self.small_image_view.image.filename
+        if self.parent is not None:
+            assert isinstance(self.parent, GalleryAlbum)
+            path = os.path.join(self.parent.absolute_path,
+                                self.small_image_view.image.filename)
+        return path
 
     @property
     def regular_image_path(self):
-        assert self.parent is not None
-        assert isinstance(self.parent, GalleryAlbum)
-        return os.path.join(self.parent.absolute_path,
-                            self.regular_image_view.image.filename)
+        path = self.regular_image_view.image.filename
+        if self.parent is not None:
+            assert isinstance(self.parent, GalleryAlbum)
+            path = os.path.join(self.parent.absolute_path,
+                                self.regular_image_view.image.filename)
+        return path
 
     @property
     def big_image_path(self):
-        assert self.parent is not None
-        assert isinstance(self.parent, GalleryAlbum)
-        return os.path.join(self.parent.absolute_path,
-                            self.big_image_view.image.filename)
+        path = self.big_image_view.image.filename
+        if self.parent is not None:
+            assert isinstance(self.parent, GalleryAlbum)
+            path = os.path.join(self.parent.absolute_path,
+                                self.big_image_view.image.filename)
+        return path
 
 
 class GalleryImageView(Persistent):

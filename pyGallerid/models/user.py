@@ -30,18 +30,22 @@ class User(PersistentContainer):
     def __init__(self, name, email, password, parent=None):
         PersistentContainer.__init__(self, name, parent)
         self.email = email
-        self.password_hash, self.password_salt = User.hash_password(password)
+        self.change_password(password)
         self.__acl__ = [
             (Allow, Everyone, 'view'),
             (Allow, Everyone, 'login'),
             (Allow, name, 'logout'),
             (Allow, name, 'edit'),
             (Allow, name, 'update'),
+            (Allow, name, 'remove'),
         ]
 
     def authenticate(self, password):
         hexhash = HASHCLASS(password + self.password_salt)
         return hexhash.hexdigest() == self.password_hash
+
+    def change_password(self, password):
+        self.password_hash, self.password_salt = self.hash_password(password)
 
     @staticmethod
     def hash_password(password):
