@@ -15,6 +15,7 @@ import json
 import urllib
 import itertools
 import logging
+import math
 from abc import ABCMeta, abstractmethod
 
 from pyramid.location import lineage
@@ -543,7 +544,8 @@ class GalleryAlbumHandler(GalleryHandler):
         else:
             pictures_per_page = -1
         if pictures_per_page > 0:
-            num_of_pages = len(context) / pictures_per_page + 1
+            num_of_pages = math.ceil(len(context) / float(pictures_per_page))
+            num_of_pages = int(num_of_pages)
             try:
                 page = int(request.params.get('page', 1))
             except ValueError:
