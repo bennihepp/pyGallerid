@@ -15,8 +15,12 @@ import json
 import urllib
 import itertools
 import logging
+<<<<<<< HEAD
 import os
 
+=======
+import math
+>>>>>>> c976c6ad51cacb6da4eba37ab3b8b1f6c92d22d9
 from abc import ABCMeta, abstractmethod
 from zope.interface.interface import InterfaceClass
 
@@ -608,7 +612,8 @@ class GalleryAlbumHandler(GalleryHandler):
         else:
             pictures_per_page = -1
         if pictures_per_page > 0:
-            num_of_pages = len(context) / pictures_per_page + 1
+            num_of_pages = math.ceil(len(context) / float(pictures_per_page))
+            num_of_pages = int(num_of_pages)
             try:
                 page = int(request.params.get('page', 1))
             except ValueError:

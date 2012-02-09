@@ -80,19 +80,24 @@ def import_pictures(zodb_root, settings, resource_path, path, sorting_order):
     user = retrieve_user(app, username)
     gallery = retrieve_gallery(user)
     resource = find_resource(gallery, resource_path)
-    print 'found resource: %s' % resource.name
+    logger.info('found resource: %s' % resource.name)
     assert isinstance(resource, GalleryContainer)
 
+    normpath = os.path.normpath(path)
     cwd = os.getcwd()
-    os.chdir(path)
+    os.chdir(os.path.split(normpath)[0])
+    basepath = os.path.basename(normpath)
 
-    container = import_gallery_container('.', settings, move_files=False, sorting_order=sorting_order)
+    container = import_gallery_container(basepath, resource_path, settings,
+                                         move_files=False,
+                                         sorting_order=sorting_order)
 
     os.chdir(cwd)
 
     if container is not None:
-        for child in container.values():
-            resource.add(child)
+        resource.add(container)
+        #for child in container.values():
+        #    resource.add(child)
         #albums = category.children
         #albums.sort(cmp=lambda x, y: cmp(x.date_from, y.date_from))
         #category.children = albums

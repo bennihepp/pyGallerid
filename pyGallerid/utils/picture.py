@@ -17,9 +17,12 @@ import subprocess
 import shutil
 import Image
 from ExifTags import TAGS
+import logging
 
 from ..models.gallery import GalleryContainer, GalleryAlbum, \
      GalleryPicture, GalleryImageFile
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_MIN_THUMBNAIL_SIZE = 400
 DEFAULT_DISPLAY_SCALE = 0.5
@@ -154,7 +157,7 @@ def import_gallery_picture(original_filename, big_filename, regular_filename,
     return picture
 
 
-def import_gallery_album(album_path, settings, move_files=True,
+def import_gallery_album(album_path, resource_path, settings, move_files=True,
                          use_image_magick=True, sorting_order='number'):
 
     rel_album_path = os.path.basename(album_path)
@@ -173,10 +176,12 @@ def import_gallery_album(album_path, settings, move_files=True,
         logging.warning('Unable to extract dates: %s' % rel_album_path)
         raise
 
-    big_image_dir = os.path.join(settings['image_dir'], album_path, 'big')
-    regular_image_dir = os.path.join(
-        settings['image_dir'], album_path, 'regular')
-    small_image_dir = os.path.join(settings['image_dir'], album_path, 'small')
+    big_image_dir = os.path.join(settings['image_dir'], resource_path,
+                                 album_path, 'big')
+    regular_image_dir = os.path.join(settings['image_dir'], resource_path,
+                                     album_path, 'regular')
+    small_image_dir = os.path.join(settings['image_dir'], resource_path,
+                                   album_path, 'small')
     for path in (big_image_dir, regular_image_dir, small_image_dir):
         if not os.path.exists(path):
             os.makedirs(path)
@@ -245,7 +250,7 @@ def import_gallery_album(album_path, settings, move_files=True,
     return album
 
 
-def import_gallery_container(path, settings, move_files=True,
+def import_gallery_container(path, resource_path, settings, move_files=True,
                              use_image_magick=True, sorting_order='number'):
     cwd = os.getcwd()
     os.chdir(os.path.split(path)[-1])
@@ -263,7 +268,8 @@ def import_gallery_container(path, settings, move_files=True,
            ['.jpg', '.jpeg', '.png', '.tif', '.tiff']:
             try:
                 album = import_gallery_album(
-                    path, settings, move_files, use_image_magick)
+                    path, resource_path, settings,
+                    move_files, use_image_magick)
             except:
                 print 'Failed to import album:', path
                 raise
@@ -272,7 +278,7 @@ def import_gallery_container(path, settings, move_files=True,
             abs_path = os.path.join(path, filename)
             try:
                 container = import_gallery_container(
-                    abs_path, settings, move_files,
+                    abs_path, resource_path, settings, move_files,
                     use_image_magick, sorting_order)
             except:
                 print 'Failed to import container:', abs_path

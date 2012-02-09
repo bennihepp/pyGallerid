@@ -63,6 +63,7 @@ setup(name='pyGallerid',
     [console_scripts]
     init_gallery = pyGallerid.scripts.init_gallery:main
     import_pictures = pyGallerid.scripts.import_pictures:main
+    remove_pictures = pyGallerid.scripts.remove_pictures:main
     """,
 )
 
