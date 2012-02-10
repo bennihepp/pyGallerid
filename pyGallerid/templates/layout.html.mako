@@ -72,7 +72,7 @@
         <%block name="footer">
           <div class="copyright">
             © Copyright 2011-2012 Benjamin Hepp<br \>
-            benjamin (at) hepp.webfactional.com
+            benjamin (at) hepp (dot) webfactional (dot) com
           </div>
         </%block>
       </div>
