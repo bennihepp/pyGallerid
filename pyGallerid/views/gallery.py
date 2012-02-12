@@ -15,12 +15,8 @@ import json
 import urllib
 import itertools
 import logging
-<<<<<<< HEAD
 import os
-
-=======
 import math
->>>>>>> c976c6ad51cacb6da4eba37ab3b8b1f6c92d22d9
 from abc import ABCMeta, abstractmethod
 from zope.interface.interface import InterfaceClass
 
